@@ -4,15 +4,28 @@ SandTable provides a web-based user interface to control artistic mechanisms bui
 
 ## Getting Started
 
-###Software:
+### Software:
+Everything you need to control a SandTable is included in this project. You only need a Raspberry Pi, a CNC controller, an actual table, and some optional LED lights. The software is easy to install and use.  A web-based interface allows you to draw a huge number of mathematically created paterns, write text, draw clipart, and even automatically find and draw images from Google.
 
+The software is intentionally written to make it easy to add new drawing methods and lighting themes.
 
+### Hardware:
+While you can use SandTable to generate interesting pictures on a screen, the real benefit comes by driving a CNC machine. Machines need to have a smooth (and preferably quiet) x/y motion stage with a magnet in the center. It takes a bit of effort to tune the power/distance of the magnet, the size of the ball, and the amount and type of sand. If the magnet isn't powerful enough the ball will bury and stop in the sand while the magnet continues.  If the magnet is too strong then the friction of the magnet, ball, and sand can lead to stepper motors stalling or missing steps and griding noise.
 
-###Hardware:
+### Modifications:
+Many people want to add some fun bells and whistles like:
+* Ball changers (electromagnets, barriers, different size balls, etc.)
+* Multiple balls moving simultaneously
+* Clearing mechanisms (wipers, vibration, etc.)
+* Magnetic sand
+* Ferrofluid
+* Ball levitation
+After years of playing with SandTables, I think you'll find most of these modifications to be disappointing. However, if you do come up with something that you feel is compelling, we should definitely add it to the code. I highly recommend adding controllable LED lighting and support already exists for [Fadecandy](https://github.com/scanlime/fadecandy) and [DotStar](https://learn.adafruit.com/adafruit-dotstar-leds/overvie://learn.adafruit.com/adafruit-dotstar-leds/overview) (recommended).
 
-While you can use SandTable to generate interesting pictures on a screen, the real benefit comes from connecting to a CNC machine. 
-
-
+#### Supported CNC Controllers:
+* [TinyG](https://synthetos.myshopify.com/products/tinyg)
+* [Smoothieboard](http://smoothieware.org/smoothieboard)
+* [Marlin](https://github.com/MarlinFirmware/Marlin)
 
 ### Examples:
 * [Michael Dubno's first table](https://makezine.com/2009/08/10/new-york-city-sand-table-project/)

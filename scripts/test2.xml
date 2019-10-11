@@ -1,0 +1,24 @@
+<Movie Name="test2">
+  <Frame>
+    <Thing Type="Grid" Name="Grid1">
+      <Param Name="ySpacing" Value="0.5"/>
+      <Param Name="width" Value="10.0"/>
+      <Param Name="length" Value="10.0"/>
+    </Thing>
+    <Thing Type="Move" Name="Move1">
+      <Param Name="xOffset" Value="0.0"/>
+      <Param Name="yOffset" Value="10.0"/>
+    </Thing>
+  </Frame>
+  <Frame Steps="20">
+    <Thing Type="Grid" Name="Grid1">
+      <Param Name="ySpacing" Value="2.0"/>
+      <Param Name="width" Value="10.0"/>
+      <Param Name="length" Value="10.0"/>
+    </Thing>
+    <Thing Type="Move" Name="Move1">
+      <Param Name="xOffset" Value="0.0"/>
+      <Param Name="yOffset" Value="10.0"/>
+    </Thing>
+  </Frame>
+</Movie>

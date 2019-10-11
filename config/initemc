@@ -1,0 +1,6 @@
+#!/bin/sh -e
+cd /var/www/sandtable
+./ledaemon.py&
+/usr/bin/emc /home/dubnom/emc2/configs/SandTable/SandTable.ini&
+sleep 6 
+./init.py

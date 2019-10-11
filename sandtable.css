@@ -1,0 +1,91 @@
+body {background-color: white; text: white; color: black; font-family: arial, sans-serif; background-image: url("images/sand_ripples.jpg")}
+
+.title 		{ font-size: 150%; line-height: 140% }
+.formTitle 	{ font-size: 80% }
+.drawtime	{ font-size: 80% }
+.form  		{ font-size: 100% }
+.save  		{ font-size: 100%; vertical-align: middle }
+.load  		{ font-size: 100%; vertical-align: middle }
+.delete		{ font-size: 100%; vertical-align: middle }
+.upload		{ font-size: 100%; vertical-align: middle }
+.error      { color: #FF3F3F; font-size: 90%; line-height: 140% }
+.status     { color: #66EE00; font-size: 100%; font-weight: bold; line-height: 120% }
+.formError	{ color: #FF3F3F; font-size: 90% }
+.navigation	{ color: #EEEEEE; font-size: 90%; font-weight: bold }
+.picturename{ font-size: 80%; text-align: center }
+.adminwarn	{ font-size: 120% }
+.admingood	{ font-size: 100% }
+.savebox	{}
+.loadbox	{}
+.historyTitle   { font-size: 120% }
+
+div.filer       { background-color: #FFFFFF; vertical-align: bottom; } 
+button.filer    { background-color: #FFFFFF; border: 2px solid #FFFFFF; margin: 0px 0px 0px 0px; padding: 0px; width: 100%; height: 100% } 
+.filerTitle     { font-size: 120%; }
+.filername      { font-size: 80%; color: #000000; text-align: center }
+
+img             { border-radius: 4px }
+img.sandable	{ border: 1px solid #6F6F6F; margin: 1px 1px 1px 1px }
+img.selected	{ border: 1px solid #EE7E00; margin: 1px 1px 1px 1px }
+img.led		{ border: 1px solid #6F6F6F; margin: 1px 1px 1px 1px }
+img.ledselected	{ border: 1px solid #FF5F5F; margin: 1px 1px 1px 1px }
+img.history     { border: 1px solid #6F6F6F; margin: 1px 1px 1px 1px }
+
+img.plan	{ border: 3px solid #B7B181; margin: 1px 1px 1px 1px; background-color: #B7B181 }
+
+a:link    	{ color: gray }
+a:visited 	{ color: gray }
+a:hover	  	{ color: black }
+a:active  	{ color: black }
+
+a.plan  	    { font-size: 140%; font-family: arial, sans-serif }
+a.plan:link	    { color: #CFCFCF }
+a.plan:visited	{ color: #CFCFAF }
+a.plan:hover	{ color: #FFFFFF }
+a.plan:active	{ color: #FFFFFF }
+
+button { border-radius: 4px }
+button.redraw	{ color: #000000; background-color: #00DF2F; font-size: 100%; margin: 3px 3px 3px 3px }
+button.random   { color: #FFFFFF; background-color: #8A2BE2; font-size: 100%; margin: 3px 3px 3px 3px }
+button.doit	    { color: #000000; background-color: #DFBF00; font-size: 100%; margin: 3px 3px 3px 3px }
+button.abort    { color: #FFFFFF; background-color: #8F0000; font-size: 100%; margin: 3px 3px 3px 3px }
+button.sand	    { color: #000000; background-color: #DFBF00; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
+button.preview	{ color: #000000; background-color: #00DF2F; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
+button.save     { color: #FFFFFF; background-color: #00007F; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
+button.export   { color: #FFFFFF; background-color: #6F5F00; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
+button.upload   { color: #FFFFFF; background-color: #00007F; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
+button.load	    { color: #FFFFFF; background-color: #00007F; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
+button.delete	{ color: #FFFFFF; background-color: #7F0000; font-size: 80%; margin: 1px 1px 1px 1px; padding: 1px; vertical-align: middle }
+button.rename	{ color: #FFFFFF; background-color: #00007F; font-size: 80%; margin: 1px 1px 1px 1px; padding: 1px; vertical-align: middle }
+button.sandable	{ background-color: #6F6F6F; border: 2px solid #6F6F6F; margin: 0px 0px 0px 0px; padding: 0px }
+button.selected	{ background-color: #000000; border: 2px solid #000000; margin: 0px 0px 0px 0px; padding: 0px }
+button.led		    { background-color: #6F6F6F; border: 2px solid #6F6F6F; margin: 0px 0px 0px 0px; padding: 0px }
+button.ledselected	{ background-color: #FF5F5F; border: 2px solid #FF5F5F; margin: 0px 0px 0px 0px; padding: 0px }
+button.history	    { background-color: #6F6F6F; border: 2px solid #6F6F6F; margin: 0px 0px 0px 0px; padding: 0px }
+button.picture      { background-color: #FFFFFF; border: 2px solid #FFFFFF; margin: 0px 0px 0px 0px; padding: 0px }
+
+input.save	{ background: #DFDFFF; color: black; width: 300px; vertical-align: middle }
+select.load	{ background: #DFDFFF; color: black; width: 250px; vertical-align: middle }
+input.upload    { background: #DF00FF: color: black; width: 400px; vertical-align: middle }
+
+pre.text	{ color: black; font-family: "Lucida Console", monospace, "Courier New"; font-size: 85% } 
+
+table.help	{}
+td		    { font-size: 90% }
+th		    { font-size: 100%; line-height: 130%; text-align: left; background-color: #3F3F3F }
+td.help     {}
+th.help     {}
+
+td.picture  { background-color: #EFEFEF }
+td.filer    { background-color: #EFEFEF }
+
+ul          { list-style-type: square; list-style-position: outside }
+
+div.adminwarn	{ background-color: white; width: 400px; padding: 10px; border: 10px solid red; margin: 10px; }
+div.admingood	{ background-color: white; width: 400px; padding: 10px; border: 10px solid darkgreen; margin: 10px; }
+
+.intSlider { -webkit-appearance: none; height: 5px; border-radius: 2px; background-color: #a29963}
+.intSlider::-webkit-slider-thumb {-webkit-appearance: none; appearance: none; height: 12px; width: 12px; border-radius: 50%; cursor: pointer; background:#615301}
+.floatSlider { -webkit-appearance: none; height: 5px; border-radius: 2px; background-color: #a29963}
+.floatSlider::-webkit-slider-thumb {-webkit-appearance: none; appearance: none; height: 12px; width: 12px; border-radius: 50%; cursor: pointer; background:#615301}
+

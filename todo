@@ -1,0 +1,31 @@
+Lighting
+    !Palettes - every lighting method should use them
+    Fix gamma/color accuity
+    Modify Waves to change origin
+    Emitter - finish
+    Sky - finish
+    Make lighting savable
+    Create the ability to link lighting with drawings
+
+Drawing
+    Post-processors
+        Spline
+        Fit to oval
+        Wavy
+        Distorted spiral
+    New drawing types
+        Flowers
+        Trees
+        Hills
+        Clouds
+        Cityscape
+    Bulbs - fix parametric inputs
+    Clipart - integrate with pictures
+    WebPic
+        Save named image automatically
+        Convert saved version to saved picture
+
+System
+    Update from GIT in admin panel
+    Reboot remotely from admin panel
+    !Add driver for Smoothieboard

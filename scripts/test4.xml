@@ -1,0 +1,20 @@
+<Movie Name="test4">
+  <Frame>
+    <Thing Type="Spiral" Name="Grid1">
+      <Param Name="xCenter" Value="5.0"/>
+      <Param Name="yCenter" Value="5.0"/>
+      <Param Name="outerRadius" Value="1.0"/>
+      <Param Name="linesPerInch" Value="3.0"/>
+      <Param Name="angleRate" Value="31.0"/>
+    </Thing>
+  </Frame>
+  <Frame Steps="2">
+    <Thing Type="Spiral" Name="Grid1">
+      <Param Name="xCenter" Value="5.0"/>
+      <Param Name="yCenter" Value="5.0"/>
+      <Param Name="outerRadius" Value="1.0"/>
+      <Param Name="linesPerInch" Value="3.0"/>
+      <Param Name="angleRate" Value="75.0"/>
+    </Thing>
+  </Frame>
+</Movie>

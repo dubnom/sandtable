@@ -1,0 +1,34 @@
+<Movie Name="Kinnernet">
+    <Frame>
+        <Thing Type="Text">
+            <Param Name="text" Value="Gadgetoff"/>
+            <Param Name="height" Value="5.0"/>
+        </Thing>
+    </Frame>
+    <Frame Steps="10">
+        <Thing Type="Text">
+            <Param Name="text" Value="Welcomes"/>
+            <Param Name="height" Value="5.0"/>
+        </Thing>
+    </Frame>
+    <Frame Steps="10">
+        <Thing Type="Text">
+            <Param Name="text" Value="You"/>
+            <Param Name="height" Value="10.0"/>
+        </Thing>
+    </Frame>
+    <Frame Steps="10">
+        <Thing Type="Text">
+            <Param Name="text" Value="To"/>
+            <Param Name="height" Value="11.0"/>
+        </Thing>
+    </Frame>
+    <Frame Steps="10">
+        <Thing Type="Text">
+            <Param Name="text" Value="Kinnernet"/>
+            <Param Name="height" Value="5.0"/>
+        </Thing>
+    </Frame>
+</Movie>
+
+

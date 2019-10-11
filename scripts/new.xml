@@ -1,0 +1,57 @@
+<Movie Name="Test" FPS="5">
+  <Eraser>
+      <Thing Type="Grid">
+          <Param Name="xSpacing" Value="2.0"/>
+          <Param Name="ySpacing" Value="2.0"/>
+      </Thing>
+  </Eraser>
+  <Frame>
+    <Thing Type="Spiral">
+      <Param Name="xCenter" Value="17.0"/>
+      <Param Name="yCenter" Value="8.0"/>
+      <Param Name="innerRadius" Value="0.0"/>
+      <Param Name="linesPerInch" Value="1.0"/>
+      <Param Name="angleRate" Value="20.0"/> 
+    </Thing>
+  </Frame>
+  <Frame Steps="10">
+    <Thing Type="Text">
+      <Param Name="xOffset" Value="1.0"/>
+      <Param Name="yOffset" Value="5.0"/>
+      <Param Name="text" Value="Gadgetoff"/>
+      <Param Name="height" Value="5.0"/>
+    </Thing>
+  </Frame>
+  <Frame Steps="10">
+    <Thing Name="1" Type="Spiral">
+      <Param Name="xCenter" Value="15.0"/>
+      <Param Name="yCenter" Value="9.0"/>
+      <Param Name="innerRadius" Value="0.0"/>
+      <Param Name="linesPerInch" Value="2.0"/>
+      <Param Name="angleRate" Value="10.0"/> 
+     </Thing>
+  </Frame>
+  <Frame Steps="10">
+    <Thing Name="1" Type="Spiral">
+      <Param Name="xCenter" Value="5.0"/>
+      <Param Name="yCenter" Value="5.0"/>
+      <Param Name="innerRadius" Value="0.0"/>
+      <Param Name="outerRadius" Value="5.0"/>
+      <Param Name="linesPerInch" Value="2.0"/>
+      <Param Name="angleRate" Value="10.0"/> 
+     </Thing>
+     <Thing Name="2" Type="Sun">
+     </Thing>
+  </Frame>
+  <Frame Repeat="5">
+      <Thing Name="2" Type="Sun">
+      </Thing>
+  </Frame>
+  <Frame Steps="10">
+      <Thing Name="2" Type="Sun">
+          <Param Name="ripples" Value="0.0"/>
+      </Thing>
+  </Frame>
+</Movie>
+
+

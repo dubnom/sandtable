@@ -1,0 +1,37 @@
+<VirtualHost *:82>
+    ServerName sandtable3.dubno.com
+
+	ServerAdmin webmaster@localhost
+
+	DocumentRoot /var/www/
+
+    WSGIDaemonProcess sandtable3.dubno.com home=/var/www/sandtable python-path=/var/www/sandtable/src
+    WSGIProcessGroup  sandtable3.dubno.com
+
+    WSGIScriptAlias /sandtable/src /var/www/sandtable/src/server.py
+
+	<Directory /sandtable/>
+		Options FollowSymLinks
+		AllowOverride None
+	</Directory>
+	<Directory /var/www/sandtable>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride None
+		Options -MultiViews +SymLinksIfOwnerMatch
+		Order allow,deny
+		allow from all
+	</Directory>
+
+    DirectoryIndex /index.html
+    <Directory />
+        Redirect /index.html /sandtable/src/draw
+    </Directory>
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+
+	# Possible values include: debug, info, notice, warn, error, crit,
+	# alert, emerg.
+	LogLevel warn
+
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>

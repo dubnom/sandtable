@@ -1,0 +1,6 @@
+mach.py
+*.sqlite
+*.png
+*.ngc
+*.pkl
+*.gcode

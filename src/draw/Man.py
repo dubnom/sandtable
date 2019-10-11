@@ -1,0 +1,131 @@
+from math import radians, sin, cos
+from Sand import *
+from dialog import *
+
+class Man( Sandable ):
+    """
+        <h3>Draw a stick-figure man</h3>
+
+        Hint: Everything is referenced to the figure's neck location.
+
+        <p>This drawing method is intended to be used for animated movies but can also be used to draw a single stick-figure.</p>
+
+        <ul>
+         <li><i>X and Y Neck locations</i> - where on the table to draw the neck. Every other part of the stick-figure
+             is drawn relative to the neck.
+         <li><i>Angles</i> - Shoulders and thighs come straight out of the body at a right-angle when set to 0 degrees.
+             Positive angles point the extremity down while negative angles point it up.
+             </i>Elbow and Calf Angles</i> are relative to their attached shoulder or thigh.  When these angles
+             are set to 0, the extremity points straight out in the same direction of what they are attached to.  Positive
+             angles point down while negative point up.
+         <li><i>Sizes</i> - size, in inches, of each extremity.  Generally <i>Angles</i> should be changed more frequently
+             than the sizes.
+        </ul>"""
+
+    def __init__( self, width, length ):
+        self.editor = [
+            DialogFloat( "xNeck",                   "X Location of Neck",       units = "inches", default = width / 2.0 ),
+            DialogFloat( "yNeck",                   "Y Location of Neck",       units = "inches", default = length / 1.5 ),
+            DialogBreak(),
+            DialogFloat( "leftShoulderAngle",       "Left shoulder angle",      units = "degrees", default = -20.0, min = -60.0, max = 60.0 ),
+            DialogFloat( "leftElbowAngle",          "Left elbow angle",         units = "degrees", default = -20.0, min = -60.0, max = 60.0 ),
+            DialogFloat( "rightShoulderAngle",      "Right shoulder angle",     units = "degrees", default = -20.0, min = -60.0, max = 60.0 ),
+            DialogFloat( "rightElbowAngle",         "Right elbow angle",        units = "degrees", default = -20.0, min = -60.0, max = 60.0 ),
+            DialogFloat( "leftKneeAngle",           "Left thigh angle",         units = "degrees", default = 50.0,  min = -60.0, max = 60.0 ),
+            DialogFloat( "leftCalfAngle",           "Left calf angle",          units = "degrees", default = 20.0,  min = -60.0, max = 60.0 ),
+            DialogFloat( "rightKneeAngle",          "Right thigh angle",        units = "degrees", default = 60.0,  min = -60.0, max = 60.0 ),
+            DialogFloat( "rightCalfAngle",          "Right calf angle",         units = "degrees", default = 20.0,  min = -60.0, max = 60.0 ),
+            DialogBreak(),
+            DialogFloat( "headSize",                "Head Size (radius)",       units = "inches", default = 1.0 ),
+            DialogFloat( "neckLength",              "Neck length",              units = "inches", default = 1.0 ),
+            DialogFloat( "bodyLength",              "Body length",              units = "inches", default = 4.0 ),
+            DialogFloat( "thighLength",             "Thigh length",             units = "inches", default = 2.0 ),
+            DialogFloat( "calfLength",              "Calf length",              units = "inches", default = 2.0 ),
+            DialogFloat( "upperArmLength",          "Upper arm length",         units = "inches", default = 2.0 ),
+            DialogFloat( "foreArmLength",           "Forearm length",           units = "inches", default = 2.0 ),
+        ]
+    
+    def generate( self, params ):
+        chain = []
+        
+        # Draw the head
+        neck = (params.xNeck, params.yNeck)
+        for a in range( 0, 360, 5 ):
+            angle = radians( a - 90 )
+            x = neck[0] + cos( angle ) * params.headSize
+            y = neck[1] + params.headSize + sin( angle ) * params.headSize
+            chain.append( (x, y) )
+        chain.append( neck )
+
+        # Draw the body
+        crotch = (params.xNeck, params.yNeck - params.bodyLength)
+        chain.append( crotch )
+
+        # Draw the left leg (and return to body)
+        angle = radians( params.leftKneeAngle )
+        x = crotch[0] - cos( angle ) * params.thighLength
+        y = crotch[1] - sin( angle ) * params.thighLength
+        knee = (x, y)
+        chain.append( knee )
+
+        angle = radians( params.leftCalfAngle + params.leftKneeAngle )
+        x = knee[0] - cos( angle ) * params.calfLength
+        y = knee[1] - sin( angle ) * params.calfLength
+        foot = (x, y)
+        chain.append( foot )
+        chain.append( knee )
+        chain.append( crotch )
+
+        # Draw the right leg (and return to body)
+        angle = radians( params.rightKneeAngle )
+        x = crotch[0] + cos( angle ) * params.thighLength
+        y = crotch[1] - sin( angle ) * params.thighLength
+        knee = (x, y)
+        chain.append( knee )
+
+        angle = radians( params.rightCalfAngle + params.rightKneeAngle )
+        x = knee[0] + cos( angle ) * params.calfLength
+        y = knee[1] - sin( angle ) * params.calfLength
+        foot = (x, y)
+        chain.append( foot )
+        chain.append( knee )
+        chain.append( crotch )
+
+        # Move to the shoulders
+        shoulders = (neck[0], neck[1] - params.neckLength)
+        chain.append( shoulders )
+        
+        # Draw the left arm (and return to body)
+        angle = radians( params.leftShoulderAngle )
+        x = shoulders[0] - cos( angle ) * params.upperArmLength
+        y = shoulders[1] - sin( angle ) * params.upperArmLength
+        elbow = (x, y)
+        chain.append( elbow )
+
+        angle = radians( params.leftShoulderAngle + params.leftElbowAngle )
+        x = elbow[0] - cos( angle ) * params.foreArmLength
+        y = elbow[1] - sin( angle ) * params.foreArmLength
+        wrist = (x, y)
+        chain.append( wrist )
+        chain.append( elbow )
+        chain.append( shoulders )
+
+        # Draw the right arm (and return to body)
+        angle = radians( params.rightShoulderAngle )
+        x = shoulders[0] + cos( angle ) * params.upperArmLength
+        y = shoulders[1] - sin( angle ) * params.upperArmLength
+        elbow = (x, y)
+        chain.append( elbow )
+
+        angle = radians( params.rightShoulderAngle + params.rightElbowAngle )
+        x = elbow[0] + cos( angle ) * params.foreArmLength
+        y = elbow[1] - sin( angle ) * params.foreArmLength
+        wrist = (x, y)
+        chain.append( wrist )
+        chain.append( elbow )
+        chain.append( shoulders )
+
+        # Return to neck
+        chain.append( neck )
+
+        return [chain]

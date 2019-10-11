@@ -1,0 +1,38 @@
+<Movie Name="Dancing" FPS="10">
+  <Eraser>
+    <Thing Type="Grid">
+      <Param Name="xOffset" Value="10"/>
+      <Param Name="yOffset" Value="1"/>
+      <Param Name="width" Value="16"/>
+      <Param Name="height" Value="14"/>
+    </Thing>
+  </Eraser>
+  <Frame>
+    <Thing Type="Man" Name="Man1" Random="True">
+    </Thing>
+  </Frame>
+  <Frame Steps="5">
+    <Thing Type="Man" Name="Man1" Random="True">
+    </Thing>
+  </Frame>
+  <Frame Steps="5">
+    <Thing Type="Man" Name="Man1" Random="True">
+    </Thing>
+  </Frame>
+  <Frame Steps="5">
+    <Thing Type="Man" Name="Man1" Random="True">
+    </Thing>
+  </Frame>
+  <Frame Steps="5">
+    <Thing Type="Man" Name="Man1" Random="True">
+    </Thing>
+  </Frame>
+  <Frame Steps="5">
+    <Thing Type="Man" Name="Man1" Random="True">
+    </Thing>
+  </Frame>
+  <Frame Steps="5">
+    <Thing Type="Man" Name="Man1" Random="True">
+    </Thing>
+  </Frame>
+</Movie>

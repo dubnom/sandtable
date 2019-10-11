@@ -7,7 +7,11 @@ SandTable provides a web-based user interface to control artistic mechanisms bui
 ### Software:
 Everything you need to control a SandTable is included in this project. You only need a Raspberry Pi, a CNC controller, an actual table, and some optional LED lights. The software is easy to install and use.  A web-based interface allows you to draw a huge number of mathematically created paterns, write text, draw clipart, and even automatically find and draw images from Google.
 
-The software is intentionally written to make it easy to add new drawing methods and lighting themes.
+Everything is written to make it easy to add new drawing methods and lighting themes.
+
+The software also has some neat additional features:
+* A scheduler that can wake up and draw a random image.
+* A movie mode that runs through a script of keyframe drawings, automatically interpolates intermediate frames, and triggers a camera to take pictures. The pictures are then assembled into an animated movie.
 
 ### Hardware:
 While you can use SandTable to generate interesting pictures on a screen, the real benefit comes by driving a CNC machine. Machines need to have a smooth (and preferably quiet) x/y motion stage with a magnet in the center. It takes a bit of effort to tune the power/distance of the magnet, the size of the ball, and the amount and type of sand. If the magnet isn't powerful enough the ball will bury and stop in the sand while the magnet continues.  If the magnet is too strong then the friction of the magnet, ball, and sand can lead to stepper motors stalling or missing steps and griding noise.
@@ -71,6 +75,13 @@ Logs are written to:
 * CNC Machine logs - /var/logs/machd.log
 * LED Lighting logs - /var/logs/ledaemon.log
 * Scheduler logs - /var/logs/scheduler.log
+
+### To Do:
+* Convert from Python 2.7 to Python 3
+* Improve installation script
+* Improve scheduler interface
+* Improve lighting scenes
+* Make the interface more interactive
 
 ## Authors:
 

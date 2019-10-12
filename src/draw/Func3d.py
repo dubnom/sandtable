@@ -137,7 +137,7 @@ class Func3d( Sandable ):
             'tanh', 'min', 'max', 'abs', 'float', 'int',
             ]
         self.safe_dict = dict( [(k, eval(k)) for k in safe_list ])
-        self.expression = expression
+        self.expression = compile(expression, 'Expression', 'eval') 
     
     def _callFunc( self, x, y ):
         self.safe_dict['x'] = self.safe_dict['X'] = x

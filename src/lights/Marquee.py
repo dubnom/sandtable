@@ -1,6 +1,3 @@
-from __future__ import division
-from builtins import range
-from past.utils import old_div
 from Sand import *
 from dialog import *
 
@@ -14,7 +11,7 @@ class Marquee( Ledable ):
     def generator( self, leds, cols, rows, params ):
         end = (cols + rows) * 2
         shift = 0
-        angle = old_div(360, params.modulus)
+        angle = 360 /  params.modulus
         colors = [ None ] * params.modulus
         while True:
             for degree in range( 0, 360, 1 ):

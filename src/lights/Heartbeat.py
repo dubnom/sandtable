@@ -1,6 +1,3 @@
-from __future__ import division
-from builtins import range
-from past.utils import old_div
 from Sand import *
 from dialog import *
 
@@ -14,11 +11,11 @@ class Heartbeat( Ledable ):
 
     def generator( self, leds, cols, rows, params ):
         end = (cols + rows) * 2 - 1
-        steps = int(old_div((60.0 / LED_PERIOD), (params.rate * len(self.brightnesses))))
+        steps = int((60.0 / LED_PERIOD) / (params.rate * len(self.brightnesses)))
         while True:
             for i in range(len(self.brightnesses)):
                 base = self.brightnesses[i-1]
-                slope = old_div((self.brightnesses[i] - base), steps)
+                slope = (self.brightnesses[i] - base) / steps
                 for step in range(steps):
                     color = (int(255 * (base + slope * step)), 0, 0)
                     leds.set( 0, color, end )

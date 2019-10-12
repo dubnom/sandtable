@@ -1,6 +1,3 @@
-from __future__ import division
-from builtins import range
-from past.utils import old_div
 from random import randint
 from Sand import *
 from dialog import *
@@ -14,8 +11,8 @@ class Kaleidoscope( Ledable ):
     def generator( self, leds, cols, rows, params ):
         ucl, ucr, lcr, lcl = 0, cols-1, cols+rows-1, cols*2+rows-1
         url, urr, lrr, lrl = cols*2+rows*2-1, cols, cols+rows-1, cols*2+rows
-        self.lights = [ [ucl+col, ucr-col, lcr+col, lcl-col] for col in range( 0, old_div(cols,2) )] \
-                + [ [urr+row, lrr-row, lrl+row, url-row] for row in range( 0, old_div(rows,2) )] 
+        self.lights = [ [ucl+col, ucr-col, lcr+col, lcl-col] for col in range( 0, col//2 )] \
+                + [ [urr+row, lrr-row, lrl+row, url-row] for row in range( 0, rows//2 )] 
         count = len( self.lights )
         colors = [ None ] * count
         newColors = [ None ] * count

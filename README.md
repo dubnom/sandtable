@@ -7,14 +7,17 @@ SandTable provides a web-based user interface to control artistic mechanisms bui
 ### Software:
 Everything you need to control a SandTable is included in this project. You only need a Raspberry Pi, a CNC controller, an actual table, and some optional LED lights. The software is easy to install and use.  A web-based interface allows you to draw a huge number of mathematically created paterns, write text, draw clipart, and even automatically find and draw images from Google.
 
-Everything is written to make it easy to add new drawing methods and lighting themes.
+The SandTable system is designed to make it easy to add new drawing methods and lighting schemes.
 
 The software also has some neat additional features:
 * A scheduler that can wake up and draw a random image.
 * A movie mode that runs through a script of keyframe drawings, automatically interpolates intermediate frames, and triggers a camera to take pictures. The pictures are then assembled into an animated movie.
+* A filer for managing clipart, movies, and pictures.
 
 ### Hardware:
-While you can use SandTable to generate interesting pictures on a screen, the real benefit comes by driving a CNC machine. Machines need to have a smooth (and preferably quiet) x/y motion stage with a magnet in the center. It takes a bit of effort to tune the power/distance of the magnet, the size of the ball, and the amount and type of sand. If the magnet isn't powerful enough the ball will bury and stop in the sand while the magnet continues.  If the magnet is too strong then the friction of the magnet, ball, and sand can lead to stepper motors stalling or missing steps and griding noise.
+While you can use SandTable to generate interesting pictures on a screen, the real benefit comes by driving a CNC machine. Machines need to have a smooth (and preferably quiet) x/y motion stage with a magnet in the center. It takes a bit of effort to tune the power/distance of the magnet, the size of the ball, and the amount and type of sand. If the magnet isn't powerful enough the ball will bury and stop in the sand while the magnet continues.  If the magnet is too strong then the friction of the magnet, ball, and sand can lead to stepper motors stalling, missing steps, and making grinding noise.
+
+The hardware should include a homing switche for each axis.  Each machines dimensions, motor speeds, accelerations, ports, etc. can be configured.
 
 ### Modifications:
 Many people want to add some fun bells and whistles like:
@@ -24,7 +27,10 @@ Many people want to add some fun bells and whistles like:
 * Magnetic sand
 * Ferrofluid
 * Ball levitation
-After years of playing with SandTables, I think you'll find most of these modifications to be disappointing. However, if you do come up with something that you feel is compelling, we should definitely add it to the code. I highly recommend adding controllable LED lighting and support already exists for [Fadecandy](https://github.com/scanlime/fadecandy) and [DotStar](https://learn.adafruit.com/adafruit-dotstar-leds/overvie://learn.adafruit.com/adafruit-dotstar-leds/overview) (recommended).
+After years of playing with SandTables, I think you'll find most of these modifications to be disappointing. However, if you do come up with something that you feel is compelling, we should definitely add it to the code. I highly recommend adding controllable LED lighting and support already exists for:
+* [DotStar](https://learn.adafruit.com/adafruit-dotstar-leds/overvie://learn.adafruit.com/adafruit-dotstar-leds/overview) Best LED strips from [Adafruit](https://www.adafruit.com/category/885).
+* [Fadecandy](https://github.com/scanlime/fadecandy) Versatile NeoPixel LED controller.
+* [OPC](http://openpixelcontrol.org/) Open Pixel Control (also used in FadeCandy).
 
 #### Supported CNC Controllers:
 * [TinyG](https://synthetos.myshopify.com/products/tinyg)
@@ -77,11 +83,14 @@ Logs are written to:
 * Scheduler logs - /var/logs/scheduler.log
 
 ### To Do:
-* Convert from Python 2.7 to Python 3
-* Improve installation script
+* Improve installation script and move to Python3
+* Add license file
+* Move machine configurations into config
+* Move machine definitions into machines
 * Improve scheduler interface
 * Improve lighting scenes
-* Make the interface more interactive
+* Make the web interface more interactive
+* Move from PIL to Pillow
 
 ## Authors:
 

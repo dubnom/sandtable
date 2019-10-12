@@ -1,7 +1,3 @@
-from __future__ import division
-from past.builtins import cmp
-from builtins import range
-from past.utils import old_div
 from math import pi, sin
 import random
 from Sand import *
@@ -37,10 +33,11 @@ class Ocean( Ledable ):
 
         wavesPerPeriod = (params.wpm / 60.0) * LED_PERIOD
         stepsPerWave   = int(1.0 / wavesPerPeriod)
-        anglePerStep   = old_div(pi, stepsPerWave)
+        anglePerStep   = pi / stepsPerWave
 
         roughness = params.roughness * 0.01
 
+        cmp = lambda a,b: (a>b)-(a<b)
         while True:
             #set the various edges of the waves
             makeColors = lambda points: [ colors[ random.randint(0,len(colors)-1) ] for p in range(points) ]
@@ -61,7 +58,7 @@ class Ocean( Ledable ):
                 percent = float( distance ) / LED_ROWS
                 threshold = 0.75
                 if percent > threshold:
-                    for led,rgb in enumerate( self._dim( lines[0][2], old_div((percent - threshold), (1.0 - threshold)))):
+                    for led,rgb in enumerate( self._dim( lines[0][2], (percent - threshold) / (1.0 - threshold))):
                         leds.set( lines[2][0][0] + lines[2][1] * led, rgb )
 
                 for line in lines:

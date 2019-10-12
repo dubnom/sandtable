@@ -1,9 +1,9 @@
 import socket
-import SocketServer
+import socketserver
 
-class StoppableTCPServer(SocketServer.TCPServer):
+class StoppableTCPServer(socketserver.TCPServer):
     def server_bind(self):
-        SocketServer.TCPServer.server_bind(self)
+        socketserver.TCPServer.server_bind(self)
         self.socket.settimeout(1)
         self.run = True
 

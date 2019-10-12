@@ -4,15 +4,15 @@ import pickle
 import json
 
 def ledPatternFactory( pattern ):
-    exec "import lights.%s" % pattern
-    exec "led = lights.%s.%s( %d, %d )" % (pattern, pattern, LED_COLUMNS, LED_ROWS )
+    exec("import lights.%s" % pattern)
+    exec("led = lights.%s.%s( %d, %d )" % (pattern, pattern, LED_COLUMNS, LED_ROWS ))
     return led
 
 def setLedPattern( pattern, params ):
     with ledApi() as api:
         return api.setPattern( pattern, params )
 
-class ledApi():
+class ledApi:
     def __init__( self, hostName=LED_HOST, hostPort=LED_PORT ):
         self.hostName = hostName
         self.hostPort = hostPort

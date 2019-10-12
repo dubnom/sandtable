@@ -21,7 +21,7 @@ palettes = {
     "Ocean":            lambda p: PaletteStatic( p, [(0,20,73), (1,38,119), (0,91,197), (0,180,252), (23,249,255)] ),
 }
 
-class Palette(object):
+class Palette:
     def __init__(self,params):
         self.params = params
         pass

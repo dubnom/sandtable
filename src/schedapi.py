@@ -2,7 +2,7 @@ import socket
 import json
 from Sand import *
 
-class schedapi(object):
+class schedapi():
     def __init__( self, hostName=SCHEDULER_HOST, portNumber=SCHEDULER_PORT ):
         self.hostName = hostName
         self.portNumber = portNumber

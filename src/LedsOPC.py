@@ -1,3 +1,4 @@
+from builtins import range
 import opc
 from LedsBase import LedsBase
 
@@ -17,10 +18,10 @@ class Leds(LedsBase):
 
     def connect( self ):
         self.client = opc.Client( '%s:%d' % (host, port))
-        self.mapping = range(0,60)+range(60,90)+range(149,89,-1)+range(179,149,-1)
+        self.mapping = list(range(0,60))+list(range(60,90))+list(range(149,89,-1))+list(range(179,149,-1))
 
     def refresh( self ):
-        self.client.put_pixels( map(lambda i:self.leds[i],self.mapping ) if self.mapping else self.leds )
+        self.client.put_pixels( [self.leds[i] for i in self.mapping] if self.mapping else self.leds )
 
     def disconnect( self ):
         self.client.disconnect()

@@ -1,3 +1,10 @@
+from __future__ import division
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from past.utils import old_div
 prompt = \
 """modes: 1D path following, 2D contour and raster, 3D slicing
 input:
@@ -23,8 +30,8 @@ keys: Q to quit
 usage: python cam.py [[-i] infile][-d display scale][-p part scale][-x xmin][-y ymin][-o outfile][-f force][-v velocity][-t tooldia][-a rate][-e power][-s speed][-h height][-c contour][-r raster][-n no noise][-# number of arc segments][-j jobname][-w write toolpath]
 """
 
-from Tkinter import *
-from tkFileDialog import *
+from tkinter import *
+from tkinter.filedialog import *
 
 from cam import *
 
@@ -35,7 +42,7 @@ def plot(event):
    #
    # scale and plot object and toolpath
    #
-   print "plotting"
+   print("plotting")
    xysize = float(sxysize.get())
    zsize = float(szsize.get())
    xyscale = float(sxyscale.get())
@@ -55,13 +62,13 @@ def plot(event):
       #
       # set scrollbars
       #
-      xscrollmin = (xmin*xyscale + xoff)*WINDOW/xysize
+      xscrollmin = old_div((xmin*xyscale + xoff)*WINDOW,xysize)
       if (xscrollmin > 0): xscrollmin = 0
-      xscrollmax = (xmax*xyscale + xoff)*WINDOW/xysize
+      xscrollmax = old_div((xmax*xyscale + xoff)*WINDOW,xysize)
       if (xscrollmax < WINDOW): xscrollmax = WINDOW
-      yscrollmin = WINDOW - (ymax*xyscale + yoff)*WINDOW/xysize
+      yscrollmin = WINDOW - old_div((ymax*xyscale + yoff)*WINDOW,xysize)
       if (yscrollmin > 0): yscrollmin = 0
-      yscrollmax = WINDOW - (ymin*xyscale + yoff)*WINDOW/xysize
+      yscrollmax = WINDOW - old_div((ymin*xyscale + yoff)*WINDOW,xysize)
       if (yscrollmax < WINDOW): yscrollmax = WINDOW
       c.configure(scrollregion=(xscrollmin,yscrollmin,xscrollmax,yscrollmax))
       if (xscrollmin == 0) & (xscrollmax == WINDOW):
@@ -75,20 +82,20 @@ def plot(event):
       #
       # mark origin
       #
-      c.create_line([(-WINDOW/20,WINDOW-1),(WINDOW/20,WINDOW-1)],fill="blue")
-      c.create_line([(0,WINDOW+WINDOW/20),(0,WINDOW-WINDOW/20)],fill="blue")
+      c.create_line([(old_div(-WINDOW,20),WINDOW-1),(old_div(WINDOW,20),WINDOW-1)],fill="blue")
+      c.create_line([(0,WINDOW+old_div(WINDOW,20)),(0,WINDOW-old_div(WINDOW,20))],fill="blue")
       #
       # plot boundary segments
       #
       for seg in range(len(boundarys[0])):
          path_plot = []
          for vertex in range(len(boundarys[0][seg])):
-            xplot = int((boundarys[0][seg][vertex][X]*xyscale + xoff)*WINDOW/xysize)
+            xplot = int(old_div((boundarys[0][seg][vertex][X]*xyscale + xoff)*WINDOW,xysize))
             path_plot.append(xplot)
-            yplot = (WINDOW-1) - int((boundarys[0][seg][vertex][Y]*xyscale + yoff)*WINDOW/xysize)
+            yplot = (WINDOW-1) - int(old_div((boundarys[0][seg][vertex][Y]*xyscale + yoff)*WINDOW,xysize))
             path_plot.append(yplot)
-	    if (vert == 1):
-	       c.create_text(xplot,yplot,text=str(seg)+':'+str(vertex),tag="plot_boundary")
+            if (vert == 1):
+               c.create_text(xplot,yplot,text=str(seg)+':'+str(vertex),tag="plot_boundary")
          c.create_line(path_plot,tag="plot_boundary")
       c.delete("plot_path")
       #
@@ -97,9 +104,9 @@ def plot(event):
       for seg in range(len(toolpaths[0])):
          path_plot = []
          for vertex in range (len(toolpaths[0][seg])):
-            xplot = int((toolpaths[0][seg][vertex][X]*xyscale + xoff)*WINDOW/xysize)
+            xplot = int(old_div((toolpaths[0][seg][vertex][X]*xyscale + xoff)*WINDOW,xysize))
             path_plot.append(xplot)
-            yplot = (WINDOW-1) - int((toolpaths[0][seg][vertex][Y]*xyscale + yoff)*WINDOW/xysize)
+            yplot = (WINDOW-1) - int(old_div((toolpaths[0][seg][vertex][Y]*xyscale + yoff)*WINDOW,xysize))
             path_plot.append(yplot)
             if (vert == 1):
                c.create_text(xplot,yplot,text=str(seg)+':'+str(vertex),tag="plot_path")
@@ -118,27 +125,27 @@ def plot(event):
       #
       # draw 3D views
       #
-      c.create_line([[WINDOW/2,0],[WINDOW/2,WINDOW]],tag="plot_boundary",fill="blue")
-      c.create_line([[0,WINDOW/2],[WINDOW,WINDOW/2]],tag="plot_boundary",fill="blue")
-      c.create_text(WINDOW/4,WINDOW/30,text="perspective",font=("sans-serif",12),fill="#c00000")
-      c.create_text(WINDOW/2+WINDOW/4,WINDOW/30,text="front",font=("sans-serif",12),fill="#c00000")
-      c.create_text(WINDOW/4,WINDOW/2+WINDOW/30,text="side",font=("sans-serif",12),fill="#c00000")
-      c.create_text(WINDOW/2+WINDOW/4,WINDOW/2+WINDOW/30,text="top",font=("sans-serif",12),fill="#c00000")
+      c.create_line([[old_div(WINDOW,2),0],[old_div(WINDOW,2),WINDOW]],tag="plot_boundary",fill="blue")
+      c.create_line([[0,old_div(WINDOW,2)],[WINDOW,old_div(WINDOW,2)]],tag="plot_boundary",fill="blue")
+      c.create_text(old_div(WINDOW,4),old_div(WINDOW,30),text="perspective",font=("sans-serif",12),fill="#c00000")
+      c.create_text(old_div(WINDOW,2)+old_div(WINDOW,4),old_div(WINDOW,30),text="front",font=("sans-serif",12),fill="#c00000")
+      c.create_text(old_div(WINDOW,4),old_div(WINDOW,2)+old_div(WINDOW,30),text="side",font=("sans-serif",12),fill="#c00000")
+      c.create_text(old_div(WINDOW,2)+old_div(WINDOW,4),old_div(WINDOW,2)+old_div(WINDOW,30),text="top",font=("sans-serif",12),fill="#c00000")
       if (boundarys == []):
          for face in range(len(faces)):
             xy_plot = []
             xz_plot = []
             yz_plot = []
-	    xyz_plot = []
+            xyz_plot = []
             for vertex in range(len(faces[face])):
- 	       x = vertices[faces[face][vertex]-1][X]
-	       y = vertices[faces[face][vertex]-1][Y]
-	       z = vertices[faces[face][vertex]-1][Z]
-               xplot = WINDOW/2 + int((x*xyscale + xoff)*WINDOW*0.5/xysize)
+               x = vertices[faces[face][vertex]-1][X]
+               y = vertices[faces[face][vertex]-1][Y]
+               z = vertices[faces[face][vertex]-1][Z]
+               xplot = old_div(WINDOW,2) + int((x*xyscale + xoff)*WINDOW*0.5/xysize)
                yplot = WINDOW - int((y*xyscale + yoff)*WINDOW*0.5/xysize)
                xy_plot.append(xplot)
                xy_plot.append(yplot)
-               xplot = WINDOW/2 + int((x*xyscale + xoff)*WINDOW*0.5/xysize)
+               xplot = old_div(WINDOW,2) + int((x*xyscale + xoff)*WINDOW*0.5/xysize)
                yplot = -int((z*zscale + zoff)*WINDOW*0.5/zsize)
                xz_plot.append(xplot)
                xz_plot.append(yplot)
@@ -146,9 +153,9 @@ def plot(event):
                yplot = WINDOW - int((y*xyscale + yoff)*WINDOW*0.5/xysize)
                yz_plot.append(xplot)
                yz_plot.append(yplot)
-	       xplot = int((x*xyscale+xoff)*WINDOW*0.5/xysize)
-               yplot = WINDOW/2 - int((y*xyscale + yoff)*WINDOW*0.5/xysize) - \
-	          int((z*zscale + zoff)*WINDOW*0.5/(10*zsize))
+               xplot = int((x*xyscale+xoff)*WINDOW*0.5/xysize)
+               yplot = old_div(WINDOW,2) - int((y*xyscale + yoff)*WINDOW*0.5/xysize) - \
+                  int((z*zscale + zoff)*WINDOW*0.5/(10*zsize))
                xyz_plot.append(xplot)
                xyz_plot.append(yplot)
             c.create_line(xy_plot,tag="plot_boundary")
@@ -160,16 +167,16 @@ def plot(event):
             xy_plot = []
             xz_plot = []
             yz_plot = []
-	    xyz_plot = []
-	    for vertex in range(len(boundarys[layer][seg])):
-	       x = boundarys[layer][seg][vertex][X3]
-	       y = boundarys[layer][seg][vertex][Y3]
-	       z = boundarys[layer][seg][vertex][Z3]
-               xplot = WINDOW/2 + int((x*xyscale + xoff)*WINDOW*0.5/xysize)
+            xyz_plot = []
+            for vertex in range(len(boundarys[layer][seg])):
+               x = boundarys[layer][seg][vertex][X3]
+               y = boundarys[layer][seg][vertex][Y3]
+               z = boundarys[layer][seg][vertex][Z3]
+               xplot = old_div(WINDOW,2) + int((x*xyscale + xoff)*WINDOW*0.5/xysize)
                yplot = WINDOW - int((y*xyscale + yoff)*WINDOW*0.5/xysize)
                xy_plot.append(xplot)
                xy_plot.append(yplot)
-               xplot = WINDOW/2 + int((x*xyscale + xoff)*WINDOW*0.5/xysize)
+               xplot = old_div(WINDOW,2) + int((x*xyscale + xoff)*WINDOW*0.5/xysize)
                yplot = -int((z*zscale + zoff)*WINDOW*0.5/zsize)
                xz_plot.append(xplot)
                xz_plot.append(yplot)
@@ -178,8 +185,8 @@ def plot(event):
                yz_plot.append(xplot)
                yz_plot.append(yplot)
                xplot = int((x*xyscale + xoff)*WINDOW*0.5/xysize)
-               yplot = WINDOW/2 - int((y*xyscale + yoff)*WINDOW*0.5/xysize) - \
-	          int((z*zscale + zoff)*WINDOW*0.5/(10*zsize))
+               yplot = old_div(WINDOW,2) - int((y*xyscale + yoff)*WINDOW*0.5/xysize) - \
+                  int((z*zscale + zoff)*WINDOW*0.5/(10*zsize))
                xyz_plot.append(xplot)
                xyz_plot.append(yplot)
             c.create_line(xy_plot,tag="plot_boundary")
@@ -191,16 +198,16 @@ def plot(event):
             xy_plot = []
             xz_plot = []
             yz_plot = []
-	    xyz_plot = []
-	    for vertex in range(len(toolpaths[layer][seg])):
-	       x = toolpaths[layer][seg][vertex][X3]
-	       y = toolpaths[layer][seg][vertex][Y3]
-	       z = toolpaths[layer][seg][vertex][Z3]
-               xplot = WINDOW/2 + int((x*xyscale + xoff)*WINDOW*0.5/xysize)
+            xyz_plot = []
+            for vertex in range(len(toolpaths[layer][seg])):
+               x = toolpaths[layer][seg][vertex][X3]
+               y = toolpaths[layer][seg][vertex][Y3]
+               z = toolpaths[layer][seg][vertex][Z3]
+               xplot = old_div(WINDOW,2) + int((x*xyscale + xoff)*WINDOW*0.5/xysize)
                yplot = WINDOW - int((y*xyscale + yoff)*WINDOW*0.5/xysize)
                xy_plot.append(xplot)
                xy_plot.append(yplot)
-               xplot = WINDOW/2 + int((x*xyscale + xoff)*WINDOW*0.5/xysize)
+               xplot = old_div(WINDOW,2) + int((x*xyscale + xoff)*WINDOW*0.5/xysize)
                yplot = -int((z*zscale + zoff)*WINDOW*0.5/zsize)
                xz_plot.append(xplot)
                xz_plot.append(yplot)
@@ -209,8 +216,8 @@ def plot(event):
                yz_plot.append(xplot)
                yz_plot.append(yplot)
                xplot = int((x*xyscale + xoff)*WINDOW*0.5/xysize)
-               yplot = WINDOW/2 - int((y*xyscale + yoff)*WINDOW*0.5/xysize) - \
-	          int((z*zscale + zoff)*WINDOW*0.5/(10*zsize))
+               yplot = old_div(WINDOW,2) - int((y*xyscale + yoff)*WINDOW*0.5/xysize) - \
+                  int((z*zscale + zoff)*WINDOW*0.5/(10*zsize))
                xyz_plot.append(xplot)
                xyz_plot.append(yplot)
             c.create_line(xy_plot,tag="plot_path",fill="red")
@@ -273,13 +280,13 @@ def camselect(event):
       sxyvel.set("4")
       szvel.set("4")
       if (faces != []):
-	 sztop.set(str(zmax))
-	 szbot.set(str(zmin))
+         sztop.set(str(zmax))
+         szbot.set(str(zmin))
          sthickness.set(str(zmax-zmin))
-	 zsliceframe.pack()
+         zsliceframe.pack()
       if ((faces != []) | (len(boundarys) > 1)):
          szsize.set(sxysize.get())
-	 zcoordframe.pack()
+         zcoordframe.pack()
       else:
          szup.set("0.05")
          szdown.set("-0.005")
@@ -296,12 +303,12 @@ def camselect(event):
          sxysize.set("6")
          szsize.set("6")
       if (faces != []):
-	 sztop.set(str(zmax))
-	 szbot.set(str(zmin))
+         sztop.set(str(zmax))
+         szbot.set(str(zmin))
          sthickness.set(str(zmax-zmin))
-	 zsliceframe.pack()
+         zsliceframe.pack()
       if ((faces != []) | (len(boundarys) > 1)):
-	 zcoordframe.pack()
+         zcoordframe.pack()
       sforce.set("45")
       svel.set("2")
       sdia.set("0.01")
@@ -316,12 +323,12 @@ def camselect(event):
          sxysize.set("24")
          szsize.set("24")
       if (faces != []):
-	 sztop.set(str(zmax))
-	 szbot.set(str(zmin))
+         sztop.set(str(zmax))
+         szbot.set(str(zmin))
          sthickness.set(str(zmax-zmin))
-	 zsliceframe.pack()
+         zsliceframe.pack()
       if ((faces != []) | (len(boundarys) > 1)):
-	 zcoordframe.pack()
+         zcoordframe.pack()
          laserzframe.pack()
       sheight.set("10")
       srate.set("2500")
@@ -340,12 +347,12 @@ def camselect(event):
          sxysize.set("24")
          szsize.set("24")
       if (faces != []):
-	 sztop.set(str(zmax))
-	 szbot.set(str(zmin))
+         sztop.set(str(zmax))
+         szbot.set(str(zmin))
          sthickness.set(str(zmax-zmin))
-	 zsliceframe.pack()
+         zsliceframe.pack()
       if ((faces != []) | (len(boundarys) > 1)):
-	 zcoordframe.pack()
+         zcoordframe.pack()
          laserzframe.pack()
       sheight.set("18")
       srate.set("500")
@@ -365,12 +372,12 @@ def camselect(event):
       sxyvel.set("2")
       szvel.set("2")
       if (faces != []):
-	 sztop.set(str(zmax))
-	 szbot.set(str(zmin))
+         sztop.set(str(zmax))
+         szbot.set(str(zmin))
          sthickness.set(str(zmax-zmin))
-	 zsliceframe.pack()
+         zsliceframe.pack()
       if ((faces != []) | (len(boundarys) > 1)):
-	 zcoordframe.pack()
+         zcoordframe.pack()
       else:
          szup.set("0.05")
          szdown.set("-0.005")
@@ -395,29 +402,29 @@ def camselect(event):
       imgframe.pack()
       xysize = float(sxysize.get())
       if ((xmax-xmin) > (ymax-ymin)):
-         xyscale = xysize/(xmax - xmin)
+         xyscale = old_div(xysize,(xmax - xmin))
          sxyscale.set(str(xyscale))
-         xoff = -(xmin*xysize)/(xmax-xmin)
-	 yoff = -(ymin*xysize)/(xmax-xmin)
+         xoff = old_div(-(xmin*xysize),(xmax-xmin))
+         yoff = old_div(-(ymin*xysize),(xmax-xmin))
          sxmin.set(str(xoff))
          symin.set(str(yoff))
       else:
-         xyscale = xysize/(ymax - ymin)
+         xyscale = old_div(xysize,(ymax - ymin))
          sxyscale.set(str(xyscale))
-         yoff = -(ymin*xysize)/(ymax-ymin)
-         xoff = -(xmin*xysize)/(ymax-ymin)
+         yoff = old_div(-(ymin*xysize),(ymax-ymin))
+         xoff = old_div(-(xmin*xysize),(ymax-ymin))
          sxmin.set(str(xoff))
          symin.set(str(yoff))
    elif (find(outtext,".ord") != -1):
       delframes()
       camframe.pack()
       if (faces != []):
-	 sztop.set(str(zmax))
-	 szbot.set(str(zmin))
+         sztop.set(str(zmax))
+         szbot.set(str(zmin))
          sthickness.set(str(zmax-zmin))
-	 zsliceframe.pack()
+         zsliceframe.pack()
       if ((faces != []) | (len(boundarys) > 1)):
-	 zcoordframe.pack()
+         zcoordframe.pack()
       if (not fixed_size):
          sxysize.set("24")
       sdia.set("0.01")
@@ -431,12 +438,12 @@ def camselect(event):
       delframes()
       camframe.pack()
       if (faces != []):
-	 sztop.set(str(zmax))
-	 szbot.set(str(zmin))
+         sztop.set(str(zmax))
+         szbot.set(str(zmin))
          sthickness.set(str(zmax-zmin))
-	 zsliceframe.pack()
+         zsliceframe.pack()
       if ((faces != []) | (len(boundarys) > 1)):
-	 zcoordframe.pack()
+         zcoordframe.pack()
       if (not fixed_size):
          sxysize.set("1")
       spulseperiod.set("10000")
@@ -460,7 +467,7 @@ def camselect(event):
       out3Dframe.pack()
       zcoordframe.pack()
    else:
-      print "output file format not supported"
+      print("output file format not supported")
 #   plot(event)
    plot_delete(event)
    return
@@ -516,30 +523,30 @@ def send(event):
       wdevbtn.config(text="sending ...")
       wdevbtn.update()
       write(event)
-      print os.system('stty 9600 raw -echo crtscts </dev/ttyS0')
-      print os.system('cat %s > /dev/ttyS0'%outtext)
-      print os.system('rm %s'%outtext)
+      print(os.system('stty 9600 raw -echo crtscts </dev/ttyS0'))
+      print(os.system('cat %s > /dev/ttyS0'%outtext))
+      print(os.system('rm %s'%outtext))
       wdevbtn.config(text="send to")
       #wdevbtn.update()
    elif (find(outtext,".camm") != -1):
       wdevbtn.config(text="sending ...")
       wdevbtn.update()
       write(event)
-      print os.system('stty 9600 raw -echo crtscts </dev/ttyS0')
-      print os.system('cat %s > /dev/ttyS0'%outtext)
-      print os.system('rm %s'%outtext)
+      print(os.system('stty 9600 raw -echo crtscts </dev/ttyS0'))
+      print(os.system('cat %s > /dev/ttyS0'%outtext))
+      print(os.system('rm %s'%outtext))
       wdevbtn.config(text="send to")
       #wdevbtn.update()
    elif (find(outtext,".epi") != -1):
       wdevbtn.config(text="sending ...")
       wdevbtn.update()
       write(event)
-      print os.system('lpr -P Queue %s'%outtext)
-      print os.system('rm %s'%outtext)
+      print(os.system('lpr -P Queue %s'%outtext))
+      print(os.system('rm %s'%outtext))
       wdevbtn.config(text="send to")
       #wdevbtn.update()
    else:
-      print "output not configured for",outtext
+      print("output not configured for",outtext)
 
 def openfile():
    #
@@ -562,10 +569,10 @@ root = Tk()
 root.title('cam.py')
 root.bind('Q','exit')
 
-print "cam.py "+DATE+" (c) MIT CBA Neil Gershenfeld"
-print """Permission granted for experimental and personal use;
-   license for commercial sale available from MIT"""
-print prompt
+print("cam.py "+DATE+" (c) MIT CBA Neil Gershenfeld")
+print("""Permission granted for experimental and personal use;
+   license for commercial sale available from MIT""")
+print(prompt)
 
 #
 # parse input command line arguments

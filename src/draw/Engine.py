@@ -52,7 +52,7 @@ class Engine( Sandable ):
                 xCenter = params.xCorner + rev * colSize + colHalf
                 yCenter = params.yCorner + row * rowSize + rowHalf
                 chain = []
-                for point in xrange( points ):
+                for point in range( points ):
                     angle = radians( point * params.angleRate - angleOffset)
                     r = radius * (point / float(points))
                     x = xCenter + cos( angle ) * r

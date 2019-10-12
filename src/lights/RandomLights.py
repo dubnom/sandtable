@@ -9,7 +9,7 @@ class RandomLights( Ledable ):
         self.editor = [
                 DialogFloat( "minutes",      "Light Pattern Change Frequency",   units = "minutes", default = 1.0, min = 0.25, max = 10.0 ),
         ]
-        self.patterns = filter( lambda c: c not in ['Random','Off'], ledPatterns )
+        self.patterns = [c for c in ledPatterns if c not in ['Random','Off']]
 
     def generator( self, leds, cols, rows, params ):
         while True:
@@ -22,7 +22,7 @@ class RandomLights( Ledable ):
             endTime = time() + params.minutes * 60.0
             try:
                 while time() < endTime:
-                    yield gen.next()
+                    yield next(gen)
             except StopIteration:
                 pass
 

@@ -55,7 +55,7 @@ class Spiral( Sandable ):
         point360 = 360.0 / abs( params.angleRate )
         
         chain = []
-        for point in xrange( points ):
+        for point in range( points ):
             angle   = radians( params.angleStart + point * params.angleRate )
             if params.fill:
                 if point > point360:

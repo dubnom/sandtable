@@ -76,7 +76,7 @@ def main():
         (options,args) = parser.parse_args()
     
         if len(args) != 1:
-            print 'Expected script name as argument'
+            print('Expected script name as argument')
             raise ValueError( "Script name wasn't passed as an argument" )
 
         movieName = MakeMovie( args[0], not options.sand, ms )

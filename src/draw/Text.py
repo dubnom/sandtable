@@ -80,7 +80,7 @@ class Text( Sandable ):
         chains = [self._reprocessChain( chain ) for chain in chains]
 
         # Sort all of the chains by rightmost point
-        chains.sort( lambda a,b: cmp(a[-1][0],b[-1][0]) )
+        chains.sort( key = lambda chain: chain[-1][0] )
         return chains 
 
     def _parseLine( self, line ):

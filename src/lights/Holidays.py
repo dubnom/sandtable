@@ -1,3 +1,4 @@
+from builtins import range
 from Sand import *
 from dialog import *
 from random import random, randint
@@ -5,7 +6,7 @@ from palettes import palettes
 
 class Holidays( Ledable ):
     def __init__( self, cols, rows ):
-        pal = palettes.keys()[ randint(0,len(palettes)-1) ]        
+        pal = list(palettes.keys())[ randint(0,len(palettes)-1) ]        
         self.editor = [
             DialogList( "palette",      "Palette",                      default = pal, list = sorted( palettes.keys()) ),
             DialogInt(  "points",       "Points per Color",             default = 5, min = 1, max = 200 ),

@@ -13,8 +13,8 @@ def humanStep(number,ticks):
             return step * scale
     return None
 
-print humanStep(3.1415,2)
-print humanStep(542.5,10)   
+print(humanStep(3.1415,2))
+print(humanStep(542.5,10))   
     
 
 
@@ -31,11 +31,11 @@ chains = [
     [[0,0], [30,0], [30,20], [0,20], [0,0]],
 ]
 
-print Chains.estimateMachiningTime( chains, [[0,0],[30,20]], TABLE_FEED, 1.5 ) #TABLE_ACCEL ) 
+print(Chains.estimateMachiningTime( chains, [[0,0],[30,20]], TABLE_FEED, 1.5 )) #TABLE_ACCEL ) 
 
 chains = [
 #    [[10,10], [15,10], [15,15], [10,15], [10,10]],
     [[0,0], [10,5], [20,15], [30,20]],
 ]
 
-print Chains.splines(chains,5)
+print(Chains.splines(chains,5))

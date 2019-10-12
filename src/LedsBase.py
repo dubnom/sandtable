@@ -1,3 +1,6 @@
+from builtins import zip
+from builtins import range
+from builtins import object
 import colorsys
 import random
 
@@ -13,10 +16,10 @@ class LedsBase(object):
         # Rectangular led ranges
         # Top, Right, Bottom, Left
         self.rectangle = [
-                range(0,cols),
-                range(cols,cols+rows),
-                range(cols+rows,cols*2+rows),
-                range(cols*2+rows,cols*2+rows*2)
+                list(range(0,cols)),
+                list(range(cols,cols+rows)),
+                list(range(cols+rows,cols*2+rows)),
+                list(range(cols*2+rows,cols*2+rows*2))
         ]
 
     def close( self ):

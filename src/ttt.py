@@ -2,8 +2,6 @@
 Thanks to Chris Radek <chris@timeguy.com> for creating TrueTypeTracer
 which was the inspiration for this python native code.
 """
-
-from math import *
 from fontTools import ttLib
 from fontTools.pens.basePen import BasePen, _TestPen
 from fontTools.pens.transformPen import TransformPen
@@ -103,11 +101,3 @@ class TrueTypeTracer():
                 xoffset += self._unitsPerEm / 2
 
         return [[ (x*self._scale, y*self._scale) for x,y in pl] for pl in pls]
-
-
-def main():
-    ttt = TrueTypeTracer()
-    print ttt.polylines( u'Wes t' )
-
-if __name__=='__main__':
-    main()

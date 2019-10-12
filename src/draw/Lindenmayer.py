@@ -1,3 +1,4 @@
+from builtins import range
 from Sand import *
 from dialog import *
 from PolyLine import *
@@ -109,7 +110,7 @@ class Lindenmayer( Sandable ):
             i = 0
             length = len(axiom)
             while i < length and length - i + len(newpath) < self.MAX_LEN:
-                for old, new in rules.iteritems():
+                for old, new in rules.items():
                     if old == axiom[ i:i + len( old ) ]:
                         newpath += new
                         i += len( old )

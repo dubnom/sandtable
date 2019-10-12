@@ -6,7 +6,7 @@ from scipy import interpolate
 import sys
 import math
 
-class Chains:
+class Chains():
     """
     Chains are arrays of one or more "chain".
     A chain is an array of one or more points.
@@ -49,7 +49,7 @@ class Chains:
         xHigh = yHigh = -1E100
         for chain in chains:
             if chain:
-                xp, yp = zip(*chain)
+                xp, yp = list(zip(*chain))
                 xLow, yLow   = min( xLow, min(xp)), min( yLow, min(yp))
                 xHigh, yHigh = max( xHigh, max(xp)), max( yHigh, max(yp))
         return (xLow, yLow), (xHigh, yHigh)
@@ -125,7 +125,7 @@ class Chains:
             angleStart = -(((points-1) * angleRate - angleEnd) % 360)
         
         chain = []
-        for point in xrange( points ):
+        for point in range( points ):
             angle   = math.radians( angleStart + point * angleRate )
             if fill:
                 if point > point360:
@@ -341,7 +341,7 @@ class Chains:
         count = len(chains)
         if count > 0:
             base = 16.
-            div = (255.-base) / count
+            div = (255.-base) /  count
             colors = [(int(c*div+base),)*3 for c in range(count)]
         for color,chain in zip(colors, Chains._makeReadyToDraw( Chains.scale( Chains.transform( chains, offset ), scale ), imageHeight - 1 )):
             draw.line( chain, fill=color )
@@ -375,22 +375,22 @@ class Chains:
         f = file( fileName, 'w' )
         unitConv = 1.
         if machUnits == 'inches':
-            print >> f, 'G20'
+            print('G20', file=f)
             fmtStr  = 'G01 X%.2fY%.2f'
             if tableUnits == 'mm':
                 unitConv = 1. / 2.54
         else:
-            print >> f, 'G21'
+            print('G21', file=f)
             fmtStr = 'G01 X%.1fY%.1f'
             if tableUnits == 'inches':
                 unitConv = 25.4
 
-        print >> f, 'F', feed
+        print('F', feed, file=f)
         for chainNum,chain in enumerate(Chains.bound( chains, box )):
-            print >> f, '%% Chain %d' % chainNum
+            print('%% Chain %d' % chainNum, file=f)
             for point in chain:
-                print >> f, fmtStr % (point[0]*unitConv, point[1]*unitConv)
-        print >> f, 'M2'
+                print(fmtStr % (point[0]*unitConv, point[1]*unitConv), file=f)
+        print('M2', file=f)
         f.close()
 
     @staticmethod
@@ -427,11 +427,11 @@ class Chains:
         xMax, yMax = extents[1][0], extents[1][1]
         width, length = xMax - xOff, yMax - yOff
         f = file( fileName, 'w' )
-        print >> f, '<svg width="%g" height="%g" version="1.1" xmlns="http://www.w3.org/2000/svg">' % (width, length)
+        print('<svg width="%g" height="%g" version="1.1" xmlns="http://www.w3.org/2000/svg">' % (width, length), file=f)
         for chain in chains:
             points = " ".join([ '%.4g,%.4g' % (point[0]-xOff, length-(point[1]-yOff)) for point in chain ])
-            print >> f, '  <polyline points="%s" stroke="black" stroke-width="1" />' % points
-        print >> f, '</svg>'
+            print('  <polyline points="%s" stroke="black" stroke-width="1" />' % points, file=f)
+        print('</svg>', file=f)
         f.close()
 
     @staticmethod
@@ -450,10 +450,10 @@ class Chains:
             scanlines.append( scanlines[-2] )
     
         # Reorder each of the chains where the first point is the rightmost one 
-        chains = map( Chains._reprocessChain, chains )
+        chains = list(map( Chains._reprocessChain, chains ))
     
         # Sort all of the chains where the leftmost is first
-        chains.sort( lambda a,b: cmp(a[0][0],b[0][0]) )
+        chains.sort( key = lambda chain: chain[0][0] )
     
         # For each chain
             # Find rightmost row intercept
@@ -510,7 +510,7 @@ class Chains:
         dy = []
         for point1, point2 in zip( startchain, endchain ):
             dx.append( (point2[0] - point1[0]) / steps )
-            dy.append( (point2[1] - point1[1]) / steps )
+            dy.append( (point2[1] - point1[1]) /steps )
 
         # Generate an array of chains, one entry for each step
         results = [[[ (point[0]+s*x, point[1]+s*y) for point, x, y in zip(startchain, dx, dy)]] for s in range(steps+1) ]
@@ -557,7 +557,7 @@ class Chains:
                 maxRadius = max( maxRadius, math.sqrt((p[0]-xCenter)**2+(p[1]-yCenter)**2))
         maxRadius = min(xCenter,yCenter)
 
-        sgn = lambda x: cmp(x,0.0)
+        sgn = lambda x: (x>0.)-(x<0.)
         newChain = []
         for p in chain:
             # Scale to unit circle
@@ -567,9 +567,9 @@ class Chains:
                 if abs(u) < Chains.EPSILON or abs(v) < Chains.EPSILON:
                     x, y = u, v
                 elif u**2 > v**2:
-                    x, y = sgn(u) * r,             sgn(v) * abs((v * r)/u)
+                    x, y = sgn(u) * r, sgn(v) * abs((v * r)/u)
                 else:
-                    x, y = sgn(u) * abs((u * r)/v),   sgn(v) * r 
+                    x, y = sgn(u) * abs((u * r)/v), sgn(v) * r 
 
             if False:   # FG-Squircular Mapping
                 if abs(u) < Chai2Yns.EPSILON or abs(v) < Chains.EPSILON:
@@ -632,7 +632,7 @@ class Chains:
             stepSize = 1. / newLen
             unew = np.arange(0, (1+newLen) * stepSize, stepSize )
             new = interpolate.splev(unew, tck)
-            return zip(new[0].tolist(),new[1].tolist())
+            return list(zip(new[0].tolist(),new[1].tolist()))
         return chain
 
     @staticmethod

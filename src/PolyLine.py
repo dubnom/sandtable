@@ -1,6 +1,6 @@
 import math
 
-class PolyLine(object):
+class PolyLine:
     def __init__(self,points=[]):
         self.points = points
         self.stack  = []
@@ -46,7 +46,7 @@ class PolyLine(object):
 #
     def extents(self,ext=[(1E100,1E100),(-1E100,-1E100)]):
         """Calculate the lower left and upper right corners"""
-        xp, yp = zip(*self.points)
+        xp, yp = list(zip(*self.points))
         return [(min(ext[0][0],min(xp)),min(ext[0][1],min(yp))),(max(ext[1][0],max(xp)),max(ext[1][1],max(yp)))]
 
     def scale( self, scale ):
@@ -119,7 +119,7 @@ class PolyLine(object):
 
         # Create ranges of points based on the first and last time a point was found
         delRange = []
-        for seg in segs.values():
+        for seg in list(segs.values()):
             lo, hi = min(seg),max(seg)
             if lo != hi:
                 delRange.append( (hi-lo,(lo,hi)) )

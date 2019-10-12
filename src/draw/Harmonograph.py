@@ -1,3 +1,4 @@
+from builtins import range
 from math import sin, exp, radians
 from Sand import *
 from dialog import *
@@ -75,7 +76,7 @@ class Harmonograph( Sandable ):
         (f1, f2, f3, f4) = (radians(params.f1), radians(params.f2), radians(params.f3), radians(params.f4))
         (p1, p2, p3, p4) = (radians(params.p1), radians(params.p2), radians(params.p3), radians(params.p4))
 
-        for t in xrange( params.steps ):
+        for t in range( params.steps ):
             dk = exp( -decay * t )
             x = xCenter + a1 * sin( t * f1 + p1) * dk + a2 * sin( t * f2 + p2 ) * dk
             y = yCenter + a3 * sin( t * f3 + p3) * dk + a4 * sin( t * f4 + p4 ) * dk

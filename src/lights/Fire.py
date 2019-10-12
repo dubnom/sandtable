@@ -32,8 +32,8 @@ class Fire( Ledable ):
     def _newLed( self ):
         startRGB, endRGB = self._randomRGB(), self._randomRGB()
         speed = randint(self.speed,5*self.speed)
-        incs = tuple( (e - s) / speed for s,e in zip(startRGB,endRGB))
+        incs = tuple( (e - s) /  speed for s,e in zip(startRGB,endRGB))
         return [ startRGB, incs, speed]
 
     def _randomRGB( self ):
-        return map( lambda c: c*self.brightness, self.colors[ randint( 0, len(self.colors)-1) ] )
+        return [c*self.brightness for c in self.colors[ randint( 0, len(self.colors)-1) ]]

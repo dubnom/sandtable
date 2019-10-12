@@ -118,7 +118,7 @@ def filerPage():
     form = request.forms
     ft = form.filetype or 'Saved Drawings'
         
-    options = '\n'.join( [ '<option%s>%s</option>' % (' selected' if ft == name else '', name) for name in filetypes.keys() ] )
+    options = '\n'.join( [ '<option%s>%s</option>' % (' selected' if ft == name else '', name) for name in list(filetypes.keys()) ] )
 
     filetype = filetypes[ ft ]
     path = filetype.path
@@ -154,7 +154,7 @@ def filerPage():
         
         res += '<tr>' if not (imgNum % columns) else ''
         button = nj.render( nm=pieces[0], fn=filename, ft=ft )
-        res += '<td class="filer" valign="bottom" width="%d%%"><div class="filer" id="%s">%s%s</div></td>' % (100 / columns, filename, s, button)
+        res += '<td class="filer" valign="bottom" width="%d%%"><div class="filer" id="%s">%s%s</div></td>' % (int(100/columns), filename, s, button)
         imgNum += 1
         res += '</tr>' if not (imgNum % columns) else ''
     res += '</tr>' if imgNum % columns else ''

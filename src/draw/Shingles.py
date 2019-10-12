@@ -27,14 +27,14 @@ class Shingles( Sandable ):
     def generate( self, params ):
         pointsPerShingle = 11
         yScale = params.sHeight
-        lines = int( params.length / yScale )
-        shingles    = (params.width / params.sHeight)
+        lines = int(params.length / yScale)
+        shingles    = params.width / params.sHeight
         pointCount  = int( shingles * pointsPerShingle )
         xScale      = params.width / pointCount
         angleMult   = 90.0 / pointsPerShingle
         
         chain = []
-        points = range( pointCount )
+        points = list(range( pointCount))
         for line in range( lines ):
             yOffset = params.yOffset + line * yScale
             offset = (line % 2) * 90.0

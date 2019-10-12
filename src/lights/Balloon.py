@@ -1,3 +1,4 @@
+from builtins import object
 from Sand import *
 from dialog import *
 import random

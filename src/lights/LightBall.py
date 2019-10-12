@@ -1,3 +1,5 @@
+from __future__ import division
+from past.utils import old_div
 from Sand import *
 from dialog import *
 import mach
@@ -18,9 +20,9 @@ class LightBall( Ledable ):
 
         # Number of leds off the drawing surface (bottom left, top right)
         xOffset = LED_OFFSETS[0][0]
-        xSlope  = (LED_COLUMNS - LED_OFFSETS[0][0] - LED_OFFSETS[1][0]) / TABLE_WIDTH
+        xSlope  = old_div((LED_COLUMNS - LED_OFFSETS[0][0] - LED_OFFSETS[1][0]), TABLE_WIDTH)
         yOffset = LED_OFFSETS[0][1]
-        ySlope  = (LED_ROWS - LED_OFFSETS[0][1] - LED_OFFSETS[1][1]) / TABLE_LENGTH
+        ySlope  = old_div((LED_ROWS - LED_OFFSETS[0][1] - LED_OFFSETS[1][1]), TABLE_LENGTH)
 
         with mach.mach() as e:
             oldX, oldY = -1, -1

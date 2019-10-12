@@ -22,7 +22,7 @@ class MovieStatus:
         self.status = status
         self.text   = text
         self.save()
-        print repr(self)
+        print(repr(self))
 
     def save( self ):
         fp = file( MOVIE_STATUS_FILE, 'wb' )
@@ -32,14 +32,14 @@ class MovieStatus:
 
     def load( self ):
         try:
-          with open(MOVIE_STATUS_FILE, 'rb') as fp:         
-            ret = pickle.load( fp )
-          self.pid    = ret.pid
-          self.time   = ret.time
-          self.status = ret.status
-          self.text   = ret.text
+            with open(MOVIE_STATUS_FILE, 'rb') as fp:         
+                ret = pickle.load( fp )
+            self.pid    = ret.pid
+            self.time   = ret.time
+            self.status = ret.status
+            self.text   = ret.text
         except:
-          self.__init__()
+            self.__init__()
 
     def __repr__( self ):
         return '%d %s %s: %s' % (self.pid, self.time.strftime( '%I:%M:%S' ), ('Done', 'Running', 'Error', 'Unknown')[ self.status ], self.text)

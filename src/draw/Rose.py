@@ -1,3 +1,4 @@
+from builtins import range
 from math import radians, sin, cos
 from Sand import *
 from dialog import *
@@ -49,10 +50,10 @@ class Rose( Sandable ):
             lines = int( thickness * params.linesPerInch )
             points = int( 360.0 / params.angleRate )
             angleStart = radians( params.angleStart )
-            for line in xrange( lines ):
+            for line in range( lines ):
                 inRadius = params.innerRadius
                 outRadius = thickness * float(line) / float(lines)
-                for point in xrange( points ):
+                for point in range( points ):
                     angle   = radians( point * params.angleRate )
                     radius  = inRadius + outRadius * abs(sin( k * angle ))
                     angle += angleStart

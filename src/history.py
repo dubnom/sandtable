@@ -1,16 +1,16 @@
 from Sand import *
 from os import getenv, listdir, rename, remove
 from Chains import *
-import cPickle as pickle
+import pickle as pickle
 
-class History(object):
+class History():
     @staticmethod
     def history( params, sandable, chains ):
         # Don't store history if the image is too simple
         if sum( map( len, chains )) < 8:
             return
 
-        files = filter( lambda f: f.startswith( '_' ), listdir( STORE_PATH ))
+        files = [f for f in listdir( STORE_PATH ) if f.startswith( '_' )]
         name = '_history%02d'
         sandFormat = name + '.sand'
         pngFormat  = name + '.png'
@@ -34,7 +34,7 @@ class History(object):
         params.sandable = sandable
         pickle.dump( params, file( "%s%s.sand" % (STORE_PATH, name), 'wb' ))
         boundingBox = [ (0.0, 0.0), (TABLE_WIDTH, TABLE_LENGTH) ]
-        Chains.saveImage( chains, boundingBox, "%s%s.png" % (STORE_PATH, name), IMAGE_WIDTH / 2, IMAGE_HEIGHT / 2)
+        Chains.saveImage( chains, boundingBox, "%s%s.png" % (STORE_PATH, name), int(IMAGE_WIDTH / 2), int(IMAGE_HEIGHT / 2))
     
     @staticmethod
     def delete( name ):
@@ -61,7 +61,7 @@ class History(object):
         return (save, history)
 
 
-class Memoize( object ):
+class Memoize():
     """Memoize is used to cache drawings"""
     def __init__( self ):
         try:

@@ -1,6 +1,6 @@
 import requests
 import re
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import os
 
 header={'User-Agent':"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36"}
@@ -30,8 +30,8 @@ def googleImages(query,size=None,color=None,ty=None):
     return imageInfo
 
 def fetchImage(url,fileType,directory,fileName):
-    req = urllib2.Request(url, headers={'User-Agent' : header})
-    raw_img = urllib2.urlopen(req).read()
+    req = urllib.request.Request(url, headers={'User-Agent' : header})
+    raw_img = urllib.request.urlopen(req).read()
 
     if fileType not in ["jpg","jpeg","gif","png"]:
         fileType = 'jpg'
@@ -50,9 +50,9 @@ def fetchImages(imageInfo,directory,fileName,counter=0):
 
 if __name__=='__main__':
     DIR="Pictures"
-    query = raw_input("Query image:")
+    query = input("Query image:")
     imageInfo = googleImages(query)
-    print imageInfo
+    print(imageInfo)
 
     if not os.path.exists(DIR):
         os.mkdir(DIR)
@@ -60,4 +60,4 @@ if __name__=='__main__':
     if not os.path.exists(DIR):
         os.mkdir(DIR)
 
-    print "Downloaded %d images" % fetchImages(imageInfo,DIR,query)
+    print("Downloaded %d images" % fetchImages(imageInfo,DIR,query))

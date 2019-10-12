@@ -21,6 +21,9 @@ LED_PERIOD          = 1.0 / 45.0
 LED_OFFSETS         = [ (1,2), (4,4) ]
 LED_MAPPING         = None
 
+HOST_ADDR           = '0.0.0.0'
+HOST_PORT           = 8081
+
 machInitialize = [
     "M92 X%.8g" % (200*10/25.4),  # 200 Steps/rev * 10 rev/inch / (25.4mm/inch)
     "M92 Y%.8g" % (200*10/25.4),  #

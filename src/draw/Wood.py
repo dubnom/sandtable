@@ -53,7 +53,7 @@ class Wood( Sandable ):
                     break
             else:
                 knots.append( ((x,y), r) )
-        knots.sort( lambda a, b: cmp(b[0][0],a[0][0]))
+        knots.sort( key = lambda chain: chain[0][0] )
 
         chains = self._grid( params )
         for c, s in knots:
@@ -82,8 +82,8 @@ class Wood( Sandable ):
             for point in chain:
                 distance = sqrt( (knotCenter[0]-point[0]) ** 2 + (knotCenter[1]-point[1]) ** 2 )
                 if distance > 0.001:
-                    point[0] += float(knotRadius/self.SPIRAL_LPI) * ((point[0] - knotCenter[0]) / distance)
-                    point[1] += float(knotRadius/self.SPIRAL_LPI) * ((point[1] - knotCenter[1]) / distance)
+                    point[0] += knotRadius/self.SPIRAL_LPI * ((point[0] - knotCenter[0]) / distance)
+                    point[1] += knotRadius/self.SPIRAL_LPI * ((point[1] - knotCenter[1]) / distance)
 
     def _spiral( self, lineWidth, innerRadius, rotations, angleRate = 15.0 ):
         chain = []

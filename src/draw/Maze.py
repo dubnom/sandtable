@@ -1,5 +1,4 @@
 import random
-import user
 from Sand import *
 from dialog import *
 
@@ -92,11 +91,11 @@ class Maze( Sandable ):
     def makeMaze( self, w, h ):
         over = False
         maze = [0] * w * h
-        path = random.sample([pos for pos in xrange(w * h) if maze[pos] == 0], 1)
+        path = random.sample([pos for pos in range(w * h) if maze[pos] == 0], 1)
         nextdir = -1
         while path:
             pos = path[-1]
-            choices = [d for d in xrange(4) if self.canbuild(maze, w, h, pos, d, over)]
+            choices = [d for d in range(4) if self.canbuild(maze, w, h, pos, d, over)]
             if nextdir in choices and random.randint(0, 1) == 0: pass
             elif choices: nextdir = random.sample(choices, 1)[0]
             else: path.pop(); continue

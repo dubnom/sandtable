@@ -2,7 +2,7 @@ import socket
 import json
 from Sand import *
 
-class mach():
+class mach:
     def __init__( self, hostName=MACH_HOST, portNumber=MACH_PORT ):
         self.hostName = hostName
         self.portNumber = portNumber

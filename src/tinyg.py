@@ -1,19 +1,19 @@
 import sys
 import serial
 import socket
-import SocketServer
+import socketserver
 from tcpserver import *
 from threading import Thread
 import json
 import time
-import Queue
+import queue
 import logging
 from Sand import *
 
 pos = [-1.0,-1.0]
 state = [0,0]
         
-class MyHandler(SocketServer.BaseRequestHandler):
+class MyHandler(socketserver.BaseRequestHandler):
     def setup(self):
         self.writer = self.server.writer
 
@@ -112,9 +112,9 @@ class ReadThread(Thread):
         self.running = False
 
 
-class Writer(object):
+class Writer():
     def __init__(self,ser):
-        self.queue = Queue.Queue()
+        self.queue = queue.Queue()
         self.writeThread = WriteThread(ser,self.queue)
         self.writeThread.start()
 

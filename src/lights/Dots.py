@@ -4,7 +4,7 @@ from palettes import *
 
 class Dots( Ledable ):
     def __init__( self, cols, rows ):
-        pal = palettes.keys()[ randint(0,len(palettes)-1) ]        
+        pal = list(palettes.keys())[ randint(0,len(palettes)-1) ]        
         self.editor = [
             DialogList( "palette",      "Palette",                      default = pal, list = sorted( palettes.keys()) ),
             DialogInt(  "dots",         "Number of Dots",               default = 20, min = 1, max = (cols + rows) * 2, ),

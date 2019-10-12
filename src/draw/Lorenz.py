@@ -1,3 +1,4 @@
+from builtins import range
 from Sand import *
 from dialog import *
 from Chains import *

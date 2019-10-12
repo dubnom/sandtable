@@ -1,8 +1,9 @@
 import os
 import random
-from cgi import escape
+import copy
+from html import escape
 
-class Params(object):
+class Params():
     def __init__(self,editor=None):
         if editor:
             for field in editor:
@@ -18,12 +19,12 @@ class Params(object):
 
     def __str__(self):
         s = "Params("
-        for a in filter( lambda a: not a.startswith( '_' ), dir( self )):
+        for a in [a for a in dir( self ) if not a.startswith( '_' )]:
             s += "%s:%s, " % (a,getattr(self,a))
         return s+")"
              
 
-class Dialog(object):
+class Dialog:
     def __init__( self, editor, form, params, autoSubmit=False ):
         self.editor     = editor
         self.form       = form
@@ -72,7 +73,7 @@ class Dialog(object):
         return s
 
 
-class DialogField(object):
+class DialogField:
     def __init__( self, name, prompt, units, default, min, max, randRange ):
         self.name       = name
         self.prompt     = prompt
@@ -356,7 +357,7 @@ class DialogFile( DialogField ):
         path = self.default
         fl = lambda f: not f.startswith('.') and (self._extension(f) in self.filters or os.path.isdir(os.path.join(path,f)))
         while True:
-            dirlist = filter( fl, os.listdir( path ))
+            dirlist = list(filter( fl, os.listdir( path )))
             if not len( dirlist ):
                 return None
             f = dirlist[ random.randint( 0, len( dirlist ) - 1 ) ]
@@ -435,7 +436,7 @@ class DialogColor( DialogField ):
     def fromForm( self, value ):
         value = value.lstrip('#')
         lv = len(value)
-        return tuple(int(value[i:i+lv/3], 16) for i in range(0, lv, lv/3))
+        return tuple(int(value[i:i+int(lv/3)], 16) for i in range(0, lv, int(lv/3)))
 
     def _random( self ):
         return (random.randint(0,255),random.randint(0,255),random.randint(0,255))
@@ -455,10 +456,9 @@ class DialogBreak( DialogField ):
         return None
 
 
-import copy
-class ArrayValue(object):
+class ArrayValue:
     def __repr__( self ):
-        return '['+','.join( [ '%s:%s' %(n,getattr(self,n)) for n in filter(lambda x: not x.startswith('_'),dir(self))])+']'
+        return '['+','.join( [ '%s:%s' %(n,getattr(self,n)) for n in [x for x in dir(self) if not x.startswith('_')]])+']'
 
 class DialogArray( DialogField ):
     def __init__( self, name='', prompt='', default='', fields=None, length=3 ):

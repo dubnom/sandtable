@@ -4,7 +4,7 @@ import time
 import logging
 import json
 import socket
-import SocketServer
+import socketserver
 from tcpserver import *
 from threading import Thread
 from collections import deque
@@ -221,7 +221,7 @@ class ProxSwitchThread(Thread):
         self.running = False
 
 
-class MyHandler(SocketServer.BaseRequestHandler):
+class MyHandler(socketserver.BaseRequestHandler):
     def setup(self):
         self.demo = self.server.demo
 

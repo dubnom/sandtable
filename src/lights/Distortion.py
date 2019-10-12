@@ -1,3 +1,5 @@
+from builtins import map
+from builtins import range
 from Sand import *
 from dialog import *
 
@@ -25,9 +27,9 @@ class Distortion( Ledable ):
         while True:
             for step in range( params.steps ):
                 bright = brightness[ step ]
-                map( lambda led: leds.set( led, bright ), self.groups[ groupNumber ] )
+                list(map( lambda led: leds.set( led, bright ), self.groups[ groupNumber ] ))
                 bright = brightness[ params.steps - step - 1]
-                map( lambda led: leds.set( led, bright ), self.groups[ 1-groupNumber ] )
+                list(map( lambda led: leds.set( led, bright ), self.groups[ 1-groupNumber ] ))
                 yield True
             groupNumber = 1 - groupNumber
 

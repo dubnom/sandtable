@@ -5,7 +5,7 @@ import time
 import logging
 import json
 import socket
-import SocketServer
+import socketserver
 from tcpserver import *
 from threading import Thread
 
@@ -13,7 +13,7 @@ from Sand import *
 from LedsBase import LedsBase
  
 # The specific LED driver is specified in the machine configuration
-exec "import %s as Leds" % LED_DRIVER
+exec("import %s as Leds" % LED_DRIVER)
 
 class startupPattern( Ledable ):
     def __init__( self, cols, rows ):
@@ -22,7 +22,7 @@ class startupPattern( Ledable ):
     def generator( self, leds, cols, rows, params ):
         revCount = 120
         for rev in range(revCount):
-            leds.set( 0, leds.HSB( 720.0*rev/revCount, 100, 50 * rev / revCount), end = len( leds.leds)-1)
+            leds.set( 0, leds.HSB( 720.0*rev/revCount, 100, 50 * rev/revCount), end = len( leds.leds)-1)
             yield True
         yield False
 
@@ -40,7 +40,7 @@ class LedThread(Thread):
         while self.running:
             if self.generator:
                 try:
-                    if self.generator.next():
+                    if next(self.generator):
                         self.leds.refresh()
                 except (GeneratorExit, StopIteration):
                     # Generator has finished, turn off the lights
@@ -64,7 +64,7 @@ class LedThread(Thread):
         return { 'running': self.generator != None, 'pattern':self.pattern }
 
 
-class MyHandler(SocketServer.BaseRequestHandler):
+class MyHandler(socketserver.BaseRequestHandler):
     def setup(self):
         self.ledThread = self.server.ledThread
 

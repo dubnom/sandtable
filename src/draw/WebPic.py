@@ -1,4 +1,4 @@
-import urllib, cStringIO
+import urllib.request, urllib.parse, urllib.error, io
 from PIL import Image
 import potrace
 import numpy as np
@@ -66,7 +66,7 @@ class WebPic( Sandable ):
         # Loop through until we find one that works
         for attempt, (url, ty) in enumerate(imageInfo):
             try:
-                file = cStringIO.StringIO(urllib.urlopen(url).read())
+                file = io.StringIO(urllib.request.urlopen(url).read())
                 image = Image.open(file)
                 image.load()
                 image.save(PICTURE_PATH+'webpic.png', 'PNG')
@@ -87,7 +87,7 @@ class WebPic( Sandable ):
                 image = image.convert('P', palette=Image.ADAPTIVE, colors=2)
 
                 width, height = image.size
-                pixels = map( lambda p: p % 2, list(image.getdata()))
+                pixels = [p % 2 for p in list(image.getdata())]
                 data = [ pixels[row*width:(row+1)*width] for row in range(height) ]
 
                 # Image is upside down, reverse it

@@ -65,7 +65,7 @@ class Sines( Sandable ):
         frequencies = params.frequencies
         amplitudes  = params.amplitudes
         phases      = params.phases
-        fap = zip( frequencies, amplitudes, map( radians, phases ))
+        fap = list(zip( frequencies, amplitudes, list(map( radians, phases ))))
         
         if params.innerRadius > params.outerRadius:
             params.innerRadius, params.outerRadius = params.outerRadius, params.innerRadius
@@ -80,7 +80,7 @@ class Sines( Sandable ):
             divisor = pow((points * abs(params.angleRate)) / 360.0, params.base)
             point360 = 360.0 / abs( params.angleRate )
             
-            for point in xrange( points ):
+            for point in range( points ):
                 angle   = params.angleStart + radians( point * params.angleRate )
                 radius  = params.innerRadius + thickness * (pow(((point * abs(params.angleRate)) / 360.0), params.base) / divisor)
                 for f, a, p in fap:

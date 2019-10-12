@@ -10,7 +10,7 @@ from cgistuff import *
 def watchPage():
     cstuff = cgistuff( 'Watch Movies' )
     
-    fileNames = sorted( filter( lambda n: n.endswith('.mp4'), os.listdir( MOVIE_OUTPUT_PATH )))
+    fileNames = sorted( [n for n in os.listdir( MOVIE_OUTPUT_PATH ) if n.endswith('.mp4')])
     form = request.forms
 
     return [

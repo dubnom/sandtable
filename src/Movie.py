@@ -101,7 +101,7 @@ class Thing:
         paramList = []
         for step in range( 0, steps + 1 ):
             params = Params()
-            for name, newValue in newThingy.params.__dict__.items():
+            for name, newValue in list(newThingy.params.__dict__.items()):
                 oldValue = getattr( self.params, name )
                 if isinstance( newValue, int ):
                     setattr( params, name, int( round( oldValue + ((newValue - oldValue) * float( step ) / steps))))
@@ -143,11 +143,11 @@ class ObjBuilder( ContentHandler ):
         self.__buffer = []
         if name not in self._classes:
             raise NameError(name)
-        args = [ '%s = "%s"' %(k, v) for k,v in attrs.items()]
+        args = [ '%s = "%s"' %(k, v) for k,v in list(attrs.items())]
         str = 'o = %s(%s)' % (name, ','.join( args ))
         exec( str )
         if self.obj:
-            apply( getattr( self.obj[-1], 'add' + name ),(o,))
+            getattr( self.obj[-1], 'add' + name )(*(o,))
         else:
             self.rootobject = o
         self.obj.append(o)
@@ -216,7 +216,7 @@ def MakeMovie( script, previewMode, ms ):
     # Parse the xml script file
     xmlFile     = MOVIE_SCRIPT_PATH + script + '.xml'
     movie = build_class_hierarchy( ["Movie", "Eraser", "Frame", "Thing", "Light", "Param" ], xmlFile )
-    print movie
+    print(movie)
     if not hasattr( movie, 'frames' ):
         raise ValueError( 'First element of xml file must be <Movie>' )
     
@@ -316,7 +316,7 @@ def interpolate( sand, oldThingy, newThingy, steps ):
     chains = []
     for step in range( 0, steps + 1 ):
         params = Params()
-        for name, newValue in newThingy.params.__dict__.items():
+        for name, newValue in list(newThingy.params.__dict__.items()):
             oldValue = getattr( oldThingy.params, name )
             if isinstance( newValue, int ):
                 setattr( params, name, int( round( oldValue + ((newValue - oldValue) * float( step ) / steps))))
@@ -373,7 +373,7 @@ def main():
         (options,args) = parser.parse_args()
     
         if len(args) != 1:
-            print 'Expected script name as argument'
+            print('Expected script name as argument')
             raise ValueError( "Script name wasn't passed as an argument" )
 
         movieName = MakeMovie( args[0], not options.sand, ms )

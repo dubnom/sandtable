@@ -1,4 +1,5 @@
 # Constants
+from builtins import range
 global TABLE_FEED, BALL_SIZE
 
 PLATFORM            = "Beaglebone"
@@ -20,7 +21,7 @@ LED_COLUMNS         = 60
 LED_ROWS            = 30
 LED_PERIOD          = 1.0 / 45.0
 LED_OFFSETS         = [ (1,2), (4,4) ]
-LED_MAPPING         = range(0,60)+range(60,90)+range(149,89,-1)+range(179,149,-1)
+LED_MAPPING         = list(range(0,60))+list(range(60,90))+list(range(149,89,-1))+list(range(179,149,-1))
 
 machInitialize = [
     {"1tr":2.0},                    # Inches per rotation

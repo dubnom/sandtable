@@ -70,14 +70,14 @@ def connect( chains ):
                 if len(i):
                     intersections.append(i)
    
-        print c1, len(intersections)
-        print "   ",
+        print(c1, len(intersections))
+        print("   ", end=' ')
         if len(intersections):
             for i in intersections:
                 for j in i:
                     for k in j.coords:
-                        print "(%4.2f,%4.2f)" % (k[0], k[1]),
-        print
+                        print("(%4.2f,%4.2f)" % (k[0], k[1]), end=' ')
+        print()
 
 
 from random import randint
@@ -97,7 +97,7 @@ def test():
     for (x,y,r) in circles:
         chains.append( [ (x+cos(radians(p*30))*r, y+sin(radians(p*30))*r) for p in range(12) ] )
 
-    print "Circles\n",circles
+    print("Circles\n",circles)
     connect( chains )
 
 test()

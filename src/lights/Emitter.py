@@ -18,7 +18,7 @@ class Emitter( Ledable ):
         emitter = int(end * params.angle / 360.) % 360
         degree = 0.
         while True:
-            for offset in range(end/2):
+            for offset in range(int(end/2)):
                 leds.set( (emitter + offset) % end, leds.HSB( offset + degree, 100, params.brightness ))
                 leds.set( (emitter - offset) % end, leds.HSB( offset + degree, 100, params.brightness ))
             yield True

@@ -1,3 +1,4 @@
+from builtins import range
 from math import radians, sin, cos
 from Sand import *
 from dialog import *

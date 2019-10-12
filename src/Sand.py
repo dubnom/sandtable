@@ -32,7 +32,7 @@ ledPatterns = [
 import platform 
 HOST_NAME = platform.node()
 from machines.hostmap import hostmap
-exec "from machines.%s import *" % hostmap[HOST_NAME]
+exec("from machines.%s import *" % hostmap[HOST_NAME])
 
 # Constants
 SERVER_LOG          = "/var/log/sandtable.log"
@@ -80,9 +80,9 @@ SCHEDULER_PORT      = 5009
 SCHEDULER_LOG       = "/var/log/scheduler.log"
 
 # Configurable "constants"
-import cPickle as pickle
+import pickle as pickle
 
-class Config(object):
+class Config():
     imgType     = True
     maxFeed     = 600
     ballSize    = .75
@@ -102,21 +102,24 @@ def SaveConfig(cfg):
 
 LoadConfig()
 
-class Sandable(object):
+class Sandable():
     editor = []
     def generate( self, params ):
         return []
 
-class Ledable(object):
+class Ledable():
     editor = []
     def generator( self, leds, cols, rows, params ):
         pass
 
 def sandableFactory( sandable ):
+    globs = globals()
+    locs = {}
+    
     if sandable in sandables:
-        exec "import draw.%s" % sandable
-        exec "sand = draw.%s.%s( %f, %f )" % (sandable, sandable, TABLE_WIDTH, TABLE_LENGTH )
-        return sand
+        exec("import draw.%s" % sandable, globs, locs)
+        exec("sand = draw.%s.%s( %f, %f )" % (sandable, sandable, TABLE_WIDTH, TABLE_LENGTH ), globs, locs)
+        return locs['sand']
     else:
         return None
 

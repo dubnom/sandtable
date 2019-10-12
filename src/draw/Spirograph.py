@@ -2,6 +2,7 @@ from math import pi, sin, cos
 from Sand import *
 from dialog import *
 from Chains import *
+from functools import reduce
 
 class Spirograph( Sandable ):
     """
@@ -57,14 +58,14 @@ class Spirograph( Sandable ):
     def generate( self, params ):
         # Get the number of teeth, renormalize based on common divisor, calculate radii
         teeth = params.teeths
-        teeth = filter( lambda t: t, teeth )
+        teeth = [t for t in teeth if t]
         if len( teeth ) == 0:
             raise SandException( "There needs to be at least one number for Wheel Teeth" )
 
         teeth[0] = abs( teeth[0] )
 
         gcd = abs(self.gcdList( teeth ))
-        teeth = [ tooth / gcd for tooth in teeth ]
+        teeth = [ int(tooth/gcd) for tooth in teeth ]
         radii = [ tooth / (2.0 * pi) for tooth in teeth ]
 
         # Ratios are all relative to the inner most gear which is 1

@@ -1,6 +1,6 @@
 import serial
 import socket
-import SocketServer
+import socketserver
 import random
 import time
 from threading import Thread, Event 
@@ -17,7 +17,7 @@ class ReadThread(Thread):
         while self.running:
             line = self.ser.readline().strip()
             if len(line):
-                print "<",line
+                print("<",line)
                 if line.startswith('ok'):
                     self.okCount += 1
 
@@ -52,7 +52,7 @@ for s in program:
     while reader.okCount < 0:
         time.sleep(.1)
     reader.decrement()
-    print ">",s
+    print(">",s)
     ser.write(s + b"\n")
 
 time.sleep(30.)

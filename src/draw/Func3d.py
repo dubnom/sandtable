@@ -59,7 +59,7 @@ class Func3d( Sandable ):
             DialogFloat( "yEnd",            "Y End",                default = 180.0 ),
             DialogInt(   "yPoints",         "Y Points",             default = 45, min = 2, max = 180 ),
             DialogFloat( "zScale",          "Z Scale",              default = 1.0, min = 0.01, max = 10.0 ),
-            DialogFloat( "xyAngle",         "Horizontal Rotation",  units = "degrees", default = 45.0, min = 0.0, max = 45.0 ),
+            DialogFloat( "xyAngle",         "Horizontal Rotation",  units = "degrees", default = 45.0, min = -45.0, max = 45.0 ),
             DialogFloat( "yzAngle",         "Vertical Tilt",        units = "degrees", default = 45.0, min = 0.0, max = 90.0 ),
             DialogFloat( "zoom",            "Zoom",                 default = 1.0, min = 0.25, max = 10.0 ),
             DialogYesNo( "topDown",         "Top Down",             default = True ),
@@ -101,15 +101,15 @@ class Func3d( Sandable ):
         except Exception as e:
             raise SandException( "Expression failed: %s" % e )
 
-        if type(zMin) != float or type(zMax) != float or zMin == zMax:
+        if type(zMin) not in (int,float) or type(zMax) not in (int,float):
             raise SandException( "The function didn't return proper numbers for the Z calculation" )
 
-        # Generate the chains (NEW WAY)
+        # Generate the chains
         xScale = 2.0 / xPoints
         xOffset = -1.0
         yScale = 2.0 / yPoints
         yOffset = -1.0
-        zScale = 2.0 / (zMax - zMin)
+        zScale = 2.0 / (zMax - zMin) if zMax != zMin else 1.
         zOffset = zMin
         chain = []
         for y in range( yPoints ):
@@ -130,21 +130,20 @@ class Func3d( Sandable ):
         return chains
 
     def _initCallFunc( self, expression ):
-        self.expression = expression
-        from math import acos,asin,atan,atan2,ceil,cos,cosh,degrees,e,exp,fabs,floor,fmod,frexp,hypot,ldexp,log,log10,modf,pi,pow,radians,sin,sinh,sqrt,tan,tanh
-
         safe_list = [
-            'math','acos', 'asin', 'atan', 'atan2', 'ceil', 'cos', 'cosh','degrees',
+            'acos', 'asin', 'atan', 'atan2', 'ceil', 'cos', 'cosh','degrees',
             'e', 'exp', 'fabs', 'floor', 'fmod', 'frexp', 'hypot', 'ldexp', 'log', 
-            'log10', 'modf', 'pi', 'pow', 'radians', 'sin', 'sinh', 'sqrt', 'tan', 'tanh',
+            'log10', 'modf', 'pi', 'pow', 'radians', 'sin', 'sinh', 'sqrt', 'tan',
+            'tanh', 'min', 'max', 'abs', 'float', 'int',
             ]
-        self.safe_dict = dict([ (k, locals().get(k, None)) for k in safe_list ])
-        self.safe_dict['abs'] = abs
+        self.safe_dict = dict( [(k, eval(k)) for k in safe_list ])
+        self.expression = expression
     
     def _callFunc( self, x, y ):
         self.safe_dict['x'] = self.safe_dict['X'] = x
         self.safe_dict['y'] = self.safe_dict['Y'] = y
-        z = eval( self.expression, {"__builtins__":None}, self.safe_dict )
+        # Only allow a small subset of builtin functions
+        z = eval( self.expression, {'__builtins__':{}}, self.safe_dict )
         return z
 
     def _rotate( self, p, xyAngle, yzAngle ):

@@ -1,3 +1,5 @@
+from past.builtins import cmp
+from builtins import range
 from random import randint
 from Sand import *
 from dialog import *

@@ -50,7 +50,7 @@ class Bulbs( Sandable ):
             majorFreq = params.majorFreq
             minorFreq = params.minorFreq
 
-            for point in xrange( points ):
+            for point in range( points ):
                 angle   = point * params.angleRate
                 radius  = params.innerRadius + thickness * point
                 radius += params.majorAmp * sin( radians( angle * majorFreq ))

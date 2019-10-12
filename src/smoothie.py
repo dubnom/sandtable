@@ -1,11 +1,11 @@
 import sys
 import serial
 import socket
-import SocketServer
+import socketserver
 from tcpserver import *
 from threading import Thread, Event 
 import time
-import Queue
+import queue
 import logging
 import re
 import json
@@ -17,7 +17,7 @@ from Sand import *
 pos = [-1.0,-1.0]
 ready = True
         
-class MyHandler(SocketServer.BaseRequestHandler):
+class MyHandler(socketserver.BaseRequestHandler):
     def setup(self):
         self.writer = self.server.writer
 
@@ -114,9 +114,9 @@ class statusTimer(Thread):
         while not self.stopped.wait(2.):
             self.writer.send('get status\r')
 
-class Writer(object):
+class Writer():
     def __init__(self,ser):
-        self.queue = Queue.Queue()
+        self.queue = queue.Queue()
         self.writeThread = WriteThread(ser,self.queue)
         self.writeThread.start()
         self.stopFlag = Event()

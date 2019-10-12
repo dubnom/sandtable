@@ -3,7 +3,7 @@ from Sand import *
 from dialog import *
 from palettes import palettes
 
-class Gauss(object):
+class Gauss:
     """Gaussian function used to feather the lighting."""
     def __init__(self,maxHeight,center,stdDev):
         self.maxHeight  = maxHeight
@@ -13,7 +13,7 @@ class Gauss(object):
     def value(self,x):
         return self.maxHeight * pow(e,-(((x-self.center)**2) / (2.*self.stdDev**2)))
 
-class Sky(object):
+class Sky( Ledable ):
     """Create a light simulation of a sky that goes from sunrise to sunset."""
     def __init__(self,cols,rows):
         self.editor = [

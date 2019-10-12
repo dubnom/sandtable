@@ -1,3 +1,5 @@
+from __future__ import division
+from past.utils import old_div
 from math import radians, sin, cos, sqrt, fabs, fmod
 from Sand import *
 from dialog import *
@@ -5,8 +7,8 @@ from dialog import *
 class LightHouse( Ledable ):
     def __init__( self, cols, rows ):
         self.editor = [
-            DialogFloat( "xOffset",         "X Center",         units = "inches", default = TABLE_WIDTH / 2, min = 0.0, max = TABLE_WIDTH ),
-            DialogFloat( "yOffset",         "Y Center",         units = "inches", default = TABLE_LENGTH / 4, min = 0.0, max = TABLE_LENGTH ),
+            DialogFloat( "xOffset",         "X Center",         units = "inches", default = old_div(TABLE_WIDTH, 2), min = 0.0, max = TABLE_WIDTH ),
+            DialogFloat( "yOffset",         "Y Center",         units = "inches", default = old_div(TABLE_LENGTH, 4), min = 0.0, max = TABLE_LENGTH ),
             DialogFloat( "angleRate",       "Angle Rate",       units = "degrees", default = 5.0, min = 1.0, max = 30.0 ),
             DialogFloat( "beamWidth",       "Beam Width",       units = "degrees", default = 30.0, min = 4.0, max = 90.0 ),
             DialogColor( "color",           "Color",            default = (255,255,255) ),
@@ -54,9 +56,9 @@ class LightHouse( Ledable ):
             x, y = point[0], point[1]
             ledRange = light[1]
             if light[0][1][0] - light[0][0][0]:
-                slope = x / (light[0][1][0] - light[0][0][0])
+                slope = old_div(x, (light[0][1][0] - light[0][0][0]))
             else:
-                slope = y / (light[0][1][1] - light[0][0][1])
+                slope = old_div(y, (light[0][1][1] - light[0][0][1]))
             led = ledRange[0] + slope * (ledRange[1] - ledRange[0])
             return int(led)
         return None
@@ -71,7 +73,7 @@ class LightHouse( Ledable ):
             return None
     
         d = (det(*line1), det(*line2))
-        x, y = det(d, xDiff) / div, det(d, yDiff) / div
+        x, y = old_div(det(d, xDiff), div), old_div(det(d, yDiff), div)
     
         within = lambda l, offset, v: ((l[0][offset] <= v <= l[1][offset]) or (l[0][offset] >= v >= l[1][offset]))
 

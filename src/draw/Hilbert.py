@@ -50,4 +50,4 @@ class Hilbert( Sandable ):
             self._hilbert( x0,               y0,               yi/2, yj/2, xi/2, xj/2, n - 1 )
             self._hilbert( x0 + xi/2,        y0 + xj/2,        xi/2, xj/2, yi/2, yj/2, n - 1 )
             self._hilbert( x0 + xi/2 + yi/2, y0 + xj/2 + yj/2, xi/2, xj/2, yi/2, yj/2, n - 1 )
-            self._hilbert( x0 + xi/2 + yi,   y0 + xj/2 + yj,  -yi/2,-yj/2,-xi/2,-xj/2, n - 1 )
+            self._hilbert( x0 + xi/2 + yi,   y0 + xj/2 + yj,   -yi/2,-yj/2,-xi/2,-xj/2, n - 1 )

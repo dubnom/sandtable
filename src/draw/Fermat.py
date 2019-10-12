@@ -40,7 +40,7 @@ class Fermat( Sandable ):
         size = params.radius / sqrt( params.turns * 360.0 )
         
         chain1, chain2 = [], []
-        for point in xrange( points, 0, -1 ):
+        for point in range( points, 0, -1 ):
             angle = point * params.angleRate
             radius = size * sqrt( angle )
             angle = radians( params.angleStart + angle )

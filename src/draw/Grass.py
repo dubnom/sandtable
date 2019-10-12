@@ -35,7 +35,7 @@ class Grass( Sandable ):
             for step in range(steps):
                 chain1.append( (x,h) )
                 chain2.append( (x+thickness,h) )
-                h += mh/steps
+                h += mh / steps
                 x += w
                 w *= 1.5
                 thickness *= (1.0 - 1./steps) 

@@ -49,10 +49,5 @@ def server_static():
 
 
 if __name__ == "__main__":
-    run(host='0.0.0.0',port=80,debug=True)
-    #run(host=socket.gethostbyname(socket.gethostname()),port=80,debug=True)
-else:
-    application = default_app()
-    from past.exceptions.errormiddleware import ErrorMiddleware
-    application = ErrorMiddleware(application, debug=True)
+    run(host=HOST_ADDR, port=HOST_PORT, debug=True)
 

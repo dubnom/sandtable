@@ -18,7 +18,7 @@ class Leds(LedsBase):
 
     def refresh( self ):
         colors = [0x04,0x01,0xdc,0x4a,0x01,0x00,0x01,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xff,0x00]
-        colors += map(lambda i:self.leds[i],self.mapping) if mapping else self.leds
+        colors += [self.leds[i] for i in self.mapping] if mapping else self.leds
         colors += [0x00,0x00]
         data = array( 'B', colors )
         self.socket.sendto( data.tostring(), self.addr )

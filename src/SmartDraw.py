@@ -1,3 +1,4 @@
+from builtins import range
 from Sand import *
 import shapely.geometry
 from Chains import *
@@ -63,12 +64,12 @@ def SmartDraw(chains,width,height,ballSize):
                 
     #print "\npolyDistances:"
     for polyNum,neighbs in enumerate(polysNeighbors):
-        neighbS = 'None' if len(neighbs) == 0 else ','.join(['%4d, %5.2f' % (ps[1],ps[0]) for ps in neighbs.values()])
+        neighbS = 'None' if len(neighbs) == 0 else ','.join(['%4d, %5.2f' % (ps[1],ps[0]) for ps in list(neighbs.values())])
         #print " %4d:  %s" % (polyNum,neighbS)
     #print
 
     def sortNeighbors(neighbors):
-        s = neighbors.values()
+        s = list(neighbors.values())
         s.sort(key=lambda k:k[0])
         return s
 

@@ -1,4 +1,3 @@
-from builtins import range
 from shapely.geometry import *
 
 def shrinky( chains, iterations, amount ):

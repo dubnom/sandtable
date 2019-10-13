@@ -1,4 +1,3 @@
-from builtins import str
 from bottle import request, route, post, get, template
 from time import time
 from datetime import timedelta

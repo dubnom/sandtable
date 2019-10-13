@@ -1,5 +1,4 @@
 # Constants
-from builtins import range
 global TABLE_FEED, BALL_SIZE
 
 PLATFORM            = "Beaglebone"

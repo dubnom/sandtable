@@ -1,5 +1,3 @@
-from builtins import map
-from builtins import range
 from Sand import *
 from dialog import *
 

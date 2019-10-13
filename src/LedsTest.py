@@ -1,4 +1,3 @@
-from builtins import range
 from LedsDS import Leds
 from time import sleep 
 

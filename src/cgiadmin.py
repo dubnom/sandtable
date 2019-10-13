@@ -1,4 +1,3 @@
-from builtins import str
 from bottle import request, route, post, get, template
 import signal
 from cgi import escape

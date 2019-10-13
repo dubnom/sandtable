@@ -1,5 +1,3 @@
-from past.builtins import cmp
-from builtins import range
 from random import randint
 from Sand import *
 from dialog import *
@@ -15,6 +13,7 @@ class Pastel( Ledable ):
             leds.set( led, self._randomRGB())
             ends[ led ] = self._randomRGB()
         
+        cmp = lambda a,b: (a>b) - (a<b)
         while True:
             for led in range( 0, end ):
                 if leds.get( led ) == ends[ led ]:

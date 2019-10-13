@@ -1,6 +1,3 @@
-from builtins import zip
-from builtins import range
-from builtins import object
 import colorsys
 import random
 

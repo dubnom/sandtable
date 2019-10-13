@@ -1,4 +1,3 @@
-from builtins import range
 from PIL import Image
 import potrace
 import numpy as np

@@ -1,4 +1,3 @@
-from builtins import range
 from os import listdir
 from Sand import *
 from dialog import *

@@ -1,4 +1,3 @@
-from builtins import range
 from Sand import *
 import shapely.geometry
 from Chains import *

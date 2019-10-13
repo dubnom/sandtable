@@ -21,6 +21,9 @@ LED_PERIOD          = 1.0 / 45.0
 LED_OFFSETS         = [ (1,2), (4,4) ]
 LED_MAPPING         = None
 
+HOST_ADDR           = '0.0.0.0'
+HOST_PORT           = 80
+
 machInitialize = [
     {"mt":2},                       # Motor enable timeout
     {"st":0},                       # Switch polarity (NO)

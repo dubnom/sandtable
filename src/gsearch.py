@@ -20,7 +20,7 @@ def googleImages(query,size=None,color=None,ty=None):
     url="https://www.google.com/search?q="+query+"&source=lnms&tbm=isch"+tbs+"&sa=1&biw=1200&bih=357"
 
     content = requests.get(url,headers=header).content
-    fileNames = re.findall('"ity":"(.*?)","oh":[0-9]*,"ou":"(.*?)"',content)
+    fileNames = re.findall('"ity":"(.*?)","oh":[0-9]*,"ou":"(.*?)"',content.decode())
 
     imageInfo=[]
     pat = re.compile('(\\\\u[0-9a-fA-F]{4})')
@@ -30,7 +30,7 @@ def googleImages(query,size=None,color=None,ty=None):
     return imageInfo
 
 def fetchImage(url,fileType,directory,fileName):
-    req = urllib.request.Request(url, headers={'User-Agent' : header})
+    req = urllib.request.Request(url, headers=header)
     raw_img = urllib.request.urlopen(req).read()
 
     if fileType not in ["jpg","jpeg","gif","png"]:

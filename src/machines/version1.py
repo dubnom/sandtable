@@ -23,6 +23,9 @@ LED_PERIOD          = 1.0 / 45.0
 LED_OFFSETS         = [ (1,2), (4,4) ]
 LED_MAPPING         = list(range(0,60))+list(range(60,90))+list(range(149,89,-1))+list(range(179,149,-1))
 
+HOST_ADDR           = '0.0.0.0'
+HOST_PORT           = 80
+
 machInitialize = [
     {"1tr":2.0},                    # Inches per rotation
     {"1po":0},                      # Motor polarity

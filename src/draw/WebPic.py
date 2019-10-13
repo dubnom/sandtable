@@ -1,4 +1,5 @@
-import urllib.request, urllib.parse, urllib.error, io
+import urllib.request, urllib.parse, urllib.error 
+from io import BytesIO
 from PIL import Image
 import potrace
 import numpy as np
@@ -66,8 +67,8 @@ class WebPic( Sandable ):
         # Loop through until we find one that works
         for attempt, (url, ty) in enumerate(imageInfo):
             try:
-                file = io.StringIO(urllib.request.urlopen(url).read())
-                image = Image.open(file)
+                f = BytesIO(urllib.request.urlopen(url).read())
+                image = Image.open(f)
                 image.load()
                 image.save(PICTURE_PATH+'webpic.png', 'PNG')
 

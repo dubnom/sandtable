@@ -33,9 +33,10 @@ After years of playing with SandTables, I think you'll find most of these modifi
 * [OPC](http://openpixelcontrol.org/) Open Pixel Control (also used in FadeCandy).
 
 #### Supported CNC Controllers:
-* [TinyG](https://synthetos.myshopify.com/products/tinyg)
-* [Smoothieboard](http://smoothieware.org/smoothieboard)
-* [Marlin](https://github.com/MarlinFirmware/Marlin)
+* [TinyG](https://synthetos.myshopify.com/products/tinyg) Full-featured controller.
+* [Smoothieboard](http://smoothieware.org/smoothieboard) Inexpensive machine controller.
+* [Marlin](https://github.com/MarlinFirmware/Marlin) Simple CNC controller.
+* [EMC](http://linuxcnc.org/) Linux CNC Enhanced Machine Controller.
 
 ### Examples:
 * [Michael Dubno's first table](https://makezine.com/2009/08/10/new-york-city-sand-table-project/)
@@ -47,7 +48,7 @@ After years of playing with SandTables, I think you'll find most of these modifi
 * [pypotrace](https://pypi.org/project/pypotrace/) - Python bindings to potrace
 * [potrace](http://potrace.sourceforge.net/) - Bitmap image to vector conversion
 * [scipy](https://www.scipy.org/) - Python science/math package
-* [Image]
+* [PIL]
 * [bottle](http://bottlepy.org/docs/dev/) - Lightweight Python web framework
 * [shapely](https://pypi.org/project/Shapely/) - Python interface to GEOS to operate on planar geometry
 * [apscheduler](https://apscheduler.readthedocs.io/en/latest/) - Advanced Python scheduler

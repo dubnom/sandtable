@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 from bottle import route, default_app, run, static_file
 import socket
 

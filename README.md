@@ -88,12 +88,12 @@ Logs are written to:
 * Add license file
 * Move machine configurations into config
 * Move machine definitions into machines
-* Move unused code into a playground directory
 * Add test code
 * Improve scheduler interface
 * Improve lighting scenes
 * Make the web interface more interactive
 * Move from PIL to Pillow
+* Add upload function to Filer tab
 
 ## Authors:
 

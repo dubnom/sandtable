@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 """Python Client library for Open Pixel Control
 http://github.com/zestyping/openpixelcontrol

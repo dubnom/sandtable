@@ -32,8 +32,11 @@ chown -R www-data pictures clipart scripts movies store data
 mkdir /var/www
 ln -s /home/sandtable/sandtable /var/www/sandtable
 
-# Update /etc/rc.local with config/rclocal
-# FIX: This currently is done manually
+# Update /etc/rc.local to run SandTable services
+sed /etc/rc.local -e '
+/exit 0/ i\
+/var/www/sandtable/config/rc.sandtable
+'
 
 # Install required packages
 apt-get update
@@ -96,6 +99,11 @@ then
     make submodules
     make
     mv fcserver /usr/local/bin
+
+    sed /etc/rc.local -e '
+/exit 0/ i\
+/var/www/sandtable/config/rc.fadecandy
+'
 
 # DotStar
 elif [ $st_led == 'DotStar' ]

@@ -1,7 +1,9 @@
-/usr/local/bin/fcserver /var/www/sandtable/config/fadecandy/version3.json >/var/log/fcserver.log 2>&1 &
+#!/bin/bash
+
+# Sandtable services
 /var/www/sandtable/config/runloop.sh /var/www/sandtable/src/machd.py >/var/log/machd.log 2>&1 &
 /var/www/sandtable/config/runloop.sh /var/www/sandtable/src/ledaemon.py >/var/log/ledaemon.log 2>&1 &
 /var/www/sandtable/config/runloop.sh /var/www/sandtable/src/scheduler.py >/var/log/scheduler.log 2>&1 &
 
-# Sandtable server itself
+# Actual SandTable server
 /var/www/sandtable/config/runloop.sh /var/www/sandtable/run > /var/log/sandtable.log 2>&1 &

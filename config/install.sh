@@ -23,14 +23,21 @@ st_samba=enable
 # Set st_remote to enable or disable
 st_remote=disable
 
+
+################################################################
+
+# Create the sandtable user and move the code into the right directories
+adduser sandtable
+adduser sandtable sudo
+adduser sandtable adm
+
 # Directories
-cd /home/sandtable/sandtable
+mkdir /var/www
+ln -s . /var/www/sandtable /home/sandtable/sandtable
+
+cd /var/www/sandtable
 mkdir store
 chown -R www-data pictures clipart scripts movies store data 
-
-# Create symbolic links
-mkdir /var/www
-ln -s /home/sandtable/sandtable /var/www/sandtable
 
 # Update /etc/rc.local to run SandTable services
 sed /etc/rc.local -e '

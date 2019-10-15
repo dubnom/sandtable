@@ -4,15 +4,18 @@ from dialog import *
     
 class Shingles( Sandable ):
     """
-        <h3>Draw a pattern that looks like roofing shingles</h3>
+### Draw a pattern that looks like roofing shingles
 
-        Hint: This is a pretty boring pattern. Try something more fun.
+#### Hints
 
-        <ul>
-         <li><i>Shingle Height</i> - the height of each individual shingle.
-         <li><i>X and Y Origin</i> - lower left corner of the drawing. Usually not worth changing.
-         <li><i>Width</i> and <i>Length</i> - how big the figure should be. Probably not worth changing.
-        </ul>"""
+This is a pretty boring pattern. Try something more fun.
+
+#### Parameters
+
+* **Shingle Height** - the height of each individual shingle.
+* **X and Y Origin** - lower left corner of the drawing. Usually not worth changing.
+* **Width** and **Length** - how big the figure should be. Probably not worth changing.
+"""
 
     def __init__( self, width, length ):
         self.editor = [

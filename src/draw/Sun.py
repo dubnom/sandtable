@@ -5,17 +5,19 @@ from Chains import *
     
 class Sun( Sandable ):
     """
-        <h3>Draw a figure that roughly resembles the sun and its rays</h3>
+### Draw figures that roughly resembles the sun and its rays
 
-        Hint: Set <i>Ray width</i>=0 for a cool effect.
+#### Hints
 
-        <ul>
-         <li><i>Ray count</i> - number of rays.
-         <li><i>Ray width</i> - width in degrees of each ray.
-         <li><i>Ripples</i> - number of waves in a ray.
-         <li><i>X Center</i> and <i>Y Center</i> - where the center of the sun will be relative to the table.
-         <li><i>Inner radius</i> and <i>Outer radius</i> - how far from the center the rays should start and end.
-        </ul>"""
+Set **Ray width**=0 for a cool effect.
+
+#### Parameters
+* **Ray count** - number of rays.
+* **Ray width** - width in degrees of each ray.
+* **Ripples** - number of waves in a ray.
+* **X Center** and **Y Center** - where the center of the sun will be relative to the table.
+* **Inner radius** and **Outer radius** - how far from the center the rays should start and end.
+"""
 
     def __init__( self, width, length ):
         radius = max(width,length) / 2.0

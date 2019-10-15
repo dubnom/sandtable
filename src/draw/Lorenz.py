@@ -5,16 +5,19 @@ import math
 
 class Lorenz( Sandable ):
     """
-        <h3>Draw a Lorenz Attractor (a type of fractal)</h3>
+### Draw a Lorenz Attractor (a type of fractal)
 
-        Hint: Read the Wikipedia article on <a href="http://en.wikipedia.org/wiki/Lorenz_system">Lorenz systems</a>
+#### Hints
 
-        <ul>
-         <li><i>h, a, b, c</i> - coefficients that describe parameters for the chaotic differential equations.
-         <li><i>Number of points</i> - number of points to draw in the Lorenz curve.
-         <li><i>X and Y Origin</i> - lower left corner of the drawing. Usually not worth changing.
-         <li><i>Width</i> and <i>Length</i> - how big the figure should be. Probably not worth changing.
-        </ul>"""
+Read the Wikipedia article on [Lorenz Systems](http://en.wikipedia.org/wiki/Lorenz_system)
+
+#### Parameters
+
+* **h, a, b, c** - coefficients that describe parameters for the chaotic differential equations.
+* **Number of points** - number of points to draw in the Lorenz curve.
+* **X and Y Origin** - lower left corner of the drawing. Usually not worth changing.
+* **Width** and **Length** - how big the figure should be. Probably not worth changing.
+"""
 
     def __init__( self, width, length ):
         self.editor = [

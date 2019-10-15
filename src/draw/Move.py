@@ -4,13 +4,16 @@ import tinyg as emc
 
 class Move( Sandable ):
     """
-        <h3>Move the ball to a new location</h3>
+### Move the ball to a new location
 
-        Hint: To avoid drawing over things, move the ball away!
+#### Hints
 
-        <ul>
-         <li><i>X and Y Origin</i> - location on the table to move the ball to.
-        </ul>"""
+To avoid drawing over things, move the ball away!
+
+#### Parameters
+
+* **X and Y Origin** - location on the table to move the ball to.
+"""
 
     def __init__( self, width, length ):
         try:

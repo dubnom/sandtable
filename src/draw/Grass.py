@@ -5,7 +5,15 @@ import random
 
 class Grass( Sandable ):
     """
-        <h3>Draw fields of grass</h3>"""
+### Draw fields of grass
+
+#### Parameters
+
+* **Maximum height** - height of the tallest blade of grass.
+* **Maximum wind** - simulate wind to move the blades around.
+* **Blades of grass** - number of blades to draw.
+* **Directional wind** - if "yes" then the wind comes only from one direction.
+"""
     
     def __init__( self, width, length ):
         self.editor = [

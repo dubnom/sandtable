@@ -72,7 +72,7 @@ pre.text	{ color: black; font-family: "Lucida Console", monospace, "Courier New"
 
 table.help	{}
 td		    { font-size: 90% }
-th		    { font-size: 100%; line-height: 130%; text-align: left; background-color: #3F3F3F }
+th		    { font-size: 100%; line-height: 130%; text-align: left; background-color: #DFDFDF }
 td.help     {}
 th.help     {}
 

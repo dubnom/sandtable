@@ -5,18 +5,18 @@ from Chains import *
 
 class ESpiral( Sandable ):
     """
-        <h3>Circular pattern with spirals</h3>
+### Circular pattern with spirals
 
-        <ul>
-         <li><i>Lines per Inch</i> - number of lines drawn within an inch of the spiral.
-             Changing this can make the lines closer together (try a number like 10) or farther apart (try 0.5).
-         <li><i>Sample rate</i> - how frequently points are calculated around the spiral.  Smaller numbers create rounder
-             spirals while larger numbers create interesting shapes.  Try 120 to get a triangle;
-             121 to get a rotating triangle; 74 makes a rotating pentagon.
-         <li><i>X Corner<i> and <i>Y Corner</i> - lower left corner to start the pattern.
-         <li><i>Width<i> and <i>Length<i> - size of the pattern (spirals can go outside of the bounds).
-        </ul>
-    """
+#### Parameters
+
+* **Lines per Inch** - number of lines drawn within an inch of the spiral.
+     Changing this can make the lines closer together (try a number like 10) or farther apart (try 0.5).
+* **Sample rate** - how frequently points are calculated around the spiral.  Smaller numbers create rounder
+     spirals while larger numbers create interesting shapes.  Try 120 to get a triangle;
+     121 to get a rotating triangle; 74 makes a rotating pentagon.
+* **X Corner** and **Y Corner** - lower left corner to start the pattern.
+* **Width** and **Length** - size of the pattern (spirals can go outside of the bounds).
+"""
 
     def __init__( self, width, length ):
         self.editor = [

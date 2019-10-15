@@ -5,19 +5,24 @@ from Chains import *
 
 class Fermat( Sandable ):
     """
-        <h3>Fermat spiral (with a yin/yang inside)</h3>
+### Fermat spiral (with a yin/yang inside)
 
-        <ul>
-         <li><i>Radius</i> - how far from the center the spiral should end.
-         <li><i>Turns</i> - number of lines in each arm of the spiral.
-         <li><i>Starting angle</i> - the angle the spiral starts at. The default of 0.0 starts to the right of center.
-         <li><i>Sample rate</i> - how frequently points are calculated around the spiral.  Smaller numbers create rounder
-             spirals while larger numbers create interesting shapes.  Try 120 to get a triangle;
-             121 to get a rotating triangle; 74 makes a rotating pentagon.
-         <li><i>Fill</i> - draw lines between points of each subsequent spiral arm. This creates a fully
-             filled-in spiral that looks pretty neat in sand.
-         <li><i>X Center</i> and <i>Y Center</i> - where the center of the spiral will be relative to the table.
-        </ul>"""
+#### Hints
+
+You can read more on WikiPedia's [Fermat's spiral](https://en.wikipedia.org/wiki/Fermat%27s_spiral).
+
+#### Parameters
+
+* **Radius** - how far from the center the spiral should end.
+* **Turns** - number of lines in each arm of the spiral.
+* **Starting angle** - the angle the spiral starts at. The default of 0.0 starts to the right of center.
+* **Sample rate** - how frequently points are calculated around the spiral.  Smaller numbers create rounder
+  spirals while larger numbers create interesting shapes.  Try 120 to get a triangle;
+  121 to get a rotating triangle; 74 makes a rotating pentagon.
+* **Fill** - draw lines between points of each subsequent spiral arm. This creates a fully
+  filled-in spiral that looks pretty neat in sand.
+* **X Center** and **Y Center** - where the center of the spiral will be relative to the table.
+"""
 
     def __init__( self, width, length ):
         self.editor = [

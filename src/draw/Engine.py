@@ -5,21 +5,21 @@ from Chains import *
 
 class Engine( Sandable ):
     """
-        <h3>Engine-Turned patterns</h3>
+### Engine-Turned patterns
 
-        <ul>
-         <li><i>Rows</i> and </i>Columns</i> - number of rows and columns to create the engine-turned pattern with.
-         <li><i>Lines per Inch</i> - number of lines drawn within an inch of the spiral.
-             Changing this can make the lines closer together (try a number like 10) or farther apart (try 0.5).
-         <li><i>Sample Rate</i> - how frequently points are calculated around the spiral.  Smaller numbers create rounder
-             spirals while larger numbers create interesting shapes.  Try 120 to get a triangle;
-             121 to get a rotating triangle; 74 makes a rotating pentagon.
-         <li><i>Size Modifier</i> - smaller numbers decrease the size of the spiral, larger numbers increase the size.
-         <li><i>X Corner<i> and <i>Y Corner</i> - lower left corner to start the pattern.
-         <li><i>Width<i> and <i>Length<i> - size of the pattern (spirals can go outside of the bounds).
-        </ul>
-    """
+#### Parameters
 
+* **Rows** and **Columns** - number of rows and columns to create the engine-turned pattern with.
+* **Lines per Inch** - number of lines drawn within an inch of the spiral.
+  Changing this can make the lines closer together (try a number like 10) or farther apart (try 0.5).
+* **Sample Rate** - how frequently points are calculated around the spiral.  Smaller numbers create rounder
+  spirals while larger numbers create interesting shapes.  Try 120 to get a triangle;
+  121 to get a rotating triangle; 74 makes a rotating pentagon.
+* **Size Modifier** - smaller numbers decrease the size of the spiral, larger numbers increase the size.
+* **X Corner** and **Y Corner** - lower left corner to start the pattern.
+* **Width** and **Length** - size of the pattern (spirals can go outside of the bounds).
+"""
+    
     def __init__( self, width, length ):
         self.editor = [
             DialogInt(   "rows",            "Rows",                 default=int(length/2), min=1, max=length ),

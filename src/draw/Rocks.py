@@ -8,20 +8,23 @@ from random import random, uniform, seed
     
 class Rocks( Sandable ):
     """
-        <h3>Create a Japanese Zen rock garden</h3>
+### Create a Japanese Zen rock garden
 
-        Hint: Press the <i>Random</i> button to automatically make new drawings.
+#### Hints
 
-        <ul>
-         <li><i>Number of rocks</i> - number of rocks in the garden.
-         <li><i>Min and Max rock size</i> - smallest and largest possible rock sizes (radius).
-         <li><i>Ball size</i> - size of the ball in inches for making rake lines.
-         <li><i>Rake teeth</i> - Number of tines in the rake for cirlces around the rocks.
-         <li><i>Random seed</i> - this is used to generate random gardens.  Different seeds generate different drawings.
-             The <i>Random</i> button will create new seeds automatically.
-         <li><i>Width</i> and <i>Length</i> - how big the maze should be. Probably not worth changing.
-         <li><i>Starting locations</i> - where on the table the maze should be drawn. Also normally not worth changing.
-        </ul>"""
+Press the *Random* button to automatically make new drawings.
+
+#### Parameters
+
+* **Number of rocks** - number of rocks in the garden.
+* **Min and Max rock size** - smallest and largest possible rock sizes (radius).
+* **Ball size** - size of the ball in inches for making rake lines.
+* **Rake teeth** - Number of tines in the rake for cirlces around the rocks.
+* **Random seed** - this is used to generate random gardens.  Different seeds generate different drawings.
+    The *Random* button will create new seeds automatically.
+* **Width** and **Length** - how big the maze should be. Probably not worth changing.
+* **Starting locations** - where on the table the maze should be drawn. Also normally not worth changing.
+"""
 
     def __init__( self, width, length ):
         rockSize = min(width,length) / 4.0

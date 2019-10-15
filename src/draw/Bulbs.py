@@ -4,23 +4,23 @@ from dialog import *
 
 class Bulbs( Sandable ):
     """
-        <h3>Bulbs can create interesting flower-like images and beautiful geometric patterns</h3>
+### Bulbs can create interesting flower-like images and beautiful geometric patterns
 
-        The formula works by imposing a sine wave of <i>Major frequency</i> and <i>Major amplitude</i> on top of a simple spiral.
-        <i>Minor frequency</i> and <i>Minor amplitude</i> are used to modify the sine wave by moving it forward or back a bit
-        as it goes around - small numbers create ripples, large numbers create cool interference patterns.
+The formula works by imposing a sine wave of **Major frequency** and **Major amplitude** on top of a simple spiral.
+**Minor frequency** and **Minor amplitude** are used to modify the sine wave by moving it forward or back a bit
+as it goes around - small numbers create ripples, large numbers create cool interference patterns.
 
-        <ul>
-         <li><i>Major frequency</i> - how many bumps to put on the spiral.
-         <li><i>Major amplitude</i> - size of the bumps in inches.
-         <li><i>Minor frequency</i> - how often to bend the major bumps forward and backward (numbers close to Major frequency are a good place to start).
-         <li><i>Minor amplitude</i> - size of the bending in degrees. Smaller numbers are more subtle, larger numbers create greater folds.
-         <li><i>Inner radius</i> and <i>Outer radius</i> - how far from the center the spiral should start and end.
-         <li><i>Lines per Inch</i> - number of lines drawn within an inch of the spiral.
-             Changing this can make the lines closer together (try a number like 10) or farther apart (try 0.5).
-         <li><i>Sample rate</i> - angular spacing between points calculated around a 360 degree spiral.
-             Smaller numbers create rounder drawings while larger numbers create spiked shapes.
-         <li><i>X Center</i> and <i>Y Center</i> - where the center of the spiral will be relative to the table."""
+#### Parameters 
+
+* **Major frequency** - number of bumps to put on the spiral.
+* **Major amplitude** - size of the bumps in inches.
+* **Minor frequency** - how often to bend the major bumps forward and backward (numbers close to Major frequency are a good place to start).
+* **Minor amplitude** - size of the bending in degrees. Smaller numbers are more subtle, larger numbers create greater folds.
+* **Inner radius** and **Outer radius** - how far from the center the spiral should start and end.
+* **Lines per Inch** - number of lines drawn within an inch of the spiral. Changing this can make the lines closer together (try a number like 10) or farther apart (try 0.5).
+* **Sample rate** - angular spacing between points calculated around a 360 degree spiral. Smaller numbers create rounder drawings while larger numbers create spiked shapes.
+* **X Center** and **Y Center** - where the center of the spiral will be relative to the table.
+"""
 
     def __init__( self, width, length ):
         self.editor = [

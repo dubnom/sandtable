@@ -5,22 +5,25 @@ from Chains import *
 
 class SpiralArms( Sandable ):
     """
-        <h3>Draw clockwise and counter-clockwise spiral arms from the center</h3>
+### Draw clockwise and counter-clockwise spiral arms from the center
 
-        Hint: Smaller <i>CW and CCW angular distances</i> make drawings that look more like flowers.
+#### Hints
 
-        <ul>
-         <li><i>CW and CCW arms</i> - number of clockwise and counter-clockwise arms.
-         <li><i>CW and CCW angular distances</i> - angular distance that each arm rotates by the time it gets to the
-             <i>Outer radius</i>. Higher numbers (try 360) give tighter spirals while lower numbers (try 30) will
-             look more like flower petals.  CW and CCW refer to the normal direction of the spirals if the <i>angular
-             distance</i> is positive, but these directions can be reversed by using negative numbers.  Zero draws straight
-             lines from the <i>Inner radius</i> to the <i>Outer radius</i>.
-         <li><i>Points per arm</i> - the number of points used to draw each spiral arm.  Smaller numbers will look
-             more like angular lines while larger numbers will generate curves.
-         <li><i>Inner radius</i> and <i>Outer radius</i> - how far from the center the spiral should start and end.
-         <li><i>X Center</i> and <i>Y Center</i> - where the center of the drawing will be relative to the table.
-        </ul>"""
+Smaller **CW and CCW angular distances** make drawings that look more like flowers.
+
+#### Parameters
+
+* **CW and CCW arms** - number of clockwise and counter-clockwise arms.
+* **CW and CCW angular distances** - angular distance that each arm rotates by the time it gets to the
+     **Outer radius**. Higher numbers (try 360) give tighter spirals while lower numbers (try 30) will
+     look more like flower petals.  CW and CCW refer to the normal direction of the spirals if the **angular
+     distance** is positive, but these directions can be reversed by using negative numbers.  Zero draws straight
+     lines from the **Inner radius** to the **Outer radius**.
+* **Points per arm** - the number of points used to draw each spiral arm.  Smaller numbers will look
+     more like angular lines while larger numbers will generate curves.
+* **Inner radius** and **Outer radius** - how far from the center the spiral should start and end.
+* **X Center** and **Y Center** - where the center of the drawing will be relative to the table.
+"""
 
     def __init__( self, width, length ):
         radius = min(width,length) / 2.0

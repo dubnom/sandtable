@@ -3,16 +3,17 @@ from dialog import *
 
 class Checkers( Sandable ):
     """
-        <h3>Draw cross-hatched rectangles</h3>
+### Draw cross-hatched rectangles
 
-        <ul>
-         <li><i>Columns</i> - number of vertical columns to have.
-         <li><i>Rows</i> - number of horizontal rows to have.
-         <li><i>X Lines</i> - number of vertical cross-hatches to have in a box.
-         <li><i>Y Lines</i> - number of horizontal cross-hatches to have in a box.
-         <li><i>X and Y Origin</i> - lower left corner of the drawing. Usually not worth changing.
-         <li><i>Width</i> and <i>Length</i> - how big the figure should be. Probably not worth changing.
-        </ul>"""
+#### Parameters
+
+* **Columns** - number of vertical columns to have.
+* **Rows** - number of horizontal rows to have.
+* **X Lines** - number of vertical cross-hatches to have in a box.
+* **Y Lines** - number of horizontal cross-hatches to have in a box.
+* **X and Y Origin** - lower left corner of the drawing. Usually not worth changing.
+* **Width** and **Length** - how big the figure should be. Probably not worth changing.
+"""
 
     def __init__( self, width, length ):
         self.editor = [

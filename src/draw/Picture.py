@@ -7,25 +7,28 @@ from Chains import *
     
 class Picture( Sandable ):
     """
-        <h3>Turn a photograph or image into a sand drawing</h3>
+### Turn a photograph or image into a sand drawing
 
-        Hint: Use the "Pictures" tab in the main navigation to more easily select photos.
+#### Hints
 
-        <ul>
-         <li><i>File Name</i> - name of the file to be drawn.  Files use a rudimentary file browser.
-             Use the "Pictures" tab to more easily select pictures.
-         <li><i>Turd Size</i> - size of the smallest "island" that is left in the image. Setting <i>Turd Size</i>
-             to higher numbers will make the image smoother, less detailed, and faster to draw.
-         <li><i>Number of Fill Iterations</i> - indicates how many shrunken-down drawings should be done inside the
-             main image.  Each shrunken drawing is </i>Fill Decrement</i> away from the previous edge.  Details get
-             lost as the fill image gets smaller. to completely fill in the image use higher numbers, the fill will
-             automatically stop when it becomes too small (try 25).
-         <li><i>Fill Decrement</i> - amount to shrink the outside image(s) by for the purpose of filling-in the drawing.
-             The smaller the <i>Fill Decrement</i> is the tighter the lines are (try .25).
-         <li><i>Height</i> - scale the resulting drawing to the specified height in inches.
-         <li><i>Width</i> and <i>Length</i> - how big the drawing should be. Probably not worth changing.
-         <li><i>Starting locations</i> - where on the table the drawing should be drawn. Also normally not worth changing.
-        </ul>"""
+Use the "Pictures" tab in the main navigation to more easily select photos.
+
+#### Parameters
+
+* **File Name** - name of the file to be drawn.  Files use a rudimentary file browser.
+     Use the "Pictures" tab to more easily select pictures.
+* **Turd Size** - size of the smallest "island" that is left in the image. Setting **Turd Size**
+     to higher numbers will make the image smoother, less detailed, and faster to draw.
+* **Number of Fill Iterations** - indicates how many shrunken-down drawings should be done inside the
+     main image.  Each shrunken drawing is **Fill Decrement** away from the previous edge.  Details get
+     lost as the fill image gets smaller. to completely fill in the image use higher numbers, the fill will
+     automatically stop when it becomes too small (try 25).
+* **Fill Decrement** - amount to shrink the outside image(s) by for the purpose of filling-in the drawing.
+     The smaller the **Fill Decrement** is the tighter the lines are (try .25).
+* **Height** - scale the resulting drawing to the specified height in inches.
+* **Width** and **Length** - how big the drawing should be. Probably not worth changing.
+* **Starting locations** - where on the table the drawing should be drawn. Also normally not worth changing.
+"""
 
     def __init__( self, width, length ):
         cfg = LoadConfig()

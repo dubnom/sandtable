@@ -4,21 +4,24 @@ from dialog import *
     
 class Waves( Sandable ):
     """
-        <h3>Draw waves</h3>
+### Draw waves
 
-        Hint: Try changing the <i>Shift per line</i>
+#### Hints
 
-        <ul>
-         <li><i>Wave Height</i> - height in inches of each of the waves.
-         <li><i>Lines per Inch</i> - number of vertical lines of waves per inch.
-         <li><i>Waves per Line</i> - number of waves per horizontal line.
-         <li><i>Shift per Line</i> - amount to shift waves over each line.
-         <li><i>Wave increment</i> - percent to increase/decrease number of waves for each line.
-             Very small changes from a 100% yield large changes to the number of waves since
-             the effect is cumulative for each line.
-         <li><i>X and Y Origin</i> - lower left corner of the drawing. Usually not worth changing.
-         <li><i>Width</i> and <i>Length</i> - how big the figure should be. Probably not worth changing.
-        </ul>"""
+Try changing **Shift per line** first.
+
+#### Parameters
+
+ * **Wave Height** - height in inches of each of the waves.
+ * **Lines per Inch** - number of vertical lines of waves per inch.
+ * **Waves per Line** - number of waves per horizontal line.
+ * **Shift per Line** - amount to shift waves over each line.
+ * **Wave increment** - percent to increase/decrease number of waves for each line.
+   Very small changes from a 100% yield large changes to the number of waves since
+   the effect is cumulative for each line.
+ * **X and Y Origin** - lower left corner of the drawing. Usually not worth changing.
+ * **Width** and **Length** - how big the figure should be. Probably not worth changing.
+ """
 
     def __init__( self, width, length ):
         self.editor = [

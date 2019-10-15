@@ -38,7 +38,7 @@ MOVIE_SCRIPT_PATH   = "scripts/"
 MOVIE_OUTPUT_PATH   = "movies/"
 STORE_PATH          = "store/"
 SOURCE_PATH         = "src/"
-CONFIG_PATH         = "config/"
+CONFIG_PATH         = "config"
 TMP_PATH            = "/tmp/"
 
 CONFIG_FILE         = "%sconfig.pkl" % DATA_PATH
@@ -48,12 +48,10 @@ MACH_PORT           = 5007
 MACH_LOG            = "/var/log/machd.log"
 GCODE_FILE          = "%sgcode.ngc" % DATA_PATH
 
-VER_FILE            = "%smach.py" % DATA_PATH
-MACH_FILE           = "%s%s.py" % (MACH_PATH, hostmap[HOST_NAME])
+VER_FILE            = "%smachine.py" % DATA_PATH
 
 IMAGE_FILE          = "%spath.png" % DATA_PATH
 IMAGE_WIDTH         = 400
-IMAGE_HEIGHT        = int(IMAGE_WIDTH * (TABLE_LENGTH / TABLE_WIDTH))
 
 CACHE_FILE          = "%ssandtable.pkl" % TMP_PATH
 
@@ -72,13 +70,14 @@ SCHEDULER_HOST      = 'localhost'
 SCHEDULER_PORT      = 5009
 SCHEDULER_LOG       = "/var/log/scheduler.log"
 
-
 # Import machine specific configuration. This is done through a hostmap file
 # located in the machines subdirectory.
 import platform 
 HOST_NAME = platform.node()
 exec("from %s.hostmap import hostmap" % CONFIG_PATH)
-exec("from machines.%s import *" % % (CONFIG_PATH, hostmap[HOST_NAME]))
+exec("from %s.%s import *" % (CONFIG_PATH, hostmap[HOST_NAME]))
+
+IMAGE_HEIGHT        = int(IMAGE_WIDTH * (TABLE_LENGTH / TABLE_WIDTH))
 
 
 # Configurable "constants"

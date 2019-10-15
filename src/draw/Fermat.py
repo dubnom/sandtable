@@ -7,6 +7,12 @@ class Fermat( Sandable ):
     """
 ### Fermat spiral (with a yin/yang inside)
 
+#### Hints
+
+You can read more on WikiPedia's [Fermat's spiral](https://en.wikipedia.org/wiki/Fermat%27s_spiral).
+
+#### Parameters
+
 * **Radius** - how far from the center the spiral should end.
 * **Turns** - number of lines in each arm of the spiral.
 * **Starting angle** - the angle the spiral starts at. The default of 0.0 starts to the right of center.

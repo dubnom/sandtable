@@ -74,6 +74,7 @@ pip3 install apscheduler
 pip3 install sqlalchemy
 #pip3 install fontTools=3.44.0
 pip3 install fontTools
+pip3 install markdown
 
 # Gphoto2
 wget https://raw.githubusercontent.com/gonzalo/gphoto2-updater/master/gphoto2-updater.sh
@@ -95,8 +96,10 @@ then
     connectd_installer
 fi
 
+#
 # Optional lighting system support
 #
+
 # FadeCandy
 if [ $st_led == 'FadeCandy' ]
 then

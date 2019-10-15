@@ -5,49 +5,53 @@ from math import *
     
 class Func3d( Sandable ):
     """
-        <h3>Graph 3D functions of the form z = f(x,y)</h3>
+### Graph 3D functions of the form z = f(x,y)
 
-        <ul>
-         <li><i>Expression</i> - mathematical formula that returns a number and can use any of the functions, constants,
-             and variables that are explained in more detail below.  The function shouldn't include "z=" because it is implied.
-         <li><i>X Start, End, Points</i> - defines the range of <i>x</i> points being given to the <i>Expression</i> and
-             subsequently graphed.
-         <li><i>Y Start, End, Points</i> - defines the range of <i>y</i> points.
-         <li><i>Z Scale</i> - amount to multiply the z values by.  Z values are automatically scaled between -1.0 and 1.0.
-             A <i>Z Scale</i> factor of 1.0 leaves the high alone. Smaller values reduce the size of the "bumps" in the graph
-             while larger values exagerate them.
-         <li><i>Horizontal Rotation</i> - angle to horizontally rotate the graph. The graph can be rotated up to 45 degrees.
-         <li><i>Vertical Tilt</i> - angle to tilt the graph down. The highest angle is 90 degrees - looking at the graph from the side.
-             An angle of 0 degrees looks down from the top and isn't very interesting because there is no way to see the z values.
-         <li><i>Zoom</i> - the graph is automatically resized to fit the drawing area. To create drawings that take up the entire
-             space you can "zoom in" by increasing this value.
-         <li><i>Top Down</i> - direction for drawing the chart. The default is set to Trueto draw with correct hidden-lines.
-             Switching this to False can create some interesting inversion effects.
-         <li><i>X and Y Origin</i> - lower left corner of the drawing. Usually not worth changing.
-         <li><i>Width</i> and <i>Length</i> - how big the figure should be. Probably not worth changing.
-        </ul>
+#### Parameters
 
-        Some interesting functions:<br>
-        <blockquote>
-         <table>
-          <tr><th>Description</th><th>Expression</th><th>Ranges</th></tr>
-          <tr><td>Waves</td><td>x**3-3*x+y**3-3*y</td><td>X and Y (-1, 1, 45)</td></tr>
-          <tr><td>Rosenbrock Function</td><td>-((1-x)**2 + 100*(y-x**2)**2)</td><td>X and Y (-2, 2, 45)</td></tr>
-          <tr><td>Reverse Dish</td><td>-x**2-y**2</td><td>X and Y (-2, 2, 45)</td></tr>
-          <tr><td>Exponential Bumps</td><td>-x*exp(-x**2-y**2)</td><td>X and Y (-2, 2, 45)</td></tr>
-         </table>
-        </blockquote>
+* **Expression** - mathematical formula that returns a number and can use any of the functions, constants,
+  and variables that are explained in more detail below.  The function shouldn't include "z=" because it is implied.
+* **X Start, End, Points** - defines the range of **x** points being given to the **Expression** and
+  subsequently graphed.
+* **Y Start, End, Points** - defines the range of **y** points.
+* **Z Scale** - amount to multiply the z values by.  Z values are automatically scaled between -1.0 and 1.0.
+  A **Z Scale** factor of 1.0 leaves the high alone. Smaller values reduce the size of the "bumps" in the graph
+  while larger values exagerate them.
+* **Horizontal Rotation** - angle to horizontally rotate the graph. The graph can be rotated up to 45 degrees.
+* **Vertical Tilt** - angle to tilt the graph down. The highest angle is 90 degrees - looking at the graph from the side.
+  An angle of 0 degrees looks down from the top and isn't very interesting because there is no way to see the z values.
+* **Zoom** - the graph is automatically resized to fit the drawing area. To create drawings that take up the entire
+  space you can "zoom in" by increasing this value.
+* **Top Down** - direction for drawing the chart. The default is set to True to draw with correct hidden-lines.
+  Switching this to False can create some interesting inversion effects.
+* **X and Y Origin** - lower left corner of the drawing. Usually not worth changing.
+* **Width** and **Length** - how big the figure should be. Probably not worth changing.
 
-        List of supported functions (from the Python math module):<br>
-        <blockquote>abs, acos, asin, atan, atan2, ceil, cos, cosh, degrees, exp, fabs, floor, fmod,
-        frexp, hypot, ldexp, log, log10, modf, pow, radians, sin, sinh, sqrt, tan, tanh</blockquote>
+#### Available functions, constants, and variables
 
-        List of supported constants:<br>
-        <blockquote>e, pi</blockquote>
+##### Functions (from the Python math module)
 
-        List of supported variables:<br>
-        <blockquote>x, y</blockquote>
-        """
+    abs, acos, asin, atan, atan2, ceil, cos, cosh, degrees,
+    exp, fabs, float, floor, fmod, frexp, hypot, int, ldexp,
+    log, log10, modf, pow, radians, sin, sinh, sqrt, tan, tanh
+
+##### Constants
+
+    e, pi
+
+##### Variables
+
+    x, y
+
+#### Examples
+
+  Description | Expression | Ranges
+  --- | --- | ---
+  Waves | x**3-3*x+y**3-3*y | X and Y (-1, 1, 45)
+  Rosenbrock Function | -((1-x)**2 + 100*(y-x**2)**2) | X and Y (-2, 2, 45)
+  Reverse Dish | -x**2-y**2 | X and Y (-2, 2, 45)
+  Exponential Bumps | -x*exp(-x**2-y**2) | X and Y (-2, 2, 45)
+"""
 
     def __init__( self, width, length ):
         self.editor = [

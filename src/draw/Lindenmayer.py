@@ -5,53 +5,57 @@ from Chains import *
 
 class Lindenmayer( Sandable ):
     """
-        <h3>Simple movement/substitution language for creating complex fractals</h3>
+### Simple movement/substitution language for creating complex fractals
 
-        Hint: Read the Wikipedia article on <a href="http://en.wikipedia.org/wiki/L-system">L-systems</a>.
-        The examples should work.
+#### Hints
 
-        <ul>
-         <li><i>Repetitions</i> - number of times to run through replacing <i>Axiom</i> with <i>Rules</i>.
-         <li><i>Angle</i> - number of degrees to turn.
-         <li><i>Axiom</i> - Starting string to iteratively apply <i>Rules</i> to.
-         <li><i>Rules</i> - Replacement rules of the form A=B where all occurences of "A" will be replaced by "B"
-             in <i>Axiom</i> and subsequent iterations of <i>Axiom</i>.<br>
-             "A" can be one or more letters.
-             "B" can be any letters including what was specified in "A". There are special characters that are
-             explained below.
-         <li><i>X and Y Origin</i> - lower lefthand corner of the drawing. Usually not worth changing.
-         <li><i>Width</i> and <i>Length</i> - how big the drawing should be. Probably not worth changing.
-        </ul>
+Read the Wikipedia article on [L-systems](http://en.wikipedia.org/wiki/L-system). All of their examples should work.
 
-        Special characters used in <i>Axiom</i> and <i>Rules</i>:
-        <ul>
-         <li><b>A, B, F</b> - Move forward and draw a line.
-         <li><b>+</b> - Turn left by <i>Angle</i> degrees.
-         <li><b>-</b> - Turn right by <i>Angle</i> degrees.
-         <li><b>|</b> - Turn around (180 degrees).
-         <li><b>[</b> - Push the current location onto a stack.
-         <li><b>]</b> - Draw an efficient, non-destructive path, back to a previously pushed location.
-        </ul>
+#### Parameters
 
-        A simple <i>Axiom</i> that would draw a square is "F-F-F-F" with <i>Angle</i>=90 degrees.<br>
-        Another simple <i>Axiom</i> that draws a triangle is "A-A-A" with <i>Angle</i>=120 degrees.<br>
-        <br>
-        Set <i>Axiom</i>="A" and <i>Rule 1</i>="A=A+A-F-A+A", <i>Repetitions</i>=1, <i>Angle</i>=90 degrees.
-        The first iteration will replace every 'A' in the <i>Axiom</i> (there is only one) with "A+A-F-A+A".
-        We only specified one <i>Repetition</i>, so this would yield:<br>
-        <pre>
-        Forward, Turn left, Forward, Turn Right, Forward, Turn Right, Forward, Turn Left
-        or something that looks like:         +--+
-                                              |  |
-                                            --+  +--
-        </pre>
-        If you set <i>Repetitions</i>=2 then each 'A' will again be replaced by "A+A-F-A+A" and <i>Axiom</i> will
-        become: "A+A-F-A+A+A+A-F-A+A-F-A+A-F-A+A+A+A-F-A+A".<br>
-        Visually, this will start looking like a filled-in
-        stepped pyramid.  Try higher values for <i>Repetitions</i> but realize that the drawing gets exponentially larger
-        for ever increment. The final length of <i>Axiom</i>, and the number of points in the drawing, are limited
-        to keep from running out of memory.
-        """
+* **Repetitions** - number of times to run through replacing **Axiom** with **Rules**.
+* **Angle** - number of degrees to turn.
+* **Axiom** - Starting string to iteratively apply **Rules** to.
+* **Rules** - Replacement rules of the form X=Y where all occurences of "X" will be replaced by "Y".
+* **X and Y Origin** - lower lefthand corner of the drawing. Usually not worth changing.
+* **Width** and **Length** - how big the drawing should be. Probably not worth changing.
+
+#### Quick primer on L-systems
+
+Special characters used in **Axiom** and **Rules**:
+
+* **A, B, F** - Move forward and draw a line.
+* **+** - Turn left by **Angle** degrees.
+* **-** - Turn right by **Angle** degrees.
+* **|** - Turn around (180 degrees).
+* **[** - Push the current location onto a stack.
+* **]** - Draw an efficient, non-destructive path, back to a previously pushed location.
+
+#### Examples
+
+A simple **Axiom** that would draw a square is "F-F-F-F" with **Angle**=90 degrees.
+
+Another simple **Axiom** that draws a triangle is "A-A-A" with **Angle**=120 degrees. 
+
+Set **Axiom**="A" and **Rule 1**="A=A+A-F-A+A", **Repetitions**=1, **Angle**=90 degrees.
+The first iteration will replace every 'A' in the **Axiom** (there is only one) with "A+A-F-A+A".
+We only specified one **Repetition**, so this would yield:  
+
+Forward, Turn left, Forward, Turn Right, Forward, Turn Right, Forward, Turn Left
+or something that looks like:
+
+        +--+
+        |  |
+      --+  +--
+
+If you set **Repetitions**=2 then each 'A' will again be replaced by "A+A-F-A+A" and **Axiom** will
+become: "A+A-F-A+A+A+A-F-A+A-F-A+A-F-A+A+A+A-F-A+A".  
+
+Visually, this will start looking like a filled-in
+stepped pyramid.  Try higher values for **Repetitions** but realize that the drawing gets exponentially larger
+for ever increment. The final length of **Axiom**, and the number of points in the drawing, are limited
+to keep from running out of memory.
+"""
 
     def __init__( self, width, length ):
         self.editor = [

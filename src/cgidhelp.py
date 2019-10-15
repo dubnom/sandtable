@@ -1,5 +1,6 @@
 from bottle import route, template
-import textwrap
+#import textwrap
+import markdown
 
 from Sand import *
 
@@ -8,7 +9,7 @@ def main(method):
     method = method if method in sandables else sandables[0]
     sandable = sandableFactory( method )
     if sandable:
-        doc = textwrap.dedent( sandable.__doc__ ) if sandable.__doc__ else 'No documentation available'
+        doc = markdown.markdown( sandable.__doc__, extensions=['tables'] ) if sandable.__doc__ else 'No documentation available'
     else:
         doc = '<div class="error">Error "%s" is not a valid drawing method!</div>' % method 
 

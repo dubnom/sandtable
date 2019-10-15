@@ -7,26 +7,29 @@ from Chains import *
 
 class Clipart( Sandable ):
     """
-        <h3>Draw clipart images (currently only DXF is supported)</h3>
+### Draw clipart images (currently only DXF is supported)
 
-        Hint: You have to browse through directories to find interesting things.<br>
-        Hint: Filling the image is very cool. <br>
+#### Hints
 
-        <p>Horizontal lines are used to "erase" the background. They are also used to hide the way the ball to creates
-        sections of the drawing that aren't connected to one-another.</p>
+You have to browse through directories to find interesting things.
+Filling the image is very cool.
 
-        <ul>
-         <li><i>File Name</i> - name of the file to be drawn.  Files use a rudimentary file browser that supports
-             directories.  Search through the directories to find interesting things to draw.
-         <li><i>Number of Fill Iterations</i> - indicates how many shrunken-down drawings should be done inside the
-             main image.  Each shrunken drawing is </i>Fill Decrement</i> away from the previous edge.  Details get
-             lost as the fill image gets smaller. to completely fill in the image use higher numbers, the fill will
-             automatically stop when it becomes too small (try 25).
-         <li><i>Fill Decrement</i> - amount to shrink the outside image(s) by for the purpose of filling-in the drawing.
-             The smaller the <i>Fill Decrement</i> is the tighter the lines are (try .25).
-         <li><i>Width</i> and <i>Length</i> - how big the drawing should be. Probably not worth changing.
-         <li><i>Starting locations</i> - where on the table the drawing should be drawn. Also normally not worth changing.
-        </ul>"""
+Horizontal lines are used to "erase" the background. They are also used to hide the way the ball to creates
+sections of the drawing that aren't connected to one-another.
+
+#### Parameters
+
+* **File Name** - name of the file to be drawn.  Files use a rudimentary file browser that supports
+  directories.  Search through the directories to find interesting things to draw.
+* **Number of Fill Iterations** - indicates how many shrunken-down drawings should be done inside the
+  main image.  Each shrunken drawing is **Fill Decrement** away from the previous edge.  Details get
+  lost as the fill image gets smaller. to completely fill in the image use higher numbers, the fill will
+  automatically stop when it becomes too small (try 25).
+* **Fill Decrement** - amount to shrink the outside image(s) by for the purpose of filling-in the drawing.
+  The smaller the **Fill Decrement** is the tighter the lines are (try .25).
+* **Width** and **Length** - how big the drawing should be. Probably not worth changing.
+* **Starting locations** - where on the table the drawing should be drawn. Also normally not worth changing.
+"""
 
     def __init__( self, width, length ):
         cfg = LoadConfig()

@@ -5,19 +5,22 @@ from Chains import *
 
 class Rose( Sandable ):
     """
-        <h3>Draw rose curves (pretty flowerlike drawings)</h3>
+### Draw rose curves (pretty flowerlike drawings)
 
-        Hint: Read the Wikipedia article on <a href="http://en.wikipedia.org/wiki/Rose_(mathematics)">Rose (mathematics)</a>
+### Hints
 
-        <ul>
-         <li><i>Petals</i> - number of petals in the flower.
-         <li><i>Starting angle</i> - amount to rotate the flower.
-         <li><i>Shift angle</i> - amount to rotate each subsequent petal. 
-         <li><i>Sample rate</i> - how frequently to draw a point when going around the flower.
-         <li><i>Lines per Inch</i> - number of flowers to draw per inch. 
-         <li><i>X Center</i> and <i>Y Center</i> - where the center of the flower will be relative to the table.
-         <li><i>Inner radius</i> and <i>Outer radius</i> - how far from the center the should start and end.
-        </ul>"""
+Read the Wikipedia article on [Rose (mathematics)](http://en.wikipedia.org/wiki/Rose_(mathematics)).
+
+#### Parameters
+
+* **Petals** - number of petals in the flower.
+* **Starting angle** - amount to rotate the flower.
+* **Shift angle** - amount to rotate each subsequent petal. 
+* **Sample rate** - how frequently to draw a point when going around the flower.
+* **Lines per Inch** - number of flowers to draw per inch. 
+* **X Center** and **Y Center** - where the center of the flower will be relative to the table.
+* **Inner radius** and **Outer radius** - how far from the center the should start and end.
+"""
 
     def __init__( self, width, length ):
         radius = min(width,length) / 2.0

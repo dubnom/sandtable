@@ -4,21 +4,24 @@ from dialog import *
     
 class Lissajous( Sandable ):
     """
-        <h3>Pretty curves that describe complex harmonic motion</h3>
+### Pretty curves that describe complex harmonic motion
 
-        Hint: Check out the Wikipedia description of the <a href="http://en.wikipedia.org/wiki/Lissajous_curve">Lissajous Curve</a>
+#### Hints
 
-        <ul>
-         <li><i>A and B Frequencies</i> - the ratio that describes the harmonic is very sensitive to A/B.<br>
-             If <i>A</i> == <i>B</i> and <i>Delta</i> == 0 then the ratio is 1 and a line is drawn.<br>
-             If <i>A</i> == <i>B</i> and <i>Delta</i> == 90 an elipse will be drawn.<br>
-             Setting <i>A</i>=1 and <i>B</i>=2 will draw a figure eight.<br>
-             Play with the numbers to make pretty looping patterns (try <i>A</i>=2 and <i>B</i>=5).
-         <li><i>Delta</i> - is the X angular offset.  Try setting <i>Delta</i> to one of these numbers: 0, 30, 45, 90.
-             Other numbers are interesting as well.
-         <li><i>X and Y Center</i> - where the center of the figure will be relative to the table. Usually not worth changing.
-         <li><i>Width</i> and <i>Length</i> - how big the figure should be. Probably not worth changing.
-        </ul>"""
+Check out the Wikipedia description of the [Lissajous Curve](http://en.wikipedia.org/wiki/Lissajous_curve).
+
+#### Parameters
+
+* **A and B Frequencies** - the ratio that describes the harmonic is very sensitive to A/B.  
+  If **A** == **B** and **Delta** == 0 then the ratio is 1 and a line is drawn.  
+  If **A** == **B** and **Delta** == 90 an elipse will be drawn.  
+  Setting **A**=1 and **B**=2 will draw a figure eight.  
+  Play with the numbers to make pretty looping patterns (try **A**=2 and **B**=5).
+* **Delta** - is the X angular offset.  Try setting **Delta** to one of these numbers: 0, 30, 45, 90.
+  Other numbers are interesting as well.
+* **X and Y Center** - where the center of the figure will be relative to the table. Usually not worth changing.
+* **Width** and **Length** - how big the figure should be. Probably not worth changing.
+"""
 
     EPSILON = 1E-4
 

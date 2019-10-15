@@ -4,20 +4,23 @@ from dialog import *
 
 class Maze( Sandable ):
     """
-        <h3>Draw a maze. Start at the lower left corner and end at the upper right corner.</h3>
+###Draw a maze. Start at the lower left corner and end at the upper right corner.
 
-        Hint: Pressing the <i>Random</i> button will draw a new maze.
+Thanks to David Bau who provided the basis of the maze generator code.
 
-        <ul>
-         <li><i>Columns and Rows per inch</i> - number of maze lines per inch. Higher numbers (try 2) create a denser,
-             harder maze while smaller numbers (try .5) create a sparser, easier maze.
-         <li><i>Random seed</i> - this is used to generate random mazes.  Different seeds generate different mazes.
-             The <i>Random</i> button will create new seeds (and mazes)  automatically.
-         <li><i>Width</i> and <i>Length</i> - how big the maze should be. Probably not worth changing.
-         <li><i>Starting locations</i> - where on the table the maze should be drawn. Also normally not worth changing.
-        </ul>
+#### Hints
 
-        Thanks to David Bau who provided the basis of the maze generator code"""
+Pressing the *Random* button will draw a new maze.
+
+#### Parameters
+
+* **Columns and Rows per inch** - number of maze lines per inch. Higher numbers (try 2) create a denser,
+  harder maze while smaller numbers (try .5) create a sparser, easier maze.
+* **Random seed** - this is used to generate random mazes.  Different seeds generate different mazes.
+  The *Random* button will create new seeds (and mazes)  automatically.
+* **Width** and **Length** - how big the maze should be. Probably not worth changing.
+* **Starting locations** - where on the table the maze should be drawn. Also normally not worth changing.
+"""
     
     LEFT    = 0
     UP      = 1
@@ -134,7 +137,3 @@ class Maze( Sandable ):
 
     def cancross( self, maze, pos, dir ):
         return maze[pos] & 15 == (10, 5, 10, 5)[dir]
-
-
-
-

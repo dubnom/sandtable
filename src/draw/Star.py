@@ -5,31 +5,30 @@ from Chains import *
 
 class Star( Sandable ):
     """
-        <h3>Draw a star that can change size while rotating</h3>
+### Draw stars that can change size while rotating
 
-        <p>Draw a star that has <i>Points</i> and an inside radius of <i>Inner radius 1</i> and an outside
-        radius of <i>Outer radius 1</i>.  For each <i>Number of stars</i>, rotate the star by
-        <i>Shift angle</i> and gradually change the size of the star to <i>Inner radius 2</i> and
-        <i>Outer radius 2</i></p>
+Draw a star that has **Points** and an inside radius of **Inner radius 1** and an outside
+radius of **Outer radius 1**.  For each **Number of stars**, rotate the star by
+**Shift angle** and gradually change the size of the star to **Inner radius 2** and
+**Outer radius 2**
 
-        <ul>
-         <li><i>Points</i> - how many points on the star.
-         <li><i>Inner and Outer Radii 1</i> - radii (inside and outside points) for star.
-         <li><i>Inner and Outer Radii 2</i> - radii for the ending sizes of the star.
-         <li><i>Starting angle</i> - amount the the entire drawing is rotated.
-         <li><i>Shift angle</i> - number of degrees to shift the drawing between stars.
-         <li><i>Number of stars</i> - number of stars to draw.
-        </ul>
+#### Parameters
 
-        Some interesting drawings:<br>
-        <blockquote>
-         <table>
-          <tr><th>Description</th><th>Points</th><th>Inner/Outer Radii</th><th>Start, Shift, Stars</th></tr>
-          <tr><td>Splashy</td><td>5</td><td>1, 3, 2, 7</td><td>32, 5, 20</td></tr>
-          <tr><td>David</td><td>6</td><td>1, 4, 5, 8</td><td>0, 5, 6</td></tr>
-          <tr><td>Battlement</td><td>12</td><td>6, 8, 1, 2</td><td>0, 0, 9</td></tr>
-         </table>
-        </blockquote>"""
+* **Points** - how many points on the star.
+* **Inner and Outer Radii 1** - radii (inside and outside points) for star.
+* **Inner and Outer Radii 2** - radii for the ending sizes of the star.
+* **Starting angle** - amount the the entire drawing is rotated.
+* **Shift angle** - number of degrees to shift the drawing between stars.
+* **Number of stars** - number of stars to draw.
+
+#### Examples
+
+Description | Points | Inner/Outer Radii | Start | Shift | Stars
+--- | --- | --- | --- | --- | ---
+Splashy | 5 | 1, 3, 2, 7 | 32 | 5 | 20
+David | 6 | 1, 4, 5, 8 | 0 | 5 | 6
+Battlement | 12 | 6, 8, 1, 2 | 0 | 0 | 9
+"""
 
     def __init__( self, width, length ):
         self.editor = [

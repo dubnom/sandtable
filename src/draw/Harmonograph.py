@@ -4,45 +4,47 @@ from dialog import *
 
 class Harmonograph( Sandable ):
     """
-        <h3>Curves that would be created if a pen pendulum was drawing over a drawing surface pendulum.
-        Both pendulums have different X and Y frequencuies and phases.</h3>
+### Gradually decaying interaction between two two-dimensional pendulums.
 
-        Hint: The harmonograph generates curves similar to Lissajous but more complex
-        because there are two Lissajous figures that interact with one another and the
-        curves are gradually decaying similar to a pendulum.
+Harmonographs are curves that would be created in the physical world if a pen pendulum
+was drawing over a drawing surface pendulum. Both pendulums have different X and Y frequencuies and phases.
 
-        <ul>
-         <li><i>X and Y Center</i> - the center of drawing. Usually these should be left alone.
-         <li><i>Decay Rate</i> - the rate at which the pendulum amplitudes decay for ever point drawn.  Lower numbers will make
-             the pendulums decay slower and therefore draw lines that are closer together. Higher numbers would do the oposite.
-         <li><i>Number of Steps</i> - the number of points used to draw the harmonograph.  More points will allow the pendulums
-             to decay closer to the center.
-         <li><i>Frequencies</i> - frequencies of the "pen" (X1, Y1) and the "surface" (X2, Y2).  Smaller numbers yield simpler
-             images.  Non-integers yield drawings that look more like scribbles or freeform.
-         <li><i>Amplitudes</i> - amplitudes indicate the amount of "energy" in each pendulum axis. Higher numbers, specified in
-             inches, means that the pendulums are swinging over a larger area. The amplitudes do not change the frequencies, and
-             amplitudes decay over time.
-         <li><i>Phases</i> - phases indicate the angular offsets between each of the frequencies. When all of the phases are 0,
-             the frequencies are all "in-phase", or directly related to one another.  Changing the phase changes this relationship
-             and tends to skew different portions of the harmonograph curve.  Try playing with different numbers to get interesting
-             variations.
-        </ul>
+#### Hints
 
-        Some pretty numbers to try:<br>
-        <blockquote>
-        <table>
-         <tr><th>Description</td><th>Frequencies</th><th>Amplitudes</td><th>Phases</th></tr>
-         <tr><td>Clover</td><td>2, 10, 6, 12</td><td>9, 9, 4, 4</td><td>0, 0, 0, 0</td></tr>
-         <tr><td>Race Track</td><td>2, 3, 6, 5</td><td>9, 9, 4, 4</td><td>0, 0, 0, 0</td></tr>
-         <tr><td>Butterfly</td><td>1, 3, 2, 4</td><td>9, 9, 4, 4</td><td>0, 0, 0, 0</td></tr>
-         <tr><td>Eight</td><td>5, 3, 2, 5</td><td>9, 9, 4, 4</td><td>0, 0, 0, 0</td></tr>
-         <tr><td>Squished Eight</td><td>5, 3, 2, 5</td><td>9, 9, 4, 4</td><td>30, 0, 0, 0</td></tr>
-         <tr><td>Ellipse</td><td>1, 1, 1, 1</td><td>9, 9, 4, 4</td><td>90, 0, 0, 0</td></tr>
-         <tr><td>Mouth</td><td>1, 1, 2, 1</td><td>9, 9, 4, 4</td><td>90, 0, 0, 0</td></tr>
-         <tr><td>Infinity</td><td>1, 1, 2, 1</td><td>9, 9, 4, 4</td><td>0, 0, 0, 0</td></tr>
-        </table>
-        </blockquote>
-        """
+The harmonograph generates curves similar to Lissajous but more complex
+because there are two Lissajous figures that interact with one another and the
+curves are gradually decaying, similar to a pendulum.
+
+#### Parameters
+
+* **X and Y Center** - the center of drawing. Usually these should be left alone.
+* **Decay Rate** - the rate at which the pendulum amplitudes decay for ever point drawn.  Lower numbers will make
+     the pendulums decay slower and therefore draw lines that are closer together. Higher numbers would do the oposite.
+* **Number of Steps** - the number of points used to draw the harmonograph.  More points will allow the pendulums
+     to decay closer to the center.
+* **Frequencies** - frequencies of the "pen" (X1, Y1) and the "surface" (X2, Y2).  Smaller numbers yield simpler
+     images.  Non-integers yield drawings that look more like scribbles or freeform.
+* **Amplitudes** - amplitudes indicate the amount of "energy" in each pendulum axis. Higher numbers, specified in
+     inches, means that the pendulums are swinging over a larger area. The amplitudes do not change the frequencies, and
+     amplitudes decay over time.
+* **Phases** - phases indicate the angular offsets between each of the frequencies. When all of the phases are 0,
+     the frequencies are all "in-phase", or directly related to one another.  Changing the phase changes this relationship
+     and tends to skew different portions of the harmonograph curve.  Try playing with different numbers to get interesting
+     variations.
+
+#### Examples 
+ 
+Description | Frequencies | Amplitudes | Phases
+--- | --- | --- | ---
+Clover | 2, 10, 6, 12 | 9, 9, 4, 4 | 0, 0, 0, 0
+Race Track | 2, 3, 6, 5 | 9, 9, 4, 4 | 0, 0, 0, 0
+Butterfly | 1, 3, 2, 4 | 9, 9, 4, 4 | 0, 0, 0, 0
+Eight | 5, 3, 2, 5 | 9, 9, 4, 4 | 0, 0, 0, 0
+Squished Eight | 5, 3, 2, 5 | 9, 9, 4, 4 | 30, 0, 0, 0
+Ellipse | 1, 1, 1, 1 | 9, 9, 4, 4 | 90, 0, 0, 0
+Mouth | 1, 1, 2, 1 | 9, 9, 4, 4 | 90, 0, 0, 0
+Infinity | 1, 1, 2, 1 | 9, 9, 4, 4 | 0, 0, 0, 0
+"""
 
     def __init__( self, width, length ):
         self.editor = [

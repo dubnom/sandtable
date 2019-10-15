@@ -5,25 +5,28 @@ from Chains import *
 
 class Spiral( Sandable ):
     """
-        <h3>Simple figures that create a surprisingly large number of beautiful paterns</h3>
+### Simple figures that create a surprisingly large number of beautiful paterns
 
-        Hint: Try playing with <i>Sample rate</i> first.
+#### Hints
 
-        <ul>
-         <li><i>Inner radius</i> and <i>Outer radius</i> - how far from the center the spiral should start and end.
-         <li><i>Lines per Inch</i> - number of lines drawn within an inch of the spiral.
-             Changing this can make the lines closer together (try a number like 10) or farther apart (try 0.5).
-         <li><i>Starting angle</i> - the angle the spiral starts at. The default of 0.0 starts to the right of center.
-         <li><i>Sample rate</i> - how frequently points are calculated around the spiral.  Smaller numbers create rounder
-             spirals while larger numbers create interesting shapes.  Try 120 to get a triangle;
-             121 to get a rotating triangle; 74 makes a rotating pentagon.
-         <li><i>Growth base power</i> - how quickly the outer rings of the spiral get farther from each other.
-             The default of 1.0 creates a linear spiral, try 2.0 or more for a spiral that grows faster
-             and 0.5 for a spiral that is big in the center.
-         <li><i>Fill in spiral</i> - draw lines between points of each subsequent spiral arm. This creates a fully
-             filled-in spiral that looks pretty neat in sand.
-         <li><i>X Center</i> and <i>Y Center</i> - where the center of the spiral will be relative to the table.
-        </ul>"""
+Try playing with **Sample rate** first.
+
+#### Parameters
+
+* **Inner radius** and **Outer radius** - how far from the center the spiral should start and end.
+* **Lines per Inch** - number of lines drawn within an inch of the spiral.
+  Changing this can make the lines closer together (try a number like 10) or farther apart (try 0.5).
+* **Starting angle** - the angle the spiral starts at. The default of 0.0 starts to the right of center.
+* **Sample rate** - how frequently points are calculated around the spiral.  Smaller numbers create rounder
+  spirals while larger numbers create interesting shapes.  Try 120 to get a triangle;
+  121 to get a rotating triangle; 74 makes a rotating pentagon.
+* **Growth base power** - how quickly the outer rings of the spiral get farther from each other.
+  The default of 1.0 creates a linear spiral, try 2.0 or more for a spiral that grows faster
+  and 0.5 for a spiral that is big in the center.
+* **Fill in spiral** - draw lines between points of each subsequent spiral arm.
+  This creates a full filled-in spiral that looks pretty neat in sand.
+* **X Center** and **Y Center** - where the center of the spiral will be relative to the table.
+"""
 
     def __init__( self, width, length ):
         self.editor = [

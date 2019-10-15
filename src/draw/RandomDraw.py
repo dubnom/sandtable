@@ -5,8 +5,8 @@ from random import randint
 
 class RandomDraw( Sandable ):
     """
-        <h3>Draw a random pattern</h3>
-    """
+### Draw a random pattern
+"""
 
     def __init__( self, width, length ):
         self.editor = [

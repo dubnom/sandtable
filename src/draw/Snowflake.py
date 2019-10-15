@@ -6,28 +6,27 @@ from Chains import *
     
 class Snowflake( Sandable ):
     """
-        <h3>Draw something that looks like a snowflake</h3>
+### Draw something that looks like a snowflake
 
-        <ul>
-         <li><i>Depth of fractility</i> - the number of times the snowflake should try to branch.
-         <li><i>Probability of branching</i> - the probability of the snowflake actually branching when it tries.
-         <li><i>Fractility size decrease</i> - how quickly each branch gets smaller than its parent.
-         <li><i>Rounded crystals</i> - Round the edges or keep them straight.
-        <li><i>Random seed</i> - this is used to generate random snowflakes.  Different seeds generate different patterns.
-             The <i>Random</i> button will create new seeds automatically.
-         <li><i>X Center</i> and <i>Y Center</i> - where the center of the spiral will be relative to the table.
-        </ul>
+#### Parameters
 
-        Some parameters that make pretty snowflakes:
-        <blockquote>
-         <table>
-          <tr><th>Description</th><th>Parameters</th></tr>
-          <tr><td>Snowflake 1</td><td>3, 0.4, 0.2, 6890</td></tr>
-          <tr><td>Snowflake 2</td><td>3, 0.4, 0.2, 2077</td></tr>
-          <tr><td>Snowflake 3</td><td>3, 0.4, 0.2, 5133</td></tr>
-          <tr><td>Snowflake 4</td><td>3, 0.5, 0.1, 3737</td></tr>
-         </table>
-        </blockquote>"""
+* **Depth of fractility** - number of times the snowflake should try to branch.
+* **Probability of branching** - the probability of the snowflake actually branching when it tries.
+* **Fractility size decrease** - how quickly each branch gets smaller than its parent.
+* **Rounded crystals** - Round the edges or keep them straight.
+* **Random seed** - this is used to generate random snowflakes.  Different seeds generate different patterns.
+  The *Random* button will create new seeds automatically.
+* **X Center** and **Y Center** - center of the snowflake on the table.
+
+#### Examples
+
+Depth | Probability | Size Decrease | Seed
+--- | --- | --- | ---
+3 | 0.4 | 0.2 | 6890
+3 | 0.4 | 0.2 | 2077
+3 | 0.4 | 0.2 | 5133
+3 | 0.5 | 0.1 | 3737
+"""
 
     def __init__( self, width, length ):
         self.editor = [

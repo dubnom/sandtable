@@ -4,23 +4,26 @@ from dialog import *
 
 class Man( Sandable ):
     """
-        <h3>Draw a stick-figure man</h3>
+### Draw a stick-figure man
 
-        Hint: Everything is referenced to the figure's neck location.
+This drawing method is intended to be used for animated movies but can also be used to draw a single stick-figure.
 
-        <p>This drawing method is intended to be used for animated movies but can also be used to draw a single stick-figure.</p>
+#### Hints
 
-        <ul>
-         <li><i>X and Y Neck locations</i> - where on the table to draw the neck. Every other part of the stick-figure
-             is drawn relative to the neck.
-         <li><i>Angles</i> - Shoulders and thighs come straight out of the body at a right-angle when set to 0 degrees.
-             Positive angles point the extremity down while negative angles point it up.
-             </i>Elbow and Calf Angles</i> are relative to their attached shoulder or thigh.  When these angles
-             are set to 0, the extremity points straight out in the same direction of what they are attached to.  Positive
-             angles point down while negative point up.
-         <li><i>Sizes</i> - size, in inches, of each extremity.  Generally <i>Angles</i> should be changed more frequently
-             than the sizes.
-        </ul>"""
+Everything is referenced to the figure's neck location.
+
+#### Parameters
+
+* **X and Y Neck locations** - where on the table to draw the neck. Every other part of the stick-figure
+  is drawn relative to the neck.
+* **Angles** - Shoulders and thighs come straight out of the body at a right-angle when set to 0 degrees.
+  Positive angles point the extremity down while negative angles point it up.
+  **Elbow and Calf Angles** are relative to their attached shoulder or thigh.  When these angles
+  are set to 0, the extremity points straight out in the same direction of what they are attached to.  Positive
+  angles point down while negative point up.
+* **Sizes** - size, in inches, of each extremity.  Generally **Angles** should be changed more frequently
+  than **Sizes**.
+"""
 
     def __init__( self, width, length ):
         self.editor = [

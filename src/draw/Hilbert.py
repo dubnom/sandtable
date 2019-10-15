@@ -4,19 +4,21 @@ from Chains import *
 
 class Hilbert( Sandable ):
     """
-        <h3>Hilbert Fractal</h3>
+### Hilbert Fractal
 
-        Hint: Read the Wikipedia article on <a href="http://en.wikipedia.org/wiki/Hilbert_curve">Hilbert curves</a>
+#### Hints
 
-        <ul>
-        <ul>
-         <li><i>Depth of fractility</i> - number of times that lines will be replaced with the Hilbert shape.
-         <li><i>Auto-fit to table</i> - if this is set to "Yes" then the curve is automatically stretched
-             in both dimensions (width and length) to make it fit the table. If this is set to "No" then the
-             curve is scaled evenly to be as big as possible without distortion.
-         <li><i>X and Y Origin</i> - lower left corner of the drawing. Usually not worth changing.
-         <li><i>Width</i> and <i>Length</i> - how big the figure should be. Probably not worth changing.
-        </ul>"""
+Read the Wikipedia article on [Hilbert curvers](http://en.wikipedia.org/wiki/Hilbert_curve").
+
+#### Parameters
+
+* **Depth of fractility** - number of times that lines will be replaced with the Hilbert shape.
+* **Auto-fit to table** - if this is set to "Yes" then the curve is automatically stretched
+  in both dimensions (width and length) to make it fit the table. If this is set to "No" then the
+  curve is scaled evenly to be as big as possible without distortion.
+* **X and Y Origin** - lower left corner of the drawing. Usually not worth changing.
+* **Width** and **Length** - how big the figure should be. Probably not worth changing.
+"""
 
     def __init__( self, width, length ):
         self.editor = [

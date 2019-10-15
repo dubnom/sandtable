@@ -3,19 +3,21 @@ from dialog import *
     
 class Grid( Sandable ):
     """
-        <h3>Draw horizontal and/or vertical lines</h3>
+### Draw horizontal and/or vertical lines
 
-        Hint: This method is useful for "erasing" the table.
+#### Hints
 
-        <ul>
-         <li><i>X and Y Origin</i> - lower lefthand corner of the grid. Usually not worth changing.
-         <li><i>Width</i> and <i>Length</i> - how big the grid should be. Probably not worth changing.
-         <li><i>X and Y Spacing</i> - amount of space between veritcal <i>(X)</i> and horizontal <i>(Y)</i> lines.
-             The smaller the numbers the closer the lines will be to one another (try 0.5).  Larger spacing doesn't
-             "erase" as well but is done with larger number (try 3.0).<br>
-             If either number is set to 0 or left blank, that set of lines will be omitted.
-        </ul>
-        """
+This method is useful for "erasing" the table.
+
+#### Parameters
+
+* **X and Y Origin** - lower lefthand corner of the grid. Usually not worth changing.
+* **Width** and **Length** - how big the grid should be. Probably not worth changing.
+* **X and Y Spacing** - amount of space between veritcal **(X)** and horizontal **(Y)** lines.
+   The smaller the numbers the closer the lines will be to one another (try 0.5).  Larger spacing doesn't
+   "erase" as well but is done with larger number (try 3.0).  
+   If either number is set to 0 or left blank, that set of lines will be omitted.
+"""
 
     def __init__( self, width, length ):
         self.editor = [

@@ -7,20 +7,23 @@ from random import random, seed
     
 class Wood( Sandable ):
     """
-        <h3>Randomly generate something that looks like a wood board</h3>
+### Randomly generate something that looks like a wood board
 
-        Hint: Drawing random wood boards requires a lot of compute time. Be patient.
+#### Hints
 
-        <ul>
-         <li><i>Number of Knots</i> - number of knots that the piece of wood should have.
-         <li><i>Maximum Knot Radius</i> - largest radius (in inches) of a random knot.
-         <li><i>Random seed</i> - used to generate random drawings.  Different seeds generate different locations
-             and sizes for the knots. The <i>Random</i> button will create new seeds automatically.
-         <li><i>X Lines per Inch</i> - The straightness/curviness of the wood grain lines.
-         <li><i>Y Lines per Inch</i> - The density of wood grain per inch.
-         <li><i>X and Y Origin</i> - lower left corner of the drawing. Usually not worth changing.
-         <li><i>Width</i> and <i>Length</i> - how big the figure should be. Probably not worth changing.
-        </ul>"""
+Drawing random wood boards requires a lot of compute time. Be patient.
+
+#### Parameters
+
+* **Number of Knots** - number of knots that the piece of wood should have.
+* **Maximum Knot Radius** - largest radius (in inches) of a random knot.
+* **Random seed** - used to generate random drawings.  Different seeds generate different locations
+  and sizes for the knots. The *Random* button will create new seeds automatically.
+* **X Lines per Inch** - The straightness/curviness of the wood grain lines.
+* **Y Lines per Inch** - The density of wood grain per inch.
+* **X and Y Origin** - lower left corner of the drawing. Usually not worth changing.
+* **Width** and **Length** - how big the figure should be. Probably not worth changing.
+"""
 
     SPIRAL_LPI = 4.0
 

@@ -6,41 +6,41 @@ from functools import reduce
 
 class Spirograph( Sandable ):
     """
-        <h3>Draw patterns similar to the Spirograph toy</h3>
+### Draw patterns similar to the Spirograph toy
 
-        Hint: Simpler wheel teeth ratios produce simpler patterns. Prime numbers take a long time!<br>
+A Spirograph is a geared toy where a gear wheel with a pen in it goes around (either inside or outside) another gear.
+This relatively simple arrangement is capable of drawing interesting geometric patterns. The SandTable takes this idea a
+bit further and allows an arbitrary number of gears to be used.
 
-        <p>A Spirograph is a geared toy where a gear wheel with a pen in it goes around (either inside or outside) another gear.
-        This relatively simple arrangement is capable of drawing interesting geometric patterns. The SandTable takes this idea a
-        bit further and allows an arbitrary number of gears to be used.</p>
+#### Hints
 
-        <ul>
-         <li><i>X Center</i> and <i>Y Center</i> - where the center of the drawing will be relative to the table.
-             Usually not worth changing.
-         <li><i>Radius</i> - how big the drawing should be. This shouldn't need changing but it is sometimes fun
-             to pick larger numbers to zoom in.
-         <li><i>Wheel Teeth</i> - a list of gears and their teeth.  The first number is a fixed gear, each subsequent
-             gear orbits the previous gear. If the number of teeth is positive, the gear orbits on the outside, negative
-             is on the inside.  Generally, the more wheels the more complex the image (and the longer it will take to generate).<br>
-             <i>Wheel Teeth</i> is the parameter that is most interesting to change. Gear teeth can only be integers and
-             they are separated in the list by commas.
-         <li><i>Resolution</i> - how fine the curves are. Smaller numbers are more boxy while larger numbers make rounder curves.
-        </ul>
+Simpler wheel teeth ratios produce simpler patterns. Prime numbers can take a long time.
 
-        Some patterns to try:<p>
+#### Parameters
 
-        <blockquote>
-        <table>
-         <tr><th>Description</th><th>Wheel Teeth</th><th>Resolution</th></tr>
-         <tr><td>Clover</td><td>40,-30</td><td>7</td></tr>
-         <tr><td>Inner Clover</td><td>40,30</td><td>9</td></tr>
-         <tr><td>Detailed Triangle</td><td>100,-33</td><td>5</td></tr>
-         <tr><td>Detailed 3-Lobes</td><td>100,33</td><td>5</td></tr>
-         <tr><td>Prickly Cross</td><td>40,-30,-5</td><td>7</td></tr>
-         <tr><td>Four Clouds</td><td>40,-30,5</td><td>7</td></tr>
-         <tr><td>Sand Dollar</td><td>50,12,-4</td><td>7</td></tr>
-        </table>
-        </blockquote>"""
+* **X Center** and **Y Center** - where the center of the drawing will be relative to the table.
+  Usually not worth changing.
+* **Radius** - how big the drawing should be. This shouldn't need changing but it is sometimes fun
+  to pick larger numbers to zoom in.
+* **Wheel Teeth** - a list of gears and their teeth.  The first number is a fixed gear, each subsequent
+  gear orbits the previous gear. If the number of teeth is positive, the gear orbits on the outside, negative
+  is on the inside.  Generally, the more wheels the more complex the image (and the longer it will take to generate).
+  **Wheel Teeth** is the parameter that is most interesting to change. Gear teeth can only be integers and
+  they are separated in the list by commas.
+* **Resolution** - how fine the curves are. Smaller numbers are more boxy while larger numbers make rounder curves.
+
+#### Examples
+
+Description | Wheel Teeth | Resolution
+--- | --- | ---
+Clover | 40,-30 | 7
+Inner Clover | 40,30 | 9
+Detailed Triangle | 100,-33 | 5
+Detailed 3-Lobes | 100,33 | 5
+Prickly Cross | 40,-30,-5 | 7
+Four Clouds | 40,-30,5 | 7
+Sand Dollar | 50,12,-4 | 7
+"""
 
     MAX_POINTS = 25000
 

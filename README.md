@@ -27,10 +27,15 @@ Many people want to add some fun bells and whistles like:
 * Magnetic sand
 * Ferrofluid
 * Ball levitation
-After years of playing with SandTables, I think you'll find most of these modifications to be disappointing. However, if you do come up with something that you feel is compelling, we should definitely add it to the code. I highly recommend adding controllable LED lighting and support already exists for:
+
+After years of playing with SandTables, I think you'll find most of these modifications to be disappointing. However, if you do come up with something that you feel is compelling, we should definitely add it to the code.
+
+#### Lighting
+I highly recommend adding controllable LED lighting and support already exists for:
 * [DotStar](https://learn.adafruit.com/adafruit-dotstar-leds/overvie://learn.adafruit.com/adafruit-dotstar-leds/overview) Best LED strips from [Adafruit](https://www.adafruit.com/category/885).
 * [Fadecandy](https://github.com/scanlime/fadecandy) Versatile NeoPixel LED controller.
 * [OPC](http://openpixelcontrol.org/) Open Pixel Control (also used in FadeCandy).
+* [ColorKinetics](https://www.colorkinetics.com/global) Large industrial lighting manufacturer.
 
 #### Supported CNC Controllers:
 * [TinyG](https://synthetos.myshopify.com/products/tinyg) Full-featured controller.

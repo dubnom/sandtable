@@ -13,7 +13,7 @@ from Sand import *
 from LedsBase import LedsBase
  
 # The specific LED driver is specified in the machine configuration
-exec("import %s as Leds" % LED_DRIVER)
+exec("import machines.%s as Leds" % LED_DRIVER)
 
 class startupPattern( Ledable ):
     def __init__( self, cols, rows ):

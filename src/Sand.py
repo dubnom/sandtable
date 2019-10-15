@@ -27,25 +27,18 @@ ledPatterns = [
         "Balloon","Sky","Emitter",
         ]
 
-# Import machine specific constants. This is done through a hostmap file
-# located in the machines subdirectory.
-import platform 
-HOST_NAME = platform.node()
-from machines.hostmap import hostmap
-exec("from machines.%s import *" % hostmap[HOST_NAME])
-
 # Constants
 SERVER_LOG          = "/var/log/sandtable.log"
 
 ROOT_DIRECTORY      = "/var/www/sandtable"
 DATA_PATH           = "data/"
 PICTURE_PATH        = "pictures/"
-CLIPART_PATH        = 'clipart'
+CLIPART_PATH        = "clipart"
 MOVIE_SCRIPT_PATH   = "scripts/"
 MOVIE_OUTPUT_PATH   = "movies/"
 STORE_PATH          = "store/"
 SOURCE_PATH         = "src/"
-MACH_PATH           = "%smachines/" % SOURCE_PATH
+CONFIG_PATH         = "config/"
 TMP_PATH            = "/tmp/"
 
 CONFIG_FILE         = "%sconfig.pkl" % DATA_PATH
@@ -78,6 +71,15 @@ LED_LOG             = "/var/log/ledaemon.log"
 SCHEDULER_HOST      = 'localhost'
 SCHEDULER_PORT      = 5009
 SCHEDULER_LOG       = "/var/log/scheduler.log"
+
+
+# Import machine specific configuration. This is done through a hostmap file
+# located in the machines subdirectory.
+import platform 
+HOST_NAME = platform.node()
+exec("from %s.hostmap import hostmap" % CONFIG_PATH)
+exec("from machines.%s import *" % % (CONFIG_PATH, hostmap[HOST_NAME]))
+
 
 # Configurable "constants"
 import pickle as pickle

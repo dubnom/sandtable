@@ -3,6 +3,6 @@ import logging
 from Sand import *
 
 logging.basicConfig(format='%(asctime)s %(message)s',level=logging.DEBUG)
-exec("from %s import *" % MACHINE)
+exec("from machines.%s import *" % MACHINE)
 runMachine()
 exit(1)

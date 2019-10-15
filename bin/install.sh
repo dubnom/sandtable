@@ -40,9 +40,9 @@ mkdir store
 chown -R www-data pictures clipart scripts movies store data 
 
 # Update /etc/rc.local to run SandTable services
-sed /etc/rc.local -e '
+sed -i.bak /etc/rc.local -e '
 /exit 0/ i\
-/var/www/sandtable/config/rc.sandtable
+/var/www/sandtable/bin/rc.sandtable
 '
 
 # Install required packages
@@ -84,13 +84,13 @@ pip3 install gphoto2
 
 
 # Optional Samba support
-if [ $st_samba == 'enable' ]
+if [ $st_samba == 'enable' ];
 then
     apt-get install -y smbclient
 fi
 
 # Optional remote connection support
-if [ $st_remote == 'enable' ]
+if [ $st_remote == 'enable' ];
 then
     apt install connectd -y
     connectd_installer
@@ -101,7 +101,7 @@ fi
 #
 
 # FadeCandy
-if [ $st_led == 'FadeCandy' ]
+if [ $st_led == 'FadeCandy' ];
 then
     cd ~
     git clone https://github.com/scanlime/fadecandy
@@ -110,25 +110,25 @@ then
     make
     mv fcserver /usr/local/bin
 
-    sed /etc/rc.local -e '
+    sed -i.bak /etc/rc.local -e '
 /exit 0/ i\
-/var/www/sandtable/config/rc.fadecandy
+/var/www/sandtable/bin/rc.fadecandy
 '
 
 # DotStar
-elif [ $st_led == 'DotStar' ]
+elif [ $st_led == 'DotStar' ];
 then
     # Enable SPI and I2C
     pip3 install RPI.GPIO
     pip3 install adafruit-blinka
 
 # OPC
-elif [ $st_led == 'OPC' ]
+elif [ $st_led == 'OPC' ];
 then
     # FIX: OPC not yet done
     echo ERROR: OPC Install not yet supported
 
 # None
-elif [ $st_led != 'None' ]
+elif [ $st_led != 'None' ];
     echo ERROR: '$st_led' is not a known lighting system
 fi

@@ -71,8 +71,7 @@ Create user "sandtable"
 Add "sandtable" to group "sudoers"
 Login as "sandtable"
 Clone the repository (should be in /home/sandtable/sandtable).
-cd sandtable/config
-./install.sh
+sandtable/bin/install.sh
 
 Configure your controller
 Configure your machine

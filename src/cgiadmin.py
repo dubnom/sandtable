@@ -93,8 +93,8 @@ def adminPage():
 
 def _escapeFile( filename ):
     try:
-        with open( filename, 'rt' ) as fp:
-            msg = escape( fp.read().decode('utf-8','replace').encode('utf-8'))
+        with open( filename, 'r' ) as fp:
+            msg = escape(fp.read())
     except:
         msg = '' 
     return '<pre class="text">' + msg + '</pre>'

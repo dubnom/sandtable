@@ -3,19 +3,15 @@ import serial
 import socket
 import socketserver
 from tcpserver import *
-from threading import Thread, Event 
+from threading import Thread
+import json
 import time
 import queue
 import logging
-import re
-import json
 from Sand import *
 
-#
-#   Driver for a Smoothieboard running software from Smoothieware
-#
 pos = [-1.0,-1.0]
-ready = True
+state = [0,0]
         
 class MyHandler(socketserver.BaseRequestHandler):
     def setup(self):
@@ -29,38 +25,40 @@ class MyHandler(socketserver.BaseRequestHandler):
             if command != 'status':
                 logging.info( "Command: %s" % command )
             if command == '*':
-                self.writer.send( " ".join(data[1:]) + '\r') 
+                self.writer.send( " ".join(data[1:]) + '\n') 
             elif command == 'run':
                 self.run(data[1],data[2])
             elif command == 'halt':
                 self.halt()
             elif command == 'restart':
                 self.restart()
-        self.request.send(json.dumps({'pos':pos,'state':ready}))
+            elif command == 'home':
+                self.writer.send( '{"gc":"G28.2X0Y0"}\n' )
+        self.request.send(json.dumps({'pos':pos,'state':state[0]}))
 
     def run(self,fileName,wait):
         fileName = fileName
         logging.info( "Executing: run %s" % fileName )
         self.writer.flush()
         with open(fileName, 'r') as file:
-            for num,line in enumerate(file):
-                self.writer.send(line.upper())
-                if num % 30 == 0:
-                    self.writer.send('get status\r')
+            for line in file:
+                self.writer.send( '{"gc":"%s"}\n' % line.strip().replace(' ',''))
                 
         if wait == 'True':
              logging.info( "Waiting for drawing to finish" )
              time.sleep(1.0)
              self.writer.wait()
-             logging.debug( "Queue depth is fine, waiting for state %s" % ready )
-             while not ready:
+             logging.debug( "Join has finished, waiting for queue depth %d" % state[1] )
+             while state[1] < 28:
+                 time.sleep(0.5)
+             logging.debug( "Queue depth is fine, waiting for state %s" % state[0] )
+             while not state[0]:
                  time.sleep(0.5)
              logging.debug( "Status has changed" )
         logging.info( "Run has completed" )
 
     def halt(self):
         logging.info( "Executing: halt" )
-        self.writer.send( "abort\r" )
         self.writer.flush()
 
     def restart(self):
@@ -73,29 +71,39 @@ class ReadThread(Thread):
         super(ReadThread, self).__init__()
 
     def run(self):
-        reStatus = re.compile( '^<(Idle|Run)\\|MPos:([\d.-]+),([\d.-]+),([\d.-]+)\\|(.*)>$' )
-
         logging.info( "Reader thread active" )
         self.running = True
         while self.running:
-            line = self.ser.readline().strip()
+            line = self.ser.readline().decode(encoding='utf-8').strip()
             if len(line):
                 # Parse the lines for status here
                 try:
+                    data = json.loads(line)
                     # Parse status reports
-                    match = reStatus.match(line)
-                    if match:
-                        status = match.groups()[0]
-                        pos[0], pos[1] = float(match.groups()[1]), float(match.groups()[2])
-                        ready = status == 'Idle'
+                    if 'sr' in data:
+                        status = data['sr']
+                        if 'posx' in status:
+                            pos[0] = status['posx']
+                        if 'posy' in status:
+                            pos[1] = status['posy']
+                        if 'stat' in status:
+                            logging.debug( "State: %d" % status['stat'] )
+                            state[0] = status['stat'] in (1,3,4)
                     
+                    # Parse queue reports
+                    elif 'qr' in data:
+                        queueDepth = data['qr']
+                        state[1] = queueDepth
+                        logging.debug( "QueueDepth: %d" % queueDepth )
+
                     # Parse responses
-                    elif line == 'ok':
-                        pass
+                    elif 'r' in data:
+                        response = data['r']
+                        logging.debug( "Response: %s" % response )
 
                     # Everything else
                     else:
-                        logging.warning( "Received: %s" % line )
+                        logging.debug( "Received:",data )
                 except ValueError:
                     logging.warning( "Couldn't parse: %s" % line )
         logging.info( "Reader thread exiting" )
@@ -104,24 +112,11 @@ class ReadThread(Thread):
         self.running = False
 
 
-class statusTimer(Thread):
-    def __init__(self, event, writer):
-        Thread.__init__(self)
-        self.stopped = event
-        self.writer = writer
-
-    def run(self):
-        while not self.stopped.wait(2.):
-            self.writer.send('get status\r')
-
 class Writer():
     def __init__(self,ser):
         self.queue = queue.Queue()
         self.writeThread = WriteThread(ser,self.queue)
         self.writeThread.start()
-        self.stopFlag = Event()
-        thread = statusTimer(self.stopFlag,self)
-        thread.start()
 
     def send(self,data):
         self.queue.put(data)
@@ -137,10 +132,8 @@ class Writer():
         self.queue.join()
 
     def stop(self):
-        # Stop the timer
-        self.stopFlag.set()
         self.writeThread.stop()
-        self.send('abort')
+        self.send('#Die')
 
 class WriteThread(Thread):
     def __init__(self,ser,queue):
@@ -153,7 +146,10 @@ class WriteThread(Thread):
         self.running = True
         while self.running:
             data = self.queue.get()
-            self.ser.write(data)
+            while state[1] > 0 and state[1] < 6:
+                time.sleep(.1)
+            state[1] -= 1
+            self.ser.write(bytes(data,encoding='utf-8'))
             self.queue.task_done()
         logging.info( "Writer thread exiting" )
 
@@ -161,10 +157,10 @@ class WriteThread(Thread):
         self.running = False
  
 
-def runMachine():
-    logging.info( 'Starting the sandtable smoothie daemon' )
+def runMachine(fullInitialization):
+    logging.info( 'Starting the sandtable tinyg daemon' )
 
-    # Open the serial port to connect to the Smoothiboard
+    # Open the serial port to connect to the TinyG
     try:
         ser = serial.Serial(MACHINE_PORT, baudrate=MACHINE_BAUD, rtscts=True, timeout=0.5)
     except Exception as e:
@@ -178,36 +174,27 @@ def runMachine():
     # Create the writer
     writer = Writer(ser)
 
-    # Check settings update file
-    fullInitialization = True
-    with open(MACH_FILE,'r') as f:
-        newVersion = f.read()
-
-    try:
-        with open(VER_FILE,'r') as f:
-            oldVersion = f.read()
-        if oldVersion == newVersion:
-            fullInitialization = False
-    except Exception as e:
-        logging.error(e)
-
-    if fullInitialization:
-        with open(VER_FILE,'w') as f:
-            f.write(newVersion)
-
     # Initialize the board
     initialize = [
+        {"rv":""},                      # Software version
+        {"rb":""},                      # Software build
+        {"ex":2},                       # Use CTS/RTS for flow control
+        {"jv":4},                       # Line numbers
+        {"qv":2},                       # Verbose queue reports
+        {"gun":0},                      # Inches 
+        {"sv":1},                       # Status reports (filtered)
     ]
 
     # Try not sending the initialization string
     if fullInitialization:
-        initialize += machInitialize
+        initialize = initialize + machInitialize + ["reset"] + initialize
 
     # Add the homing commands
-    initialize += ["G28.2X0Y0"]
+    initialize += [{"gc":"G28.2X0Y0"}]
 
     for i in initialize:
-        writer.send( i + "\r" ) 
+        writer.send( "\x18\n" if i=='reset' else json.dumps(i) + "\n" ) 
+        time.sleep(6. if i=='reset' else .5)
 
     # Start the socket server and listen for requests
     logging.info( "Trying to listen on %s:%d" % (MACH_HOST,MACH_PORT))

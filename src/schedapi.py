@@ -18,8 +18,8 @@ class schedapi():
     def command( self, command, data=None ):
         sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
         sock.connect( (self.hostName, self.portNumber) )
-        sock.sendall( json.dumps( (command,data) ))
-        self._status = json.loads( sock.recv(self.BUFFER_SIZE))
+        sock.sendall( bytes(json.dumps( (command,data) ), encoding='utf-8'))
+        self._status = json.loads( sock.recv(self.BUFFER_SIZE).decode('utf-8'))
         sock.close()
         del sock
 

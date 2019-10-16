@@ -1,4 +1,0 @@
-#!/bin/bash
-
-# Optional FadeCandy service
-/usr/local/bin/fcserver /var/www/sandtable/config/fadecandy/version3.json >/var/log/fcserver.log 2>&1 &

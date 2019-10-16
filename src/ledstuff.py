@@ -1,11 +1,15 @@
 from Sand import *
 import socket
 import json
+import pickle
 
 def ledPatternFactory( pattern ):
-    exec("import lights.%s" % pattern)
-    exec("led = lights.%s.%s( %d, %d )" % (pattern, pattern, LED_COLUMNS, LED_ROWS ))
-    return led
+    globs = globals()
+    locs = {}
+
+    exec("import lights.%s" % pattern, globs, locs)
+    exec("led = lights.%s.%s( %d, %d )" % (pattern, pattern, LED_COLUMNS, LED_ROWS ), globs, locs)
+    return locs['led']
 
 def setLedPattern( pattern, params ):
     with ledApi() as api:
@@ -29,7 +33,7 @@ class ledApi:
         return False
 
     def command( self, cmd, pattern=None, params=None ):
-        self.sock.sendall( bytes(json.dumps((cmd, pattern, params)), encoding='utf-8' ))
+        self.sock.sendall( pickle.dumps((cmd, pattern, params)))
         self._status = json.loads( self.sock.recv( 512 ).decode('utf-8'))
         return self._status
 

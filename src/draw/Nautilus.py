@@ -1,4 +1,4 @@
-from math import pow, radians, sin, cos, exp, pi 
+from math import radians, sin, cos, exp, pi, sqrt 
 from Sand import *
 from dialog import *
 from Chains import *
@@ -6,6 +6,8 @@ from Chains import *
 class Nautilus( Sandable ):
     """
 ### Nautilus spiral
+
+The Nautilus or [Logarithmic spiral](https://en.wikipedia.org/wiki/Logarithmic_spiral) can draw many shapes commonly found in nature.
 
 #### Parameters
 * **Inner radius** - Radius of the inside of the spiral.
@@ -31,6 +33,7 @@ class Nautilus( Sandable ):
             DialogFloat( "xCenter",         "X Center",             units = "inches", default = width / 2.0 ),
             DialogFloat( "yCenter",         "Y Center",             units = "inches", default = length / 2.0 ),
         ]
+        self.maxRadius = 2. * sqrt(width**2 + length**2)
 
     def generate( self, params ):
         xCenter = params.xCenter
@@ -44,6 +47,8 @@ class Nautilus( Sandable ):
 
         def pnt(angle, offset):
             radius = exp((angle+offset)*growth) + params.innerRadius
+            if radius > self.maxRadius:
+                raise OverflowError()
             x = xCenter + cos(angle) * radius
             y = yCenter + sin(angle) * radius
             return (x,y) 
@@ -54,15 +59,17 @@ class Nautilus( Sandable ):
             angle   = radians( point * angleRate )
             angleRate *= angleGrowth
 
-            pchain.append( pnt( angle, 0 ))
-            pchain.append( pnt( angle-curveAngle, -.5*pi ))
-            pchain.append( pnt( angle-curveAngle, -1.5*pi ))
-            pchain.append( pnt( angle-2.*pi, 0. ))
-            nchain = Chains.Spline( pchain )
-
-            chain += nchain
-            nchain.reverse()
-            chain += nchain
+            try:
+                pchain.append( pnt( angle, 0 ))
+                pchain.append( pnt( angle-curveAngle, -.5*pi ))
+                pchain.append( pnt( angle-curveAngle, -1.5*pi ))
+                pchain.append( pnt( angle-2.*pi, 0. ))
+                nchain = Chains.Spline( pchain )
+                chain += nchain
+                nchain.reverse()
+                chain += nchain
+            except:
+                break
 
         if params.fitToTable:
             chain = Chains.circleToTable( chain, TABLE_WIDTH, TABLE_LENGTH )

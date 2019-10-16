@@ -1,6 +1,5 @@
 from Sand import *
 import socket
-import pickle
 import json
 
 def ledPatternFactory( pattern ):
@@ -30,7 +29,7 @@ class ledApi:
         return False
 
     def command( self, cmd, pattern=None, params=None ):
-        self.sock.sendall( bytes(pickle.dumps( (cmd, pattern, params) ),encoding='utf-8'))
+        self.sock.sendall( bytes(json.dumps((cmd, pattern, params)), encoding='utf-8' ))
         self._status = json.loads( self.sock.recv( 512 ).decode('utf-8'))
         return self._status
 

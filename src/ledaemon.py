@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 import os
-import pickle
 import time
 import logging
 import json
@@ -69,8 +68,8 @@ class MyHandler(socketserver.BaseRequestHandler):
         self.ledThread = self.server.ledThread
 
     def handle(self):
-        req = self.request.recv(10*1024)
-        cmd, pattern, params = pickle.loads( req )
+        req = self.request.recv(10*1024).decode('utf-8')
+        cmd, pattern, params = json.loads(req )
         if cmd == 'pattern':
             self.ledThread.setPattern( pattern, params )
             logging.info( "Request: %s %s %s" % (cmd, pattern, params ))

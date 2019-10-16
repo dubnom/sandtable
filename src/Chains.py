@@ -372,7 +372,7 @@ class Chains():
     @staticmethod
     def makeGCode( chains, box, feed, fileName, machUnits, tableUnits ):
         """Convert chains into a bounded G-Code file"""
-        f = file( fileName, 'w' )
+        f = open( fileName, 'w' )
         unitConv = 1.
         if machUnits == 'inches':
             print('G20', file=f)
@@ -426,7 +426,7 @@ class Chains():
         xOff, yOff = extents[0][0], extents[0][1]
         xMax, yMax = extents[1][0], extents[1][1]
         width, length = xMax - xOff, yMax - yOff
-        f = file( fileName, 'w' )
+        f = open( fileName, 'w' )
         print('<svg width="%g" height="%g" version="1.1" xmlns="http://www.w3.org/2000/svg">' % (width, length), file=f)
         for chain in chains:
             points = " ".join([ '%.4g,%.4g' % (point[0]-xOff, length-(point[1]-yOff)) for point in chain ])

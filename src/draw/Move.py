@@ -1,6 +1,7 @@
 from Sand import *
 from dialog import *
-import tinyg as emc
+import mach
+
 
 class Move( Sandable ):
     """
@@ -17,7 +18,7 @@ To avoid drawing over things, move the ball away!
 
     def __init__( self, width, length ):
         try:
-            with emc.emc() as e:
+            with mach.mach() as e:
                 x,y = e.getPosition()
         except:
             x,y = 0.,0.

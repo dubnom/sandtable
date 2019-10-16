@@ -21,7 +21,7 @@ class MyHandler(socketserver.BaseRequestHandler):
         self.writer = self.server.writer
 
     def handle(self):
-        data = self.request.recv(1024).strip().split()
+        data = self.request.recv(1024).decode('utf-8').strip().split()
         logging.debug( "Data: %s" % data )
         if len(data):
             command = data[0]
@@ -35,7 +35,7 @@ class MyHandler(socketserver.BaseRequestHandler):
                 self.halt()
             elif command == 'restart':
                 self.restart()
-        self.request.send(json.dumps({'pos':pos,'state':ready}))
+        self.request.send(bytes(json.dumps({'pos':pos,'state':ready}),encoding='utf-8'))
 
     def run(self,fileName,wait):
         fileName = fileName
@@ -77,7 +77,7 @@ class ReadThread(Thread):
     def run(self):
         self.running = True
         while self.running:
-            line = self.ser.readline().strip()
+            line = self.ser.readline().decode(encoding='utf-8').strip()
             if len(line):
                 print("<",line)
                 if line.startswith('ok'):
@@ -130,7 +130,7 @@ class WriteThread(Thread):
         while self.running:
             # FIX: Add conditional for controller readiness
             data = self.queue.get()
-            self.ser.write(data)
+            self.ser.write(bytes(data,encoding='UTF-8'))
             self.queue.task_done()
         logging.info( "Writer thread exiting" )
 
@@ -138,7 +138,7 @@ class WriteThread(Thread):
         self.running = False
  
 
-def runMachine():
+def runMachine(fullInitialization):
     logging.info( 'Starting the sandtable Marlin daemon' )
 
     # Open the serial port to connect to Marlin
@@ -155,28 +155,8 @@ def runMachine():
     # Create the writer
     writer = Writer(ser)
 
-    # Check settings update file
-    fullInitialization = True
-    with open(MACH_FILE,'r') as f:
-        newVersion = f.read()
-
-    try:
-        with open(VER_FILE,'r') as f:
-            oldVersion = f.read()
-        if oldVersion == newVersion:
-            fullInitialization = False
-    except Exception as e:
-        logging.error(e)
-
-    if fullInitialization:
-        with open(VER_FILE,'w') as f:
-            f.write(newVersion)
-
     # Initialize the board
-    initialize = [
-    ]
-
-    # Try not sending the initialization string
+    initialize = []
     if fullInitialization:
         initialize += machInitialize
 

@@ -32,7 +32,7 @@ class History():
     @staticmethod
     def save( params, sandable, chains, name ):
         params.sandable = sandable
-        pickle.dump( params, file( "%s%s.sand" % (STORE_PATH, name), 'wb' ))
+        pickle.dump( params, open( "%s%s.sand" % (STORE_PATH, name), 'wb' ))
         boundingBox = [ (0.0, 0.0), (TABLE_WIDTH, TABLE_LENGTH) ]
         Chains.saveImage( chains, boundingBox, "%s%s.png" % (STORE_PATH, name), int(IMAGE_WIDTH / 2), int(IMAGE_HEIGHT / 2))
     
@@ -43,7 +43,7 @@ class History():
     
     @staticmethod
     def load( name ):
-        params = pickle.load( file( "%s%s.sand" % (STORE_PATH, name), 'rb' ))
+        params = pickle.load( open( "%s%s.sand" % (STORE_PATH, name), 'rb' ))
         return params
 
     @staticmethod

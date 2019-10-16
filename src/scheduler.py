@@ -15,40 +15,18 @@ from ledstuff import *
 from dialog import *
 from Chains import *
 from history import *
+import board
+import digitalio
 import mach
 
 # Parameters
 POLLING_DELAY   = 0.100     # 1/10 second
 DRAW_TIME_MIN   = 18        # 18 Seconds
 DRAW_TIME_MAX   = 25*60     # 25 minutes
-PROX_SWITCH_SECS= 8.0       # Number of seconds to wait for taps
+PROX_SWITCH_SECS= 8         # Number of seconds to wait for taps
 
-# Platform dependent pins to use for demo mode switch
-if PLATFORM == 'Beaglebone':
-    import Adafruit_BBIO.GPIO as GPIO
-    PROX_PIN = "P9_11"
-elif PLATFORM == 'RaspberryPi':
-    import RPi.GPIO as GPIO
-    GPIO.setmode(GPIO.BCM)
-    PROX_PIN = 23
-else:
-    #raise Exception( 'Unknown platform: %s' % PLATFORM )
-    PROX_PIN = 0
-    class GPIO():
-        IN          = 0
-        FALLING     = 0
-        
-        @staticmethod
-        def setup( pin, mode ):
-            pass
-        
-        @staticmethod
-        def add_event_detect( pin, direction, bouncetime ):
-            pass
-
-        @staticmethod
-        def event_detected( pin ):
-            return False
+PROX_PIN = board.D18
+PROX_PIN.direction = digitalio.Direction.INPUT
 
 # Advanced job scheduler setup
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -200,15 +178,13 @@ class ProxSwitchThread(Thread):
         self.window = window 
         self.callback = callback
         self.q = deque( maxlen=window )
-        GPIO.setup( self.pin, GPIO.IN )
-        GPIO.add_event_detect( self.pin, GPIO.FALLING, bouncetime=50 )  # FIX: bouncetime should be a parameter
 
     def run(self):
         logging.info( "ProxSwitchThread active" )
         self.running = True
         while self.running:
             t = time.time()
-            if GPIO.event_detected( self.pin ):
+            if self.pin.value:
                 self.q.append( t )
             if len(self.q) and t - self.q[0] >= self.window:
                 self.callback(len(self.q))
@@ -226,7 +202,7 @@ class MyHandler(socketserver.BaseRequestHandler):
         self.demo = self.server.demo
 
     def handle(self):
-        command, data = json.loads( self.request.recv(1024*10))
+        command, data = json.loads( self.request.recv(1024*10).decode('utf-8'))
         logging.debug( "Command: %s, %s" % (command, data))
         if command == 'status':
             pass
@@ -246,7 +222,7 @@ class MyHandler(socketserver.BaseRequestHandler):
             pass    # FIX: Finish code
         else:
             logging.warning( "Unknown command: %s" % command )
-        self.request.send(json.dumps({'state':self.demo._state}))
+        self.request.send( bytes(json.dumps({'state':self.demo._state}), encoding='utf-8'))
 
     def _restart(self):
         self.server.stop()

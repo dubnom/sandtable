@@ -33,7 +33,7 @@ setInterval(updater, 2500);
 </form>
 
 <form method="post" action="admin">
-%for k,v in iter(sorted(actions.iteritems())):
+%for k,v in iter(sorted(actions.items())):
  %if v[1]:
   <button class="doit" name="action" type="submit" value="{{k}}">{{v[1]}}</button><br>
  %end

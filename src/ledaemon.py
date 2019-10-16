@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 import os
-import pickle
 import time
 import logging
 import json
+import pickle
 import socket
 import socketserver
 from tcpserver import *
@@ -13,7 +13,7 @@ from Sand import *
 from LedsBase import LedsBase
  
 # The specific LED driver is specified in the machine configuration
-exec("import %s as Leds" % LED_DRIVER)
+exec("import machines.%s as Leds" % LED_DRIVER)
 
 class startupPattern( Ledable ):
     def __init__( self, cols, rows ):
@@ -70,15 +70,15 @@ class MyHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
         req = self.request.recv(10*1024)
-        cmd, pattern, params = pickle.loads( req )
+        cmd, pattern, params = pickle.loads(req )
         if cmd == 'pattern':
-            self.ledThread.setPattern( pattern, params )
             logging.info( "Request: %s %s %s" % (cmd, pattern, params ))
+            self.ledThread.setPattern( pattern, params )
         elif cmd == 'status':
             pass
         elif cmd == 'restart':
             self.server.stop()
-        self.request.send(json.dumps(self.ledThread.status()))
+        self.request.send(bytes(json.dumps(self.ledThread.status()),encoding='utf-8'))
 
 if __name__=="__main__":
     logging.basicConfig(format='%(asctime)s %(message)s',level=logging.INFO)

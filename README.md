@@ -53,13 +53,14 @@ I highly recommend adding controllable LED lighting and support already exists f
 * [pypotrace](https://pypi.org/project/pypotrace/) - Python bindings to potrace
 * [potrace](http://potrace.sourceforge.net/) - Bitmap image to vector conversion
 * [scipy](https://www.scipy.org/) - Python science/math package
-* [PIL]
+* [pillow](https://pillow.readthedocs.io/en/stable/) - Python image package
 * [bottle](http://bottlepy.org/docs/dev/) - Lightweight Python web framework
 * [shapely](https://pypi.org/project/Shapely/) - Python interface to GEOS to operate on planar geometry
 * [apscheduler](https://apscheduler.readthedocs.io/en/latest/) - Advanced Python scheduler
 * [sqlalchemy](https://www.sqlalchemy.org/) - Python SQL toolkit and object relational manager
 * [fontTools](https://github.com/fonttools/fonttools) - Python library for manipulating fonts
 * [gphoto2](https://github.com/jim-easterbrook/python-gphoto2) - Python control of cameras
+* [blinka](https://pypi.org/project/Adafruit-Blinka/) - Adafruit Circuitpython device control
 
 ## Deployment:
 
@@ -67,38 +68,33 @@ The system is happy running on Linux (prefered), Macs, and PCs.  Raspberry Pi ru
 
 ### Raspberry Pi Installation (tested on 2,3,3b+,and 4):
 Set the hostname of your machine
-Create user "sandtable"
-Add "sandtable" to group "sudoers"
-Login as "sandtable"
-Clone the repository (should be in /home/sandtable/sandtable).
-cd sandtable/config
-./install.sh
+cd sandtable
+bin/install.sh
 
 Configure your controller
 Configure your machine
 Give access to the USB port
 
-Modify local.rc
-
 Reboot
 
 Logs are written to:
-* Server logs - /var/logs/server.log
+* Server logs - /var/logs/sandtable.log
 * CNC Machine logs - /var/logs/machd.log
 * LED Lighting logs - /var/logs/ledaemon.log
 * Scheduler logs - /var/logs/scheduler.log
 
 ### To Do:
-* Improve installation script and move to Python3
 * Add license file
-* Move machine configurations into config
-* Move machine definitions into machines
 * Add test code
 * Improve scheduler interface
 * Improve lighting scenes
 * Make the web interface more interactive
 * Move from PIL to Pillow
 * Add upload function to Filer tab
+* Move common items from machines into machd
+* Move common items from machines Leds into ledaemon
+* Rename code for more consistency (ledstuff, ledaemon, etc.)
+* Condense Polylines and Chains
 
 ## Authors:
 

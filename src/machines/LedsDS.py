@@ -1,4 +1,5 @@
-from dotstar import Adafruit_DotStar
+import board
+import adafruit_dotstar as dotstar
 from LedsBase import LedsBase
 
 class Leds(LedsBase):
@@ -8,15 +9,13 @@ class Leds(LedsBase):
         LedsBase.__init__(self,rows,cols)
 
     def connect( self ):
-        self.strip = Adafruit_DotStar(self.count)
-        self.strip.begin()
+        self.strip = dotstar.DotStar(board.SCK, board.MOSI, self.count, auto_write=False)
 
     def refresh( self ):
         for led,color in enumerate(self.leds):
             if self.mapping:
                 color = self.leds[self.mapping[led]]
-            # Note: GRB is used!
-            self.strip.setPixelColor(led, int(color[0])<<8 | int(color[1])<<16 | int(color[2]))
+            self.strip[led] = color
         self.strip.show()
 
     def disconnect( self ):

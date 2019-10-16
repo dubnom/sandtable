@@ -27,25 +27,18 @@ ledPatterns = [
         "Balloon","Sky","Emitter",
         ]
 
-# Import machine specific constants. This is done through a hostmap file
-# located in the machines subdirectory.
-import platform 
-HOST_NAME = platform.node()
-from machines.hostmap import hostmap
-exec("from machines.%s import *" % hostmap[HOST_NAME])
-
 # Constants
 SERVER_LOG          = "/var/log/sandtable.log"
 
 ROOT_DIRECTORY      = "/var/www/sandtable"
 DATA_PATH           = "data/"
 PICTURE_PATH        = "pictures/"
-CLIPART_PATH        = 'clipart'
+CLIPART_PATH        = "clipart"
 MOVIE_SCRIPT_PATH   = "scripts/"
 MOVIE_OUTPUT_PATH   = "movies/"
 STORE_PATH          = "store/"
 SOURCE_PATH         = "src/"
-MACH_PATH           = "%smachines/" % SOURCE_PATH
+CONFIG_PATH         = "config"
 TMP_PATH            = "/tmp/"
 
 CONFIG_FILE         = "%sconfig.pkl" % DATA_PATH
@@ -55,12 +48,10 @@ MACH_PORT           = 5007
 MACH_LOG            = "/var/log/machd.log"
 GCODE_FILE          = "%sgcode.ngc" % DATA_PATH
 
-VER_FILE            = "%smach.py" % DATA_PATH
-MACH_FILE           = "%s%s.py" % (MACH_PATH, hostmap[HOST_NAME])
+VER_FILE            = "%smachine.py" % DATA_PATH
 
 IMAGE_FILE          = "%spath.png" % DATA_PATH
 IMAGE_WIDTH         = 400
-IMAGE_HEIGHT        = int(IMAGE_WIDTH * (TABLE_LENGTH / TABLE_WIDTH))
 
 CACHE_FILE          = "%ssandtable.pkl" % TMP_PATH
 
@@ -79,6 +70,16 @@ SCHEDULER_HOST      = 'localhost'
 SCHEDULER_PORT      = 5009
 SCHEDULER_LOG       = "/var/log/scheduler.log"
 
+# Import machine specific configuration. This is done through a hostmap file
+# located in the machines subdirectory.
+import platform 
+HOST_NAME = platform.node()
+exec("from %s.hostmap import hostmap" % CONFIG_PATH)
+exec("from %s.%s import *" % (CONFIG_PATH, hostmap[HOST_NAME]))
+
+IMAGE_HEIGHT        = int(IMAGE_WIDTH * (TABLE_LENGTH / TABLE_WIDTH))
+MACH_FILE           = '%smachines/%s.py' % (SOURCE_PATH, MACHINE)
+
 # Configurable "constants"
 import pickle as pickle
 
@@ -92,13 +93,13 @@ class Config():
     
 def LoadConfig():
     try:
-        cfg = pickle.load( file( CONFIG_FILE, 'rb' ))
+        cfg = pickle.load( open( CONFIG_FILE, 'rb' ))
     except:
         cfg = Config()
     return cfg
 
 def SaveConfig(cfg):
-    pickle.dump( cfg, file( CONFIG_FILE, 'wb' ))
+    pickle.dump( cfg, open( CONFIG_FILE, 'wb' ))
 
 LoadConfig()
 

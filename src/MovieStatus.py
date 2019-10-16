@@ -25,7 +25,7 @@ class MovieStatus:
         print(repr(self))
 
     def save( self ):
-        fp = file( MOVIE_STATUS_FILE, 'wb' )
+        fp = open( MOVIE_STATUS_FILE, 'wb' )
         pickle.dump( self, fp )
         fp.close()
         del fp

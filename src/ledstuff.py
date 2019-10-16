@@ -30,8 +30,8 @@ class ledApi:
         return False
 
     def command( self, cmd, pattern=None, params=None ):
-        self.sock.sendall( pickle.dumps( (cmd, pattern, params) ))
-        self._status = json.loads( self.sock.recv( 512 ))
+        self.sock.sendall( bytes(pickle.dumps( (cmd, pattern, params) ),encoding='utf-8'))
+        self._status = json.loads( self.sock.recv( 512 ).decode('utf-8'))
         return self._status
 
     def setPattern( self, pattern, params ):

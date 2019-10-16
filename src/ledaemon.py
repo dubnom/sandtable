@@ -69,7 +69,7 @@ class MyHandler(socketserver.BaseRequestHandler):
         self.ledThread = self.server.ledThread
 
     def handle(self):
-        req = self.request.recv(10*1024)
+        req = self.request.recv(10*1024).decode('utf-8')
         cmd, pattern, params = pickle.loads( req )
         if cmd == 'pattern':
             self.ledThread.setPattern( pattern, params )
@@ -78,7 +78,7 @@ class MyHandler(socketserver.BaseRequestHandler):
             pass
         elif cmd == 'restart':
             self.server.stop()
-        self.request.send(json.dumps(self.ledThread.status()))
+        self.request.send(bytes(json.dumps(self.ledThread.status()),encoding='utf-8'))
 
 if __name__=="__main__":
     logging.basicConfig(format='%(asctime)s %(message)s',level=logging.INFO)

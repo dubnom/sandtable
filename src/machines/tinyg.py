@@ -74,7 +74,7 @@ class ReadThread(Thread):
         logging.info( "Reader thread active" )
         self.running = True
         while self.running:
-            line = self.ser.readline().strip()
+            line = self.ser.readline().decode(encoding='utf-8').strip()
             if len(line):
                 # Parse the lines for status here
                 try:
@@ -149,7 +149,7 @@ class WriteThread(Thread):
             while state[1] > 0 and state[1] < 6:
                 time.sleep(.1)
             state[1] -= 1
-            self.ser.write(data)
+            self.ser.write(bytes(data,encoding='utf-8'))
             self.queue.task_done()
         logging.info( "Writer thread exiting" )
 
@@ -157,7 +157,7 @@ class WriteThread(Thread):
         self.running = False
  
 
-def runMachine():
+def runMachine(fullInitialization):
     logging.info( 'Starting the sandtable tinyg daemon' )
 
     # Open the serial port to connect to the TinyG
@@ -174,23 +174,6 @@ def runMachine():
     # Create the writer
     writer = Writer(ser)
 
-    # Check settings update file
-    fullInitialization = True
-    with open(MACH_FILE,'r') as f:
-        newVersion = f.read()
-
-    try:
-        with open(VER_FILE,'r') as f:
-            oldVersion = f.read()
-        if oldVersion == newVersion:
-            fullInitialization = False
-    except Exception as e:
-        logging.error(e)
-
-    if fullInitialization:
-        with open(VER_FILE,'w') as f:
-            f.write(newVersion)
-
     # Initialize the board
     initialize = [
         {"rv":""},                      # Software version
@@ -202,7 +185,7 @@ def runMachine():
         {"sv":1},                       # Status reports (filtered)
     ]
 
-    # FIX: Try not sending the initialization string
+    # Try not sending the initialization string
     if fullInitialization:
         initialize = initialize + machInitialize + ["reset"] + initialize
 

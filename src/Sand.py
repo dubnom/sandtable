@@ -78,7 +78,7 @@ exec("from %s.hostmap import hostmap" % CONFIG_PATH)
 exec("from %s.%s import *" % (CONFIG_PATH, hostmap[HOST_NAME]))
 
 IMAGE_HEIGHT        = int(IMAGE_WIDTH * (TABLE_LENGTH / TABLE_WIDTH))
-
+MACH_FILE           = '%smachines/%s.py' % (SOURCE_PATH, MACHINE)
 
 # Configurable "constants"
 import pickle as pickle
@@ -93,13 +93,13 @@ class Config():
     
 def LoadConfig():
     try:
-        cfg = pickle.load( file( CONFIG_FILE, 'rb' ))
+        cfg = pickle.load( open( CONFIG_FILE, 'rb' ))
     except:
         cfg = Config()
     return cfg
 
 def SaveConfig(cfg):
-    pickle.dump( cfg, file( CONFIG_FILE, 'wb' ))
+    pickle.dump( cfg, open( CONFIG_FILE, 'wb' ))
 
 LoadConfig()
 

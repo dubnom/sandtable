@@ -78,7 +78,7 @@ class ReadThread(Thread):
         logging.info( "Reader thread active" )
         self.running = True
         while self.running:
-            line = self.ser.readline().strip()
+            line = self.ser.readline().decode(encoding='utf-8').strip()
             if len(line):
                 # Parse the lines for status here
                 try:
@@ -153,7 +153,7 @@ class WriteThread(Thread):
         self.running = True
         while self.running:
             data = self.queue.get()
-            self.ser.write(data)
+            self.ser.write(bytes(data,encoding='utf-8'))
             self.queue.task_done()
         logging.info( "Writer thread exiting" )
 
@@ -161,7 +161,7 @@ class WriteThread(Thread):
         self.running = False
  
 
-def runMachine():
+def runMachine(fullInitialization):
     logging.info( 'Starting the sandtable smoothie daemon' )
 
     # Open the serial port to connect to the Smoothiboard
@@ -178,28 +178,8 @@ def runMachine():
     # Create the writer
     writer = Writer(ser)
 
-    # Check settings update file
-    fullInitialization = True
-    with open(MACH_FILE,'r') as f:
-        newVersion = f.read()
-
-    try:
-        with open(VER_FILE,'r') as f:
-            oldVersion = f.read()
-        if oldVersion == newVersion:
-            fullInitialization = False
-    except Exception as e:
-        logging.error(e)
-
-    if fullInitialization:
-        with open(VER_FILE,'w') as f:
-            f.write(newVersion)
-
     # Initialize the board
-    initialize = [
-    ]
-
-    # Try not sending the initialization string
+    initialize = []
     if fullInitialization:
         initialize += machInitialize
 

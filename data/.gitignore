@@ -1,4 +1,4 @@
-mach.py
+machine.py
 *.sqlite
 *.png
 *.ngc

@@ -69,7 +69,7 @@ class MyHandler(socketserver.BaseRequestHandler):
         self.ledThread = self.server.ledThread
 
     def handle(self):
-        req = self.request.recv(10*1024).decode('utf-8')
+        req = self.request.recv(10*1024)
         cmd, pattern, params = pickle.loads( req )
         if cmd == 'pattern':
             self.ledThread.setPattern( pattern, params )

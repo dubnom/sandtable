@@ -70,6 +70,7 @@ apt-get install -y libgeos-dev
 apt-get install -y python3-numpy python3-scipy
 
 # Python3 packages
+pip3 install future
 pip3 install pillow
 pip3 install evdev
 pip3 install bottle

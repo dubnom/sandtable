@@ -1,4 +1,6 @@
 #/bin/bash
+[ "$(whoami)" != "root" ] && exec sudo -- "$0" "$@"
+
 # need:
 #	create sandtable user
 #		adduser sandtable
@@ -33,17 +35,20 @@ adduser sandtable adm
 
 # Directories
 mkdir /var/www
-ln -s . /var/www/sandtable /home/sandtable/sandtable
+ln -s $PWD /var/www/
+ln -s $PWD /home/sandtable/
 
 cd /var/www/sandtable
 mkdir store
 chown -R www-data pictures clipart scripts movies store data 
 
 # Update /etc/rc.local to run SandTable services
-sed -i.bak /etc/rc.local -e '
-/exit 0/ i\
-/var/www/sandtable/bin/rc.sandtable
-'
+if grep -q /var/www/sandtable/bin/rc.sandtable "/etc/rc.local";
+then
+    echo already updated /etc/rc.local to run SandTable services
+else
+    sed -i.bak "\$i /var/www/sandtable/bin/rc.sandtable" /etc/rc.local
+fi
 
 # Install required packages
 apt-get update
@@ -62,7 +67,7 @@ apt-get install -y potrace
 apt-get install -y libagg-dev
 apt-get install -y libpotrace-dev
 apt-get install -y libgeos-dev
-apt-get install -y python-numpy python-scipy
+apt-get install -y python3-numpy python3-scipy
 
 # Python3 packages
 pip3 install pillow
@@ -77,20 +82,20 @@ pip3 install fontTools
 pip3 install markdown
 
 # Gphoto2
-wget https://raw.githubusercontent.com/gonzalo/gphoto2-updater/master/gphoto2-updater.sh
-chmod +x gphoto2-updater.sh
-./gphoto2-updater.sh
+#wget https://raw.githubusercontent.com/gonzalo/gphoto2-updater/master/gphoto2-updater.sh
+#chmod +x gphoto2-updater.sh
+#./gphoto2-updater.sh --stable
 pip3 install gphoto2
 
 
 # Optional Samba support
-if [ $st_samba == 'enable' ];
+if [ "$st_samba" = "enable" ];
 then
     apt-get install -y smbclient
 fi
 
 # Optional remote connection support
-if [ $st_remote == 'enable' ];
+if [ "$st_remote" = "enable" ];
 then
     apt install connectd -y
     connectd_installer
@@ -101,7 +106,7 @@ fi
 #
 
 # FadeCandy
-if [ $st_led == 'FadeCandy' ];
+if [ "$st_led" = "FadeCandy" ];
 then
     cd ~
     git clone https://github.com/scanlime/fadecandy
@@ -109,14 +114,17 @@ then
     make submodules
     make
     mv fcserver /usr/local/bin
-
-    sed -i.bak /etc/rc.local -e '
-/exit 0/ i\
-/var/www/sandtable/bin/rc.fadecandy
-'
+    
+    if grep -q /var/www/sandtable/bin/rc.fadecandy "/etc/rc.local";
+    then
+        echo rc.local already modified to support fadecandy
+    else
+        sed -i.bak "\$i /var/www/sandtable/bin/rc.fadecandy" /etc/rc.local
+	echo modified rc.local to support fadecandy
+    fi
 
 # DotStar
-elif [ $st_led == 'DotStar' ];
+elif [ "$st_led" = "DotStar" ];
 then
     # Enable SPI and I2C
     pip3 install RPI.GPIO
@@ -124,12 +132,13 @@ then
     pip3 install adafruit-circuitpython-dotstar
 
 # OPC
-elif [ $st_led == 'OPC' ];
+elif [ "$st_led" = "OPC" ];
 then
     # FIX: OPC not yet done
     echo ERROR: OPC Install not yet supported
 
 # None
-elif [ $st_led != 'None' ];
+elif [ "$st_led" != "None" ];
+then
     echo ERROR: '$st_led' is not a known lighting system
 fi

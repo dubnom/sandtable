@@ -76,7 +76,7 @@ import platform
 HOST_NAME = platform.node()
 exec("from %s.hostmap import hostmap" % CONFIG_PATH)
 if HOST_NAME not in hostmap:
-    HOST_NAME = default
+    HOST_NAME = 'default'
 exec("from %s.%s import *" % (CONFIG_PATH, hostmap[HOST_NAME]))
 
 IMAGE_HEIGHT        = int(IMAGE_WIDTH * (TABLE_LENGTH / TABLE_WIDTH))

@@ -8,18 +8,26 @@ from threading import Thread, Event
 import json
 from Sand import *
 
-class NoMachine:
-    def __init__(self):
-        pass
+class Machine:
+    """ Base class for communicating with a CNC controller.
+    
+        Subclasses must implement:
+            initialize - connect and initialize the actual machine (through serial,
+                         API, etc.) it expects:
+                             machInitialize - settings like motor mapping, acceleration, etc.
+                             This initialization should be sent if not None.
+            home - home the machine.
+            halt - halt the machine.
+            stop - disconnect from the machine.
+    """
 
-    def connect(self):
-        pass
-
-    def initialize(self, full, extras):
-        pass
+    def __init__(self, fullInitialization, machInitialize ):
+        # FIX: Add machine specific parameters as a dictionary
+        self.queue = queue.Queue()
+        self.initialize( machInitialize)
 
     def send(self, data):
-        pass
+        self.queue.put(data)
 
     def home(self):
         pass
@@ -28,19 +36,51 @@ class NoMachine:
         pass
 
     def wait(self):
-        pass
+        self.queue.join()
+
+    def flush(self):
+        while not self.queue.empty():
+            self.queue.get()
+            self.queue.task_done()
 
     def stop(self):
         pass
 
 
+class NoMachine(Machine):
+    def initialize(self, machInitialize):
+        self.writeThread = NoWriteThread(self)
+        self.writeThread.start()
+        self.stopFlag = Event()
+
+    def stop(self):
+        self.stopFlag.set()
+
+class NoWriteThread(Thread):
+    def __init__(self,machine):
+        self.queue = machine.queue
+        super(WriteThread, self).__init__()
+
+    def run(self):
+        self.running = True
+        while self.running:
+            data = self.queue.get()
+            logging.info( "Writing %s" % data )
+            self.queue.task_done()
+
+    def stop(self):
+        self.running = False
+
+
+
 #
 #   Driver for any kind of board running Marlin software
 #
-pos = [-1.0,-1.0]
-ready = True
         
 class MyHandler(socketserver.BaseRequestHandler):
+    pos = [-1.0,-1.0]
+    ready = True
+
     def setup(self):
         self.machine = self.server.machine
 
@@ -59,7 +99,7 @@ class MyHandler(socketserver.BaseRequestHandler):
                 self.machine.halt()
             elif command == 'restart':
                 self.restart()
-        self.request.send(bytes(json.dumps({'pos':pos,'state':ready}),encoding='utf-8'))
+        self.request.sendall(bytes(json.dumps({'pos':self.pos,'state':self.ready}),encoding='utf-8'))
 
     def run(self,fileName,wait):
         fileName = fileName
@@ -75,8 +115,8 @@ class MyHandler(socketserver.BaseRequestHandler):
              logging.info( "Waiting for drawing to finish" )
              time.sleep(1.0)
              self.machine.wait()
-             logging.debug( "Queue depth is fine, waiting for state %s" % ready )
-             while not ready:
+             logging.debug( "Queue depth is fine, waiting for state %s" % self.ready )
+             while not self.ready:
                  time.sleep(0.5)
              logging.debug( "Status has changed" )
         logging.info( "Run has completed" )
@@ -86,17 +126,16 @@ class MyHandler(socketserver.BaseRequestHandler):
 
 
 def runMachine(fullInitialization):
-    logging.info( 'Starting the sandtable nomachine daemon' )
+    logging.info( 'Starting the sandtable machine daemon' )
 
-    # Open the serial port to connect to Marlin
-    machine = NoMachine()
+    # Connect to the machine
     try:
-       connection = machine.connect()
+        machine = Machine( machInitialize if fullInitialization else None )
     except Exception as e:
         logging.error( e )
         exit(0)
 
-    machine.initialize( fullInitialization, machInitialize )
+    # Home the machine so it is in a known state
     machine.home()
 
     # Start the socket server and listen for requests
@@ -114,11 +153,13 @@ def runMachine(fullInitialization):
             retries -= 1
             time.sleep(10.0)
     
+    # If SocketServer connected, then start listening and dispatching commands to the machine
     if server:
         server.machine = machine
         server.serve()
     logging.info( "Out of server loop!" )
     
+    # Close everything down
     loggin.info( "Stopping machine" )
     machine.stop()
     logging.info( "Should be all done. Shut down." )

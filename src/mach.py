@@ -18,8 +18,9 @@ class mach:
     def command( self, string ):
         sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
         sock.connect( (self.hostName, self.portNumber) )
-        sock.sendall( bytes(string + '\n\r', encoding='utf-8'))
-        self.status = json.loads( sock.recv(self.BUFFER_SIZE).decode('utf-8'))
+        sock.sendall( bytes(json.dumps(string), encoding='utf-8'))
+        v = sock.recv(self.BUFFER_SIZE)
+        self.status = json.loads( v )
         sock.close()
         del sock
  

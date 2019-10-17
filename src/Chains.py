@@ -372,26 +372,25 @@ class Chains():
     @staticmethod
     def makeGCode( chains, box, feed, fileName, machUnits, tableUnits ):
         """Convert chains into a bounded G-Code file"""
-        f = open( fileName, 'w' )
-        unitConv = 1.
-        if machUnits == 'inches':
-            print('G20', file=f)
-            fmtStr  = 'G01 X%.2fY%.2f'
-            if tableUnits == 'mm':
-                unitConv = 1. / 2.54
-        else:
-            print('G21', file=f)
-            fmtStr = 'G01 X%.1fY%.1f'
-            if tableUnits == 'inches':
-                unitConv = 25.4
+        with open( fileName, 'w' ) as f:
+            unitConv = 1.
+            if machUnits == 'inches':
+                print('G20', file=f)
+                fmtStr  = 'G01 X%.2fY%.2f'
+                if tableUnits == 'mm':
+                    unitConv = 1. / 2.54
+            else:
+                print('G21', file=f)
+                fmtStr = 'G01 X%.1fY%.1f'
+                if tableUnits == 'inches':
+                    unitConv = 25.4
 
-        print('F', feed, file=f)
-        for chainNum,chain in enumerate(Chains.bound( chains, box )):
-            print('%% Chain %d' % chainNum, file=f)
-            for point in chain:
-                print(fmtStr % (point[0]*unitConv, point[1]*unitConv), file=f)
-        print('M2', file=f)
-        f.close()
+            print('F', feed, file=f)
+            for chainNum,chain in enumerate(Chains.bound( chains, box )):
+                print('%% Chain %d' % chainNum, file=f)
+                for point in chain:
+                    print(fmtStr % (point[0]*unitConv, point[1]*unitConv), file=f)
+            print('M2', file=f)
 
     @staticmethod
     def estimateMachiningTime( chains, box, feed, accel ):
@@ -426,13 +425,12 @@ class Chains():
         xOff, yOff = extents[0][0], extents[0][1]
         xMax, yMax = extents[1][0], extents[1][1]
         width, length = xMax - xOff, yMax - yOff
-        f = open( fileName, 'w' )
-        print('<svg width="%g" height="%g" version="1.1" xmlns="http://www.w3.org/2000/svg">' % (width, length), file=f)
-        for chain in chains:
-            points = " ".join([ '%.4g,%.4g' % (point[0]-xOff, length-(point[1]-yOff)) for point in chain ])
-            print('  <polyline points="%s" stroke="black" stroke-width="1" />' % points, file=f)
-        print('</svg>', file=f)
-        f.close()
+        with open( fileName, 'w' ) as f:
+            print('<svg width="%g" height="%g" version="1.1" xmlns="http://www.w3.org/2000/svg">' % (width, length), file=f)
+            for chain in chains:
+                points = " ".join([ '%.4g,%.4g' % (point[0]-xOff, length-(point[1]-yOff)) for point in chain ])
+                print('  <polyline points="%s" stroke="black" stroke-width="1" />' % points, file=f)
+            print('</svg>', file=f)
 
     @staticmethod
     def scanalize( chains, xOffset, yOffset, width, length, rowsPerInch = 1.0 ):

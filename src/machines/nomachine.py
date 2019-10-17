@@ -85,7 +85,7 @@ class MyHandler(socketserver.BaseRequestHandler):
         self.machine = self.server.machine
 
     def handle(self):
-        data = self.request.recv(1024).decode('utf-8').strip().split()
+        data = json.loads( self.request.recv(1024).decode('utf-8')).strip().split()
         logging.debug( "Data: %s" % data )
         if len(data):
             command = data[0]
@@ -99,12 +99,14 @@ class MyHandler(socketserver.BaseRequestHandler):
                 self.machine.halt()
             elif command == 'restart':
                 self.restart()
-        self.request.sendall(bytes(json.dumps({'pos':self.pos,'state':self.ready}),encoding='utf-8'))
+
+        state = {'pos':self.pos, 'state':self.ready}
+        self.request.send(bytes(json.dumps(state),encoding='utf-8'))
 
     def run(self,fileName,wait):
         fileName = fileName
         logging.info( "Executing: run %s" % fileName )
-        self.writer.flush()
+        self.machine.flush()
 
         # FIX: Convert to metric
         with open(fileName, 'r') as file:

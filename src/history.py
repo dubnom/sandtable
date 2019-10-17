@@ -22,9 +22,11 @@ class History():
         # Shift the history files
         for n in range( HISTORY_COUNT )[::-1]:
             oldName = sandFormat % n
+            oldPng = pngFormat % n
             if oldName in files:
                 rename( STORE_PATH + oldName, STORE_PATH + sandFormat % (n + 1) )
-                rename( STORE_PATH + pngFormat % n, STORE_PATH + pngFormat % (n + 1) )
+            if oldPng in files:
+                rename( STORE_PATH + oldPng, STORE_PATH + pngFormat % (n + 1) )
     
         # Save the history
         History.save( params, sandable, chains, name % 0 )
@@ -32,7 +34,8 @@ class History():
     @staticmethod
     def save( params, sandable, chains, name ):
         params.sandable = sandable
-        pickle.dump( params, open( "%s%s.sand" % (STORE_PATH, name), 'wb' ))
+        with open( "%s%s.sand" % (STORE_PATH, name), 'wb' ) as f:
+            pickle.dump( params, f )
         boundingBox = [ (0.0, 0.0), (TABLE_WIDTH, TABLE_LENGTH) ]
         Chains.saveImage( chains, boundingBox, "%s%s.png" % (STORE_PATH, name), int(IMAGE_WIDTH / 2), int(IMAGE_HEIGHT / 2))
     

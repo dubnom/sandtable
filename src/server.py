@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from bottle import route, default_app, run, static_file
 import socket
+import logging
 
 from Sand import *
 import cgidraw
@@ -49,5 +50,6 @@ def server_static():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(format='%(asctime)s %(message)s',level=logging.INFO)
     run(host=HOST_ADDR, port=HOST_PORT, debug=True)
 

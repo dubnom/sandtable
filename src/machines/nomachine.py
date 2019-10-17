@@ -21,7 +21,7 @@ class Machine:
             stop - disconnect from the machine.
     """
 
-    def __init__(self, fullInitialization, machInitialize ):
+    def __init__(self, machInitialize ):
         # FIX: Add machine specific parameters as a dictionary
         self.queue = queue.Queue()
         self.initialize( machInitialize)
@@ -59,7 +59,7 @@ class NoMachine(Machine):
 class NoWriteThread(Thread):
     def __init__(self,machine):
         self.queue = machine.queue
-        super(WriteThread, self).__init__()
+        super(NoWriteThread, self).__init__()
 
     def run(self):
         self.running = True
@@ -130,7 +130,7 @@ def runMachine(fullInitialization):
 
     # Connect to the machine
     try:
-        machine = Machine( machInitialize if fullInitialization else None )
+        machine = NoMachine( machInitialize if fullInitialization else None )
     except Exception as e:
         logging.error( e )
         exit(0)

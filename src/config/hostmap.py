@@ -1,4 +1,5 @@
 hostmap = {
+    'default':              'default',
     'sandtable.dubno.com':  'version1',
     'sandtable2.dubno.com': 'version2',
     'sandtable3.dubno.com': 'version3',

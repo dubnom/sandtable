@@ -2,7 +2,7 @@ from random import randint
 from Sand import *
 from dialog import *
 
-class Kaleidoscope( Ledable ):
+class Lighter( Ledable ):
     steps = 15
 
     def __init__( self, cols, rows ):

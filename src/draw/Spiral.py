@@ -3,7 +3,7 @@ from Sand import *
 from dialog import *
 from Chains import *
 
-class Spiral( Sandable ):
+class Sander( Sandable ):
     """
 ### Simple figures that create a surprisingly large number of beautiful paterns
 

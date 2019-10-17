@@ -6,7 +6,7 @@ from colorsys import *
 from palettes import palettes
 from LedsBase import LedsBase
 
-class Ocean( Ledable ):
+class Lighter( Ledable ):
     """
         Create a light pattern similar to waves washing up on a beach.
 

@@ -2,7 +2,7 @@ from Sand import *
 from dialog import *
 from time import localtime, time
 
-class Clock( Ledable ):
+class Lighter( Ledable ):
     def __init__( self, cols, rows ):
         self.editor = []
 

@@ -3,7 +3,7 @@ from Sand import *
 from dialog import *
 from Chains import *
 
-class Nautilus( Sandable ):
+class Sander( Sandable ):
     """
 ### Nautilus spiral
 

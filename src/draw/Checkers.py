@@ -1,7 +1,7 @@
 from Sand import *
 from dialog import *
 
-class Checkers( Sandable ):
+class Sander( Sandable ):
     """
 ### Draw cross-hatched rectangles
 

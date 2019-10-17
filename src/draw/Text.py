@@ -8,7 +8,7 @@ from Chains import *
 #import sys
 from ttt import TrueTypeTracer
 
-class Text( Sandable ):
+class Sander( Sandable ):
     """
 ### Write text in sand
 

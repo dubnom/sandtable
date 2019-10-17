@@ -1,7 +1,7 @@
 from Sand import *
 from dialog import *
 
-class Marquee( Ledable ):
+class Lighter( Ledable ):
     def __init__( self, cols, rows ):
         self.editor = [
             DialogInt(  "modulus",      "Lights per Marquee",       default = 10, min = 1, max = 1000 ),

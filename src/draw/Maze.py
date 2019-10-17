@@ -2,9 +2,9 @@ import random
 from Sand import *
 from dialog import *
 
-class Maze( Sandable ):
+class Sander( Sandable ):
     """
-###Draw a maze. Start at the lower left corner and end at the upper right corner.
+### Draw a maze. Start at the lower left corner and end at the upper right corner.
 
 Thanks to David Bau who provided the basis of the maze generator code.
 

@@ -3,7 +3,7 @@ from Sand import *
 from dialog import *
 from Chains import *
 
-class Star( Sandable ):
+class Sander( Sandable ):
     """
 ### Draw stars that can change size while rotating
 

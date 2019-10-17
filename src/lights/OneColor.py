@@ -1,7 +1,7 @@
 from Sand import *
 from dialog import *
 
-class OneColor( Ledable ):
+class Lighter( Ledable ):
     def __init__( self, cols, rows ):
         self.editor = [
             DialogColor( "color",           "Color",                default=(255,0,0) ),

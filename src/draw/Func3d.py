@@ -3,7 +3,7 @@ from dialog import *
 from Chains import *
 from math import *
     
-class Func3d( Sandable ):
+class Sander( Sandable ):
     """
 ### Graph 3D functions of the form z = f(x,y)
 

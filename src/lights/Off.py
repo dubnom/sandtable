@@ -1,7 +1,7 @@
 import colorsys
 from Sand import *
 
-class Off( Ledable ):
+class Lighter( Ledable ):
     def __init__( self, cols, rows ):
         self.editor = []
 

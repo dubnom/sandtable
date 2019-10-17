@@ -13,7 +13,7 @@ class Gauss:
     def value(self,x):
         return self.maxHeight * pow(e,-(((x-self.center)**2) / (2.*self.stdDev**2)))
 
-class Sky( Ledable ):
+class Lighter( Ledable ):
     """Create a light simulation of a sky that goes from sunrise to sunset."""
     def __init__(self,cols,rows):
         self.editor = [

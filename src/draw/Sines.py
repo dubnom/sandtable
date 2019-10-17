@@ -3,7 +3,7 @@ from Sand import *
 from dialog import *
 from Chains import *
 
-class Sines( Sandable ):
+class Sander( Sandable ):
     """
 ### Draw interfering sine waves around a spiral
 

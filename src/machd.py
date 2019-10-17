@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 import logging
 from Sand import *
+from importlib import import_module
+
 
 logging.basicConfig(format='%(asctime)s %(message)s',level=logging.DEBUG)
-exec("from machines.%s import *" % MACHINE)
+machine = import_module('machines.%s' % MACHINE)
 
 # Check settings update file
 fullInitialization = True
@@ -22,5 +24,5 @@ if fullInitialization:
     with open(VER_FILE,'w') as f:
         f.write(newVersion)
 
-runMachine(fullInitialization)
+machine.runMachine(fullInitialization)
 exit(1)

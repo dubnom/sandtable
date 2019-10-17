@@ -4,7 +4,7 @@ from Sand import *
 from dialog import *
 from Chains import * 
     
-class Snowflake( Sandable ):
+class Sander( Sandable ):
     """
 ### Draw something that looks like a snowflake
 

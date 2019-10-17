@@ -3,7 +3,7 @@ from Sand import *
 from dialog import *
 from Chains import *
 
-class Fermat( Sandable ):
+class Sander( Sandable ):
     """
 ### Fermat spiral (with a yin/yang inside)
 

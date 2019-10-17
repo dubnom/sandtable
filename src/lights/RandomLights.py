@@ -4,7 +4,7 @@ from dialog import *
 from time import time
 from ledstuff import *
 
-class RandomLights( Ledable ):
+class Lighter( Ledable ):
     def __init__( self, cols, rows ):
         self.editor = [
                 DialogFloat( "minutes",      "Light Pattern Change Frequency",   units = "minutes", default = 1.0, min = 0.25, max = 10.0 ),

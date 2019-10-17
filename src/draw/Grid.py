@@ -1,7 +1,7 @@
 from Sand import *
 from dialog import *
     
-class Grid( Sandable ):
+class Sander( Sandable ):
     """
 ### Draw horizontal and/or vertical lines
 

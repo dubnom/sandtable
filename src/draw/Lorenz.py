@@ -3,7 +3,7 @@ from dialog import *
 from Chains import *
 import math
 
-class Lorenz( Sandable ):
+class Sander( Sandable ):
     """
 ### Draw a Lorenz Attractor (a type of fractal)
 

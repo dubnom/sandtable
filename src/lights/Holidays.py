@@ -3,7 +3,7 @@ from dialog import *
 from random import random, randint
 from palettes import palettes
 
-class Holidays( Ledable ):
+class Lighter( Ledable ):
     def __init__( self, cols, rows ):
         pal = list(palettes.keys())[ randint(0,len(palettes)-1) ]        
         self.editor = [

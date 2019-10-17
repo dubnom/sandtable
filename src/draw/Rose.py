@@ -3,7 +3,7 @@ from Sand import *
 from dialog import *
 from Chains import *
 
-class Rose( Sandable ):
+class Sander( Sandable ):
     """
 ### Draw rose curves (pretty flowerlike drawings)
 

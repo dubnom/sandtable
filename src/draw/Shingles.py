@@ -2,7 +2,7 @@ from math import radians, sin
 from Sand import *
 from dialog import *
     
-class Shingles( Sandable ):
+class Sander( Sandable ):
     """
 ### Draw a pattern that looks like roofing shingles
 

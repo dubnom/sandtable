@@ -1,6 +1,6 @@
 from Sand import *
 
-class On( Ledable ):
+class Lighter( Ledable ):
     def __init__( self, cols, rows ):
         self.editor = []
 

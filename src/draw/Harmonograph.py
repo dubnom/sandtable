@@ -2,7 +2,7 @@ from math import sin, exp, radians
 from Sand import *
 from dialog import *
 
-class Harmonograph( Sandable ):
+class Sander( Sandable ):
     """
 ### Gradually decaying interaction between two two-dimensional pendulums.
 

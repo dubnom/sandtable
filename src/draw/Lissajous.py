@@ -2,7 +2,7 @@ from math import radians, sin, cos, floor, fabs
 from Sand import *
 from dialog import *
     
-class Lissajous( Sandable ):
+class Sander( Sandable ):
     """
 ### Pretty curves that describe complex harmonic motion
 

@@ -3,7 +3,7 @@ from Sand import *
 from dialog import *
 from palettes import *
 
-class Fire( Ledable ):
+class Lighter( Ledable ):
     def __init__( self, cols, rows ):
         self.editor = [
             DialogList( "palette",  "Palette",              default = 'Fire', list = sorted( palettes.keys()) ),

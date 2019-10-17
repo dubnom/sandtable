@@ -2,7 +2,7 @@ from Sand import *
 from dialog import *
 from Chains import *
 
-class Dragon( Sandable ):
+class Sander( Sandable ):
     """
 ### Dragon Fractal
 

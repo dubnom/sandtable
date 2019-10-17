@@ -2,7 +2,7 @@ from math import radians, sin
 from Sand import *
 from dialog import *
     
-class Waves( Sandable ):
+class Sander( Sandable ):
     """
 ### Draw waves
 

@@ -2,7 +2,7 @@ from math import fmod
 from Sand import *
 from dialog import *
 
-class Rainbow( Ledable ):
+class Lighter( Ledable ):
     def __init__( self, cols, rows ):
         self.editor = [
             DialogFloat( "degsPerFrame",    "Degrees per refresh",      units="degrees", default=2., min=-60., max=60., step=1. ),

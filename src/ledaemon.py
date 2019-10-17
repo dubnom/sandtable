@@ -8,12 +8,13 @@ import socket
 import socketserver
 from tcpserver import *
 from threading import Thread
+from importlib import import_module
 
 from Sand import *
 from LedsBase import LedsBase
  
 # The specific LED driver is specified in the machine configuration
-exec("import machines.%s as Leds" % LED_DRIVER)
+Leds = import_module('machines.%s' % LED_DRIVER)
 
 class startupPattern( Ledable ):
     def __init__( self, cols, rows ):

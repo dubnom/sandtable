@@ -4,7 +4,7 @@ from dialog import *
 from Chains import *
 from functools import reduce
 
-class Spirograph( Sandable ):
+class Sander( Sandable ):
     """
 ### Draw patterns similar to the Spirograph toy
 

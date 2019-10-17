@@ -3,7 +3,7 @@ from dialog import *
 from PolyLine import *
 from Chains import *
 
-class Lindenmayer( Sandable ):
+class Sander( Sandable ):
     """
 ### Simple movement/substitution language for creating complex fractals
 

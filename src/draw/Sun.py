@@ -3,7 +3,7 @@ from Sand import *
 from dialog import *
 from Chains import *
     
-class Sun( Sandable ):
+class Sander( Sandable ):
     """
 ### Draw figures that roughly resembles the sun and its rays
 

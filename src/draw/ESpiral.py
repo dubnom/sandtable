@@ -3,7 +3,7 @@ from Sand import *
 from dialog import *
 from Chains import *
 
-class ESpiral( Sandable ):
+class Sander( Sandable ):
     """
 ### Circular pattern with spirals
 

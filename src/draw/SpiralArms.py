@@ -3,7 +3,7 @@ from Sand import *
 from dialog import *
 from Chains import *
 
-class SpiralArms( Sandable ):
+class Sander( Sandable ):
     """
 ### Draw clockwise and counter-clockwise spiral arms from the center
 

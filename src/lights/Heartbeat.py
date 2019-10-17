@@ -1,7 +1,7 @@
 from Sand import *
 from dialog import *
 
-class Heartbeat( Ledable ):
+class Lighter( Ledable ):
     brightnesses = [ 1.0, 0.9, 0.1, 0.2, 0.3, 0.5, 0.3, 0.4, 0.2, 0.3 ]
 
     def __init__( self, cols, rows ):

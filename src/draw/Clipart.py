@@ -5,7 +5,7 @@ from dialog import *
 import cam
 from Chains import *
 
-class Clipart( Sandable ):
+class Sander( Sandable ):
     """
 ### Draw clipart images (currently only DXF is supported)
 

@@ -3,7 +3,7 @@ from dialog import *
 import mach
 
 
-class Move( Sandable ):
+class Sander( Sandable ):
     """
 ### Move the ball to a new location
 

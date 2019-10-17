@@ -2,7 +2,7 @@ from math import radians, sin, cos
 from Sand import *
 from dialog import *
 
-class Man( Sandable ):
+class Sander( Sandable ):
     """
 ### Draw a stick-figure man
 

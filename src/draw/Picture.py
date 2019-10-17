@@ -5,7 +5,7 @@ from Sand import *
 from dialog import *
 from Chains import *
     
-class Picture( Sandable ):
+class Sander( Sandable ):
     """
 ### Turn a photograph or image into a sand drawing
 

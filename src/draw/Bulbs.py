@@ -2,7 +2,7 @@ from math import pow, radians, sin, cos
 from Sand import *
 from dialog import *
 
-class Bulbs( Sandable ):
+class Sander( Sandable ):
     """
 ### Bulbs can create interesting flower-like images and beautiful geometric patterns
 

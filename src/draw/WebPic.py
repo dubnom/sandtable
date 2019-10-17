@@ -8,7 +8,7 @@ from dialog import *
 from Chains import *
 import gsearch
     
-class WebPic( Sandable ):
+class Sander( Sandable ):
     """
 ### Turn a photograph or image into a sand drawing
 

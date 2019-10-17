@@ -2,14 +2,12 @@ from Sand import *
 import socket
 import json
 import pickle
+from importlib import import_module
+
 
 def ledPatternFactory( pattern ):
-    globs = globals()
-    locs = {}
-
-    exec("import lights.%s" % pattern, globs, locs)
-    exec("led = lights.%s.%s( %d, %d )" % (pattern, pattern, LED_COLUMNS, LED_ROWS ), globs, locs)
-    return locs['led']
+    lm = import_module('lights.%s' % pattern)
+    return lm.Lighter(LED_COLUMNS, LED_ROWS)
 
 def setLedPattern( pattern, params ):
     with ledApi() as api:

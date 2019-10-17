@@ -2,7 +2,7 @@ from Sand import *
 from dialog import *
 from Chains import *
 
-class Hilbert( Sandable ):
+class Sander( Sandable ):
     """
 ### Hilbert Fractal
 

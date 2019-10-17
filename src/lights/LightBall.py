@@ -2,7 +2,7 @@ from Sand import *
 from dialog import *
 import mach
 
-class LightBall( Ledable ):
+class Lighter( Ledable ):
     def __init__( self, cols, rows ):
         self.editor = []
 

@@ -2,7 +2,7 @@ from math import radians, sin, cos, sqrt, fabs, fmod
 from Sand import *
 from dialog import *
 
-class LightHouse( Ledable ):
+class Lighter( Ledable ):
     def __init__( self, cols, rows ):
         self.editor = [
             DialogFloat( "xOffset",         "X Center",         units = "inches", default = TABLE_WIDTH/2, min = 0.0, max = TABLE_WIDTH ),

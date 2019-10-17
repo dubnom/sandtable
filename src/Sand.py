@@ -114,13 +114,11 @@ class Ledable():
         pass
 
 def sandableFactory( sandable ):
-    globs = globals()
-    locs = {}
+    from importlib import import_module
     
     if sandable in sandables:
-        exec("import draw.%s" % sandable, globs, locs)
-        exec("sand = draw.%s.%s( %f, %f )" % (sandable, sandable, TABLE_WIDTH, TABLE_LENGTH ), globs, locs)
-        return locs['sand']
+        sm = import_module('draw.%s' % sandable)
+        return sm.Sander(TABLE_WIDTH, TABLE_LENGTH)
     else:
         return None
 

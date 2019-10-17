@@ -3,7 +3,7 @@ from Chains import *
 from dialog import *
 from random import randint
 
-class RandomDraw( Sandable ):
+class Sander( Sandable ):
     """
 ### Draw a random pattern
 """

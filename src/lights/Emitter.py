@@ -2,7 +2,7 @@ from math import fmod
 from Sand import *
 from dialog import *
 
-class Emitter( Ledable ):
+class Lighter( Ledable ):
     def __init__( self, cols, rows ):
         self.editor = [
             DialogFloat( "angle",           "Source angle",         units = "degrees", default = 2.0, min = 0.0, max = 720.0, step = 1. ),

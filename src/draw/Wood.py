@@ -5,7 +5,7 @@ from dialog import *
 
 from random import random, seed
     
-class Wood( Sandable ):
+class Sander( Sandable ):
     """
 ### Randomly generate something that looks like a wood board
 

@@ -3,7 +3,7 @@ from dialog import *
 from Chains import *
 import random
 
-class Grass( Sandable ):
+class Sander( Sandable ):
     """
 ### Draw fields of grass
 

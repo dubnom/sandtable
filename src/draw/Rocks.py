@@ -6,7 +6,7 @@ from Sand import *
 
 from random import random, uniform, seed
     
-class Rocks( Sandable ):
+class Sander( Sandable ):
     """
 ### Create a Japanese Zen rock garden
 

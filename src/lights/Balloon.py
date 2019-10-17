@@ -13,7 +13,7 @@ class BalloonData(object):
     accCount        = 0
    
 
-class Balloon( Ledable ):
+class Lighter( Ledable ):
     def __init__( self, cols, rows ):
         self.editor = [
             DialogInt(  "balloons",     "Number of Balloons",       default=7, min=1, max=15 ),

@@ -1,9 +1,8 @@
 # Constants
 global TABLE_FEED, BALL_SIZE
-PLATFORM            = "RaspberryPi"
-MACHINE             = "smoothie"
-MACHINE_PORT        = "/dev/ttyACM0"
-MACHINE_BAUD        = 115200
+
+HOST_ADDR           = '0.0.0.0'
+HOST_PORT           = 80
 
 TABLE_WIDTH         = 748.0 / 25.4  # Width in inches (converted from mm)
 TABLE_LENGTH        = 1565.0 / 25.4 # Length in inches (converted from mm)
@@ -19,9 +18,12 @@ LED_PERIOD          = 1.0 / 45.0
 LED_OFFSETS         = [ (1,2), (4,4) ]
 LED_MAPPING         = None
 
-HOST_ADDR           = '0.0.0.0'
-HOST_PORT           = 80
+MACHINE             = "smoothie"
+MACHINE_UNITS       = "inches"
 
-machInitialize = [
-]
+MACHINE_PARAMS = {
+    'port': "/dev/ttyACM0",
+    'baud': 115200,
+    'init': [],
+}
 

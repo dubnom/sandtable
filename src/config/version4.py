@@ -1,10 +1,8 @@
 # Constants
 global TABLE_FEED, BALL_SIZE
-PLATFORM            = "RaspberryPi"
-MACHINE             = "marlin"
-MACHINE_PORT        = "/dev/ttyACM0"
-MACHINE_BAUD        = 115200
-MACHINE_UNITS       = "mm"
+
+HOST_ADDR           = '0.0.0.0'
+HOST_PORT           = 80
 
 TABLE_UNITS         = "inches"
 TABLE_WIDTH         = 30.0
@@ -21,10 +19,14 @@ LED_PERIOD          = 1.0 / 45.0
 LED_OFFSETS         = [ (1,2), (4,4) ]
 LED_MAPPING         = None
 
-HOST_ADDR           = '0.0.0.0'
-HOST_PORT           = 80
+MACHINE             = "marlin"
+MACHINE_UNITS       = "mm"
 
-machInitialize = [
-    "M92 X%.8g" % (200*10/25.4),  # 200 Steps/rev * 10 rev/inch / (25.4mm/inch)
-    "M92 Y%.8g" % (200*10/25.4),  #
-]
+MACHINE_PARAMS = {
+    'port': "/dev/ttyACM0",
+    'baud': 115200,
+    'init': [
+        "M92 X%.8g" % (200*10/25.4),  # 200 Steps/rev * 10 rev/inch / (25.4mm/inch)
+        "M92 Y%.8g" % (200*10/25.4),  #
+        ]
+}

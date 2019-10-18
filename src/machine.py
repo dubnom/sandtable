@@ -21,10 +21,13 @@ class Machine:
             stop - disconnect from the machine.
     """
 
-    def __init__(self, machInitialize ):
+    pos = [-1., -1.]
+    ready = False
+
+    def __init__(self, params, fullInit):
         # FIX: Add machine specific parameters as a dictionary
         self.queue = queue.Queue()
-        self.initialize( machInitialize)
+        self.initialize(params, fullInit)
 
     def send(self, data):
         self.queue.put(data)

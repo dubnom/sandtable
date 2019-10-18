@@ -4,8 +4,6 @@ from threading import Thread
 import queue
 import logging
 import re
-import json
-from Sand import *
 
 
 POSITION_POLL_FREQ = 30     # Poll for status every 30 instructions
@@ -15,28 +13,28 @@ POSITION_POLL_SECS = 2.     # Or every 2. seconds
 class machiner(Machine):
     """ Driver for SmoothieWare compatible controllers."""
 
-    def initialize(self, machInitialize):
+    def initialize(self, params, fullInit):
         logging.info( 'Trying to connect to Smoothie controller.' )
 
         # Open the serial port to connect to Smoothie
         try:
-            ser = serial.Serial(MACHINE_PORT, baudrate=MACHINE_BAUD, rtscts=True, timeout=0.5)
+            self.ser = serial.Serial(params['port'], baudrate=params['baud'], rtscts=True, timeout=0.5)
         except Exception as e:
             logging.error( e )
             exit(0)
 
         # Start the read thread
-        self.reader = ReadThread(self, ser)
+        self.reader = ReadThread(self, self.ser)
         self.reader.start()
 
         # Create the writer
-        self.writer = WriteThread(self, ser)
+        self.writer = WriteThread(self, self.ser)
         self.writer.start()
 
         # Initialize the board
         initialize = []
-        if machInitialize:
-            initialize += machInitialize
+        if fullInit:
+            initialize += params['init']
 
         for i in initialize:
             self.send( i ) 
@@ -54,6 +52,7 @@ class machiner(Machine):
     def stop(self):
        self.writer.stop()
        self.reader.stop()
+       self.ser.close()
 
 
 class ReadThread(Thread):
@@ -64,7 +63,7 @@ class ReadThread(Thread):
     def run(self):
         reStatus = re.compile( '^<(Idle|Run)\\|MPos:([\d.-]+),([\d.-]+),([\d.-]+)\\|(.*)>$' )
         
-        logging.info( "Reader thread active" )
+        logging.info( "Read thread active" )
         self.running = True
         while self.running:
             line = self.ser.readline().decode(encoding='utf-8').strip()
@@ -75,9 +74,8 @@ class ReadThread(Thread):
                     match = reStatus.match(line)
                     if match:
                         status = match.groups()[0]
-                        posX, posY = float(match.groups()[1]), float(match.groups()[2])
-                        ready = status == 'Idle'
-                        # FIX: self.machine.setState( posX, posY, ready )
+                        self.machine.pos[0], self.machine.pos[1] = float(match.groups()[1]), float(match.groups()[2])
+                        self.machine.ready = status == 'Idle'
                     
                     # Parse responses
                     elif line == 'ok':
@@ -88,7 +86,7 @@ class ReadThread(Thread):
                         logging.warning( "Received: %s" % line )
                 except ValueError:
                     logging.warning( "Couldn't parse: %s" % line )
-        logging.info( "Reader thread exiting" )
+        logging.info( "Read thread exiting" )
 
     def stop(self):
         self.running = False
@@ -106,7 +104,7 @@ class WriteThread(Thread):
         thread = statusTimer(self.stopFlag,self)
         thread.start()
 
-        logging.info( "Writer thread active" )
+        logging.info( "Write thread active" )
         self.running = True
         while self.running:
             try:
@@ -121,7 +119,7 @@ class WriteThread(Thread):
             except Queue.Empty:
                 self._getStatus()
 
-        logging.info( "Writer thread exiting" )
+        logging.info( "Write thread exiting" )
 
     def _getStatus(self):
         self.num = 0

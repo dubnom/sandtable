@@ -9,9 +9,10 @@ class machiner(Machine):
         This is useful for debugging, or if you don't have a CNC machine
         handy and want to generate patterns anyway."""
 
-    def initialize(self, machInitialize):
+    def initialize(self, params, fullInit):
         self.writeThread = NoWriteThread(self)
         self.writeThread.start()
+        self.ready = True
 
     def stop(self):
         self.writeThread.stop()
@@ -23,11 +24,13 @@ class NoWriteThread(Thread):
         super(NoWriteThread, self).__init__()
 
     def run(self):
+        logging.info( "Write thread active" )
         self.running = True
         while self.running:
             data = self.queue.get()
             logging.info( "Writing %s" % data.strip())
             self.queue.task_done()
+        logging.info( "Write thread exiting" )
 
     def stop(self):
         self.running = False

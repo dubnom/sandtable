@@ -3,41 +3,41 @@ import logging
 import queue
 from threading import Thread
 import json
-from Sand import *
 from machine import Machine
 
 
 class machiner(Machine):
     """ Driver for Marlin compatible controllers."""
 
-    def initialize(self, machInitialize):
-        logging.info( 'Trying to connect to  Marlin controller.' )
+    def initialize(self, params, fullInit):
+        logging.info( 'Trying to connect to Marlin controller.' )
 
         # Open the serial port to connect to Marlin
         try:
-            ser = serial.Serial(MACHINE_PORT, baudrate=MACHINE_BAUD, rtscts=True, timeout=0.5)
+            self.ser = serial.Serial(params['port'], baudrate=params['baud'], rtscts=True, timeout=0.5)
         except Exception as e:
             logging.error( e )
             exit(0)
 
         # Start the read thread
-        self.reader = ReadThread(self, ser)
+        self.reader = ReadThread(self, self.ser)
         self.reader.start()
 
         # Create the writer
-        self.writer = WriteThread(self, ser)
+        self.writer = WriteThread(self, self.ser)
         self.writer.start()
 
         # Initialize the board
         initialize = []
-        if machInitialize:
-            initialize += machInitialize
+        if fullInit:
+            initialize += params['init']
 
         for i in initialize:
             self.send( i ) 
 
         # Home the machine
         self.home()
+        self.ready = True
 
     def home(self):
         self.send( 'G28.2X0Y0' )
@@ -50,6 +50,7 @@ class machiner(Machine):
     def stop(self):
        self.writer.stop()
        self.reader.stop()
+       self.ser.close()
 
 
 class ReadThread(Thread):
@@ -60,13 +61,15 @@ class ReadThread(Thread):
         super(ReadThread, self).__init__()
 
     def run(self):
+        logging.info( "Read thread active" )
         self.running = True
         while self.running:
             line = self.ser.readline().decode(encoding='utf-8').strip()
             if len(line):
-                print("<",line)
+                logging.debug("<"+line)
                 if line.startswith('ok'):
                     self.okCount += 1
+        logging.info( "Read thread exiting" )
 
     def decrement(self):
         self.okCount -= 1
@@ -82,14 +85,14 @@ class WriteThread(Thread):
         super(WriteThread, self).__init__()
 
     def run(self):
-        logging.info( "Writer thread active" )
+        logging.info( "Write thread active" )
         self.running = True
         while self.running:
             # FIX: Add conditional for controller readiness
             data = self.queue.get()
             self.ser.write(bytes(data+'\r',encoding='UTF-8'))
             self.queue.task_done()
-        logging.info( "Writer thread exiting" )
+        logging.info( "Write thread exiting" )
 
     def stop(self):
         self.running = False

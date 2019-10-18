@@ -1,10 +1,8 @@
 # Constants
 global TABLE_FEED, BALL_SIZE
-PLATFORM            = "RaspberryPi"
-MACHINE             = "nomachine"
-MACHINE_PORT        = "/dev/ttyACM0"
-MACHINE_BAUD        = 115200
-MACHINE_UNITS       = "mm"
+
+HOST_ADDR           = '0.0.0.0'
+HOST_PORT           = 80
 
 TABLE_UNITS         = "inches"
 TABLE_WIDTH         = 30.0
@@ -21,8 +19,7 @@ LED_PERIOD          = 1.0 / 45.0
 LED_OFFSETS         = [ (1,2), (4,4) ]
 LED_MAPPING         = None
 
-HOST_ADDR           = '0.0.0.0'
-HOST_PORT           = 80
+MACHINE             = "nomachine"
+MACHINE_UNITS       = "inches"
+MACHINE_PARAMS      = {}
 
-machInitialize = [
-]

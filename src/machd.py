@@ -9,10 +9,6 @@ from threading import Thread, Event
 from Sand import *
 
 
-logging.basicConfig(format='%(asctime)s %(message)s',level=logging.DEBUG)
-machine_module = import_module('machines.%s' % MACHINE)
-machiner = machine_module.machiner
-
 class MyHandler(socketserver.BaseRequestHandler):
     pos = [-1.0,-1.0]
     ready = True
@@ -63,12 +59,12 @@ class MyHandler(socketserver.BaseRequestHandler):
         self.server.stop()
 
 
-def runMachine(machiner, fullInitialization):
+def runMachine(machiner, params, fullInitialization):
     logging.info( 'Starting the sandtable machine daemon' )
 
     # Connect to the machine
     try:
-        machine = machiner( machInitialize if fullInitialization else None )
+        machine = machiner( params, fullInitialization )
     except Exception as e:
         logging.error( e )
         exit(0)
@@ -103,22 +99,30 @@ def runMachine(machiner, fullInitialization):
     logging.info( "Should be all done. Shut down." )
 
 
-# Check settings update file
-fullInitialization = True
-with open(MACH_FILE,'r') as f:
-    newVersion = f.read()
+def main():
+    logging.basicConfig(format='%(asctime)s %(message)s',level=logging.DEBUG)
+    machine_module = import_module('machines.%s' % MACHINE)
+    machiner = machine_module.machiner
 
-try:
-    with open(VER_FILE,'r') as f:
-        oldVersion = f.read()
-    if oldVersion == newVersion:
-        fullInitialization = False
-except Exception as e:
-    logging.error(e)
+    # Check settings update file
+    fullInitialization = True
+    with open(MACH_FILE,'r') as f:
+        newVersion = f.read()
 
-if fullInitialization:
-    with open(VER_FILE,'w') as f:
-        f.write(newVersion)
+    try:
+        with open(VER_FILE,'r') as f:
+            oldVersion = f.read()
+        if oldVersion == newVersion:
+            fullInitialization = False
+    except Exception as e:
+        logging.error(e)
 
-runMachine(machiner, fullInitialization)
+    if fullInitialization:
+        with open(VER_FILE,'w') as f:
+            f.write(newVersion)
+
+    runMachine(machiner, MACHINE_PARAMS, fullInitialization)
+
+
+main()
 exit(1)

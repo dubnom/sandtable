@@ -28,5 +28,6 @@ MACHINE_PARAMS = {
     'init': [
         "M92 X%.8g" % (200*10/25.4),  # 200 Steps/rev * 10 rev/inch / (25.4mm/inch)
         "M92 Y%.8g" % (200*10/25.4),  #
+        "M211 S0",                    # Disable software endstops
         ]
 }

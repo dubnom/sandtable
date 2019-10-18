@@ -106,20 +106,17 @@ def main():
 
     # Check settings update file
     fullInitialization = True
-    with open(MACH_FILE,'r') as f:
-        newVersion = f.read()
-
     try:
-        with open(VER_FILE,'r') as f:
-            oldVersion = f.read()
-        if oldVersion == newVersion:
+        with open(VER_FILE,'rb') as f:
+            oldVersion = pickle.load(f)
+        if oldVersion == MACHINE_PARAMS:
             fullInitialization = False
     except Exception as e:
         logging.error(e)
 
     if fullInitialization:
-        with open(VER_FILE,'w') as f:
-            f.write(newVersion)
+        with open(VER_FILE,'wb') as f:
+            pickle.dump(MACHINE_PARAMS, f, protocol=4)
 
     runMachine(machiner, MACHINE_PARAMS, fullInitialization)
 

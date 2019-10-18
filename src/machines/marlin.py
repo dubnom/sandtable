@@ -30,7 +30,8 @@ class machiner(Machine):
         # Initialize the board
         initialize = []
         if fullInit:
-            initialize += params['init']
+            logging.info( 'Full machine initialization.' )
+            initialize += params['init'] + ['M500']
 
         for i in initialize:
             self.send( i ) 

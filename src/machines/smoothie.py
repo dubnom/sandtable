@@ -1,80 +1,69 @@
 import sys
 import serial
-import socket
-import socketserver
-from tcpserver import *
-from threading import Thread, Event 
-import time
+from threading import Thread
 import queue
 import logging
 import re
 import json
 from Sand import *
 
-#
-#   Driver for a Smoothieboard running software from Smoothieware
-#
-pos = [-1.0,-1.0]
-ready = True
-        
-class MyHandler(socketserver.BaseRequestHandler):
-    def setup(self):
-        self.writer = self.server.writer
 
-    def handle(self):
-        data = self.request.recv(1024).strip().split()
-        logging.debug( "Data: %s" % data )
-        if len(data):
-            command = data[0]
-            if command != 'status':
-                logging.info( "Command: %s" % command )
-            if command == '*':
-                self.writer.send( " ".join(data[1:]) + '\r') 
-            elif command == 'run':
-                self.run(data[1],data[2])
-            elif command == 'halt':
-                self.halt()
-            elif command == 'restart':
-                self.restart()
-        self.request.send(json.dumps({'pos':pos,'state':ready}))
+POSITION_POLL_FREQ = 30     # Poll for status every 30 instructions
+POSITION_POLL_SECS = 2.     # Or every 2. seconds
 
-    def run(self,fileName,wait):
-        fileName = fileName
-        logging.info( "Executing: run %s" % fileName )
-        self.writer.flush()
-        with open(fileName, 'r') as file:
-            for num,line in enumerate(file):
-                self.writer.send(line.upper())
-                if num % 30 == 0:
-                    self.writer.send('get status\r')
-                
-        if wait == 'True':
-             logging.info( "Waiting for drawing to finish" )
-             time.sleep(1.0)
-             self.writer.wait()
-             logging.debug( "Queue depth is fine, waiting for state %s" % ready )
-             while not ready:
-                 time.sleep(0.5)
-             logging.debug( "Status has changed" )
-        logging.info( "Run has completed" )
+
+class machiner(Machine):
+    """ Driver for SmoothieWare compatible controllers."""
+
+    def initialize(self, machInitialize):
+        logging.info( 'Trying to connect to Smoothie controller.' )
+
+        # Open the serial port to connect to Smoothie
+        try:
+            ser = serial.Serial(MACHINE_PORT, baudrate=MACHINE_BAUD, rtscts=True, timeout=0.5)
+        except Exception as e:
+            logging.error( e )
+            exit(0)
+
+        # Start the read thread
+        self.reader = ReadThread(self, ser)
+        self.reader.start()
+
+        # Create the writer
+        self.writer = WriteThread(self, ser)
+        self.writer.start()
+
+        # Initialize the board
+        initialize = []
+        if machInitialize:
+            initialize += machInitialize
+
+        for i in initialize:
+            self.send( i ) 
+
+        # Home the machine
+        self.home()
+
+    def home(self):
+        self.send( 'G28.2X0Y0' )
 
     def halt(self):
-        logging.info( "Executing: halt" )
-        self.writer.send( "abort\r" )
-        self.writer.flush()
-
-    def restart(self):
-        self.server.stop()
+        self.flush()
+        self.send( "abort" )
+        
+    def stop(self):
+       self.writer.stop()
+       self.reader.stop()
 
 
 class ReadThread(Thread):
-    def __init__(self,ser):
+    def __init__(self, machine, ser):
         self.ser = ser
         super(ReadThread, self).__init__()
 
     def run(self):
         reStatus = re.compile( '^<(Idle|Run)\\|MPos:([\d.-]+),([\d.-]+),([\d.-]+)\\|(.*)>$' )
-
+        
         logging.info( "Reader thread active" )
         self.running = True
         while self.running:
@@ -86,8 +75,9 @@ class ReadThread(Thread):
                     match = reStatus.match(line)
                     if match:
                         status = match.groups()[0]
-                        pos[0], pos[1] = float(match.groups()[1]), float(match.groups()[2])
+                        posX, posY = float(match.groups()[1]), float(match.groups()[2])
                         ready = status == 'Idle'
+                        # FIX: self.machine.setState( posX, posY, ready )
                     
                     # Parse responses
                     elif line == 'ok':
@@ -104,113 +94,39 @@ class ReadThread(Thread):
         self.running = False
 
 
-class statusTimer(Thread):
-    def __init__(self, event, writer):
-        Thread.__init__(self)
-        self.stopped = event
-        self.writer = writer
+class WriteThread(Thread):
+    def __init__(self, machine, ser):
+        self.ser = ser
+        self.queue = machine.queue
+        self.num = 0
+        super(WriteThread, self).__init__()
 
     def run(self):
-        while not self.stopped.wait(2.):
-            self.writer.send('get status\r')
-
-class Writer():
-    def __init__(self,ser):
-        self.queue = queue.Queue()
-        self.writeThread = WriteThread(ser,self.queue)
-        self.writeThread.start()
         self.stopFlag = Event()
         thread = statusTimer(self.stopFlag,self)
         thread.start()
 
-    def send(self,data):
-        self.queue.put(data)
-
-    def flush(self):
-        logging.debug( "Flushing queue %d" % self.queue.qsize())
-        while not self.queue.empty():
-            self.queue.get()
-            self.queue.task_done()
-        logging.debug( "Done flushing queue" )
-
-    def wait(self):
-        self.queue.join()
-
-    def stop(self):
-        # Stop the timer
-        self.stopFlag.set()
-        self.writeThread.stop()
-        self.send('abort')
-
-class WriteThread(Thread):
-    def __init__(self,ser,queue):
-        self.ser = ser
-        self.queue = queue
-        super(WriteThread, self).__init__()
-
-    def run(self):
         logging.info( "Writer thread active" )
         self.running = True
         while self.running:
-            data = self.queue.get()
-            self.ser.write(bytes(data,encoding='utf-8'))
-            self.queue.task_done()
+            try:
+                data = self.queue.get(True, POSITION_POLL_SECS)
+                self.ser.write(bytes(data+'\r',encoding='UTF-8'))
+                self.queue.task_done()
+
+                # Ask for the machine's status periodically
+                self.num += 1
+                if self.num % POSITION_POLL_FREQ == 0:
+                    self._getStatus()
+            except Queue.Empty:
+                self._getStatus()
+
         logging.info( "Writer thread exiting" )
+
+    def _getStatus(self):
+        self.num = 0
+        self.ser.write(bytes('get status\r',encoding='utf-8'))
 
     def stop(self):
         self.running = False
- 
 
-def runMachine(fullInitialization):
-    logging.info( 'Starting the sandtable smoothie daemon' )
-
-    # Open the serial port to connect to the Smoothiboard
-    try:
-        ser = serial.Serial(MACHINE_PORT, baudrate=MACHINE_BAUD, rtscts=True, timeout=0.5)
-    except Exception as e:
-        logging.error( e )
-        exit(0)
-
-    # Start the read thread
-    reader = ReadThread(ser)
-    reader.start()
-
-    # Create the writer
-    writer = Writer(ser)
-
-    # Initialize the board
-    initialize = []
-    if fullInitialization:
-        initialize += machInitialize
-
-    # Add the homing commands
-    initialize += ["G28.2X0Y0"]
-
-    for i in initialize:
-        writer.send( i + "\r" ) 
-
-    # Start the socket server and listen for requests
-    logging.info( "Trying to listen on %s:%d" % (MACH_HOST,MACH_PORT))
-    
-    retries = 10
-    server = None
-    while retries > 0:
-        try:
-            server = StoppableTCPServer((MACH_HOST,MACH_PORT), MyHandler)
-            logging.info( "SocketServer connected" )
-            break
-        except socket.error as e:
-            logging.error( "%d retries left: %s" %(retries,e) )
-            retries -= 1
-            time.sleep(10.0)
-    
-    if server:
-        server.writer = writer
-        server.serve()
-    logging.info( "Out of server loop!" )
-    
-    logging.info( "Stopping writer" )
-    writer.stop()
-    logging.info( "Stopping reader" )
-    reader.stop()
-    logging.info( "Should be all done. Shut down." )

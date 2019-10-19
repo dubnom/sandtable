@@ -11,7 +11,7 @@ sandables = [
         "Rocks", "SpiralArms", "Sines",
         "Picture", "WebPic", "RandomDraw",
         "Bulbs", "Engine", "ESpiral",
-        "Grass", "Nautilus"
+        "Grass", "Nautilus", "Sisyphus",
         ]
 
 todo = [ "Tree", "Celtic", "LOGO", "GreekKey", "CropCircle", "Propogation", ]

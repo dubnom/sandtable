@@ -115,9 +115,9 @@ class Chains():
         return newChains
 
     @staticmethod
-    def spiral(xCenter,yCenter,outerRadius,linesPerInch=1.0,angleRate=15.0,angleStart=0.0,innerRadius=0.0,base=1.0,fill=False,angleEnd=None):
-        thickness = outerRadius - innerRadius
-        points = int( (360.0 / abs(angleRate)) * linesPerInch * (outerRadius - innerRadius))
+    def spiral(xCenter,yCenter,radiusStart,linesPerInch=1.0,angleRate=15.0,angleStart=0.0,radiusEnd=0.0,base=1.0,fill=False,angleEnd=None):
+        thickness = radiusEnd - radiusStart
+        points = int( abs( thickness * linesPerInch * 360.0 / angleRate))
         divisor = pow((points * abs(angleRate)) / 360.0, base)
         point360 = 360.0 / abs( angleRate )
 
@@ -129,13 +129,13 @@ class Chains():
             angle   = math.radians( angleStart + point * angleRate )
             if fill:
                 if point > point360:
-                    radius  = innerRadius + thickness * (math.pow((((point - point360) * abs(angleRate)) / 360.0), base) / divisor)
+                    radius  = radiusStart + thickness * (math.pow((((point - point360) * abs(angleRate)) / 360.0), base) / divisor)
                 else:
-                    radius = innerRadius
+                    radius = radiusStart
                 x = xCenter + math.cos( angle ) * radius
                 y = yCenter + math.sin( angle ) * radius
                 chain.append( (x,y) )
-            radius  = innerRadius + thickness * (math.pow(((point * abs(angleRate)) / 360.0), base) / divisor)
+            radius  = radiusStart + thickness * (math.pow(((point * abs(angleRate)) / 360.0), base) / divisor)
             x = xCenter + math.cos( angle ) * radius
             y = yCenter + math.sin( angle ) * radius
             chain.append( (x,y) )

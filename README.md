@@ -89,12 +89,12 @@ Logs are written to:
 * Improve scheduler interface
 * Improve lighting scenes
 * Make the web interface more interactive
-* Move from PIL to Pillow
 * Add upload function to Filer tab
-* Move common items from machines into machd
 * Move common items from machines Leds into ledaemon
 * Rename code for more consistency (ledstuff, ledaemon, etc.)
 * Condense Polylines and Chains
+* Move gcode generation to machines
+* Add export gcode and make export svg return file
 
 ## Authors:
 

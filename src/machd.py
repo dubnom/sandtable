@@ -2,6 +2,7 @@
 import logging
 import socket
 import json
+import time
 import socketserver
 from importlib import import_module
 from tcpserver import *
@@ -10,9 +11,6 @@ from Sand import *
 
 
 class MyHandler(socketserver.BaseRequestHandler):
-    pos = [-1.0,-1.0]
-    ready = True
-
     def setup(self):
         self.machine = self.server.machine
 
@@ -32,7 +30,7 @@ class MyHandler(socketserver.BaseRequestHandler):
             elif command == 'restart':
                 self.restart()
 
-        state = {'pos':self.pos, 'state':self.ready}
+        state = {'pos':self.machine.pos, 'state':self.machine.ready}
         self.request.send(bytes(json.dumps(state),encoding='utf-8'))
 
     def run(self,fileName,wait):

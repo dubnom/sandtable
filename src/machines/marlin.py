@@ -28,8 +28,8 @@ class machiner(Machine):
         self.writer.start()
 
         # Initialize the board
-        fullInit = True     # FIX
         initialize = []
+        fullInit = True     # FIX: Board doesn't seem to remember anything
         if fullInit:
             logging.info( 'Full machine initialization.' )
             initialize += params['init'] + ['M500']
@@ -42,15 +42,20 @@ class machiner(Machine):
         self.ready = True
 
     def run(self, chains, units, feed):
+        self.send( 'M17' )
         self.send( 'G1 F%g' % feed )
+        self.count = 0
         for chain in chains:
             for point in chain:
                 s =  'G1 X%g Y%g' % (round(point[0],1), round(point[1],1))
-                logging.info( s )
                 self.send( s )
+                self.count += 1
+        self.send( 'M18' )
 
     def home(self):
-        self.send( 'G28.2X0Y0' )
+        pass
+        # FIX: NEED LIMIT SWITCHES
+        #self.send( 'G28.2X0Y0' )
 
     def halt(self):
         self.flush()
@@ -100,6 +105,7 @@ class WriteThread(Thread):
         while self.running:
             # FIX: Add conditional for controller readiness
             data = self.queue.get()
+            logging.debug('%d %s' % (self.queue.qsize(), data))
             self.ser.write(bytes(data+'\r',encoding='UTF-8'))
             self.queue.task_done()
         logging.info( "Write thread exiting" )

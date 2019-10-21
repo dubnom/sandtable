@@ -22,17 +22,17 @@ LED_MAPPING         = None
 
 MACHINE             = "marlin"
 MACHINE_UNITS       = "mm"
-MACHINE_FEED        = 100.0
-MACHINE_ACCEL       = 100.0
+MACHINE_FEED        = 60 * 50.0     # mm/minute
+MACHINE_ACCEL       = 3000.0
 
 MACHINE_PARAMS = {
     'port': "/dev/ttyACM0",
     'baud': 115200,
     'init': [
-        "M92 X%.8g" % (200/500),   # Steps/mm
-        "M92 Y%.8g" % (200/500),   #
-        "M203 X%g" % 100,          # Max feed mm / second
-        "M203 Y%g" % 100,          # Max feed mm / second
-        "M211 S0",                 # Disable software endstops
+        "M92 X%.8g" % (16*200/50),  # microsteps*StepsPerRotation/mm
+        "M92 Y%.8g" % (16*200/50),  #
+        "M203 X%g" % 150,           # Max feed mm / second
+        "M203 Y%g" % 150,           # Max feed mm / second
+        "M211 S0",                  # Disable software endstops
         ]
 }

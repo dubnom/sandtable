@@ -24,9 +24,10 @@ def status():
 
     try:
         with mach.mach() as e:
-            results.append( [ 'State', ["Busy","Ready"][e.getState()]] )
-            results.append( [ 'Position', '%g, %g' %  e.getPosition()] )
-            # FIX: type of drawing, Estimated time, estimated remaining time, points, length, remaining points, remaining length
+            status = e.getStatus()
+            results.append( [ 'Machine State', ["Busy","Ready"][status['ready']]] )
+            results.append( [ 'Machine Position', '%g, %g' %  (status['pos'][0],status['pos'][1])])
+            results.append( [ 'Drawing Percent', '%g' % status['percent']] )
     except:
         results.append( ('State', 'Unknown' ))
         results.append( ('Position', 'Unknown'))

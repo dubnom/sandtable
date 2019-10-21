@@ -19,7 +19,7 @@ To avoid drawing over things, move the ball away!
     def __init__( self, width, length ):
         try:
             with mach.mach() as e:
-                x,y = e.getPosition()
+                x,y = e.getStatus()['pos']
         except:
             x,y = 0.,0.
 

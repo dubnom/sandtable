@@ -24,6 +24,7 @@ class Machine:
 
     pos = [-1., -1.]
     ready = False
+    count = 0
 
     def __init__(self, params, fullInit):
         # FIX: Add machine specific parameters as a dictionary
@@ -46,10 +47,18 @@ class Machine:
         self.queue.join()
 
     def flush(self):
-        while not self.queue.empty():
-            self.queue.get()
-            self.queue.task_done()
+        try:
+            while True:
+                self.queue.get_nowait()
+                self.queue.task_done()
+        except queue.Empty:
+            pass
 
     def stop(self):
         pass
+
+    def getStatus(self):
+        count = self.count
+        percent = 100 if count == 0 else (count-self.queue.qsize()) / count
+        return {'pos':self.pos, 'ready':self.ready, 'percent':percent}
 

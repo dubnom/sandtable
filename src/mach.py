@@ -43,10 +43,6 @@ class mach:
     def home( self ):
         self.command( 'home' )
 
-    def getPosition( self ):
+    def getStatus( self ):
         self.command( 'status' )
-        return self.status['pos']
-
-    def getState( self ):
-        self.command( 'status' )
-        return self.status['state']
+        return self.status

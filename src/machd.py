@@ -28,8 +28,8 @@ class MyHandler(socketserver.BaseRequestHandler):
         elif command == 'restart':
             self.restart()
 
-        state = {'pos':self.machine.pos, 'state':self.machine.ready}
-        self.request.send(bytes(json.dumps(state),encoding='utf-8'))
+        status = self.machine.getStatus()
+        self.request.send(bytes(json.dumps(status),encoding='utf-8'))
 
     def run(self, data):
         logging.info( data )

@@ -56,6 +56,7 @@ apt-get upgrade
 
 apt-get install -y ntp ntpdate
 apt-get install -y vim
+apt-get install -y tmux
 apt-get install -y python3-dev
 apt-get install -y libjpeg-dev
 apt-get install -y fonts-liberation

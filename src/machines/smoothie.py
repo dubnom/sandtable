@@ -42,6 +42,17 @@ class machiner(Machine):
         # Home the machine
         self.home()
 
+    def run(self, chains, units, feed):
+        self.send( 'G20' if units == 'inches' else 'G21')
+        self.send( 'F%g' % feed )
+        self.count = 0
+        for chain in chains:
+            for point in chain:
+                s =  'G1 X%g Y%g' % (round(point[0],2), round(point[1],2))
+                self.send( s )
+                self.count += 1
+        self.send( 'M2' )
+
     def home(self):
         self.send( 'G28.2X0Y0' )
 

@@ -27,7 +27,7 @@ def status():
             status = e.getStatus()
             results.append( [ 'Machine State', ["Busy","Ready"][status['ready']]] )
             results.append( [ 'Machine Position', '%g, %g' %  (status['pos'][0],status['pos'][1])])
-            results.append( [ 'Drawing Percent', '%g' % status['percent']] )
+            results.append( [ 'Drawing Percent', '%5.1f' % (100*status['percent'])] )
     except:
         results.append( ('State', 'Unknown' ))
         results.append( ('Position', 'Unknown'))

@@ -97,7 +97,6 @@ Logs are written to:
 * Move common items from machines Leds into ledaemon
 * Rename code for more consistency (ledstuff, ledaemon, etc.)
 * Condense Polylines and Chains
-* Move gcode generation to machines
 * Add export gcode and make export svg return file
 * Add playlists
 

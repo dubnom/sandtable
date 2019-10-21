@@ -72,12 +72,20 @@ SIZE = 1
 WIDTH = 1
 HEIGHT = 2
 
+nverts = 10
+
 #
 faces = []
 contours = [[]]
 boundarys = [[]]
 toolpaths = [[]]
 slices = [[]]
+
+def strip(foo):
+    return foo.strip()
+
+def find(foo,b):
+    return foo.find(b)
 
 def coord(str,digits,fraction):
    #

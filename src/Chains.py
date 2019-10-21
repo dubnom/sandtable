@@ -286,9 +286,9 @@ class Chains():
                 outcode2 = Chains._compOutCode( p2, box )
         
     @staticmethod    
-    def saveImage( chains, box, fileName, imageWidth, imageHeight, realistic=True ):
+    def saveImage( chains, box, fileName, imageWidth, imageHeight, imageType ):
         """Save the chains as a PNG file to disk"""
-        if realistic:
+        if imageType == 'Realistic':
             pic = Chains.makeRealisticImage( chains, box, imageWidth, imageHeight )
         else:
             pic = Chains.makeImage( chains, box, imageWidth, imageHeight )
@@ -368,6 +368,14 @@ class Chains():
                 for x,y,c in Chains._lines:
                     draw.line( [ (start[0]+x, start[1]+y), (end[0]+x, end[1]+y) ], fill=c )
         return pic
+
+    @staticmethod
+    def convertUnits(chains, fromUnits, toUnits):
+        """Convert between measurement units"""
+        if fromUnits == toUnits:
+            return chains
+        unitConv = 1./2.54 if toUnits=='inches' else 25.4
+        return [[ (p[0]*unitConv, p[1]*unitConv) for p in chain] for chain in chains ]
 
     @staticmethod
     def makeGCode( chains, box, feed, fileName, machUnits, tableUnits ):

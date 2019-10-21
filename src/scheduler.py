@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3 -u
 import sched
 import time
 import logging
@@ -132,7 +132,6 @@ class Demo(Thread):
         setLedPattern( pattern, params )
 
     def _drawRandom(self):
-        cfg = LoadConfig()
         boundingBox = [ (0.0, 0.0), (TABLE_WIDTH, TABLE_LENGTH) ]
         while True:
             if self._state == self.HALT:
@@ -143,7 +142,7 @@ class Demo(Thread):
             params.randomize( sand.editor )
             try:
                 chains = sand.generate( params )
-                t, d, p = Chains.estimateMachiningTime( chains, boundingBox, cfg.maxFeed, TABLE_ACCEL )
+                t, d, p = Chains.estimateMachiningTime( chains, boundingBox, MACHINE_FEED, MACHINE_ACCEL )
                 if DRAW_TIME_MIN <= t <= DRAW_TIME_MAX:
                     break
                 logging.info( "Tried %s but time was %d:%02d" % (sand,int(t/60),int(t)%60))
@@ -151,9 +150,8 @@ class Demo(Thread):
                 logging.warning( "Tried %s but failed with %s" % (sand,e))
 
         logging.info( "Drawing %s, estimated time %d:%02d" % (sand,int(t/60),int(t)%60))
-        Chains.makeGCode( chains, boundingBox, cfg.maxFeed, GCODE_FILE, MACHINE_UNITS, TABLE_UNITS )
         with mach.mach() as e:
-            e.run( GCODE_FILE )
+            e.run( chains, boundingBox, MACHINE_FEED, TABLE_UNITS, MACHINE_UNITS )
         History.save( params, sandable, chains, "lastdemo" )
 
     def _drawWait(self):
@@ -247,9 +245,8 @@ if __name__=="__main__":
 
     # FIX: Kluge to clear out the scheduler and start a random drawing everyday at 3:00 am.
     def kluge():
-        cfg = LoadConfig()
         logging.info( "Kluge triggered" )
-        if cfg.scheduler:
+        if SCHEDULER_ENABLED:
             logging.info( "Running single demo" )
             demo.demoOnce()
         else:

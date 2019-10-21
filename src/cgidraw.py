@@ -17,7 +17,6 @@ import schedapi
 def drawPage():
     cstuff = cgistuff( 'Draw' )
     form = request.forms
-    cfg = LoadConfig()  
  
     # Check to see if params are being loaded from a file
     params = None
@@ -44,7 +43,7 @@ def drawPage():
 
         # Generate the chains
         memoize = Memoize()
-        if cfg.cache and memoize.match( sandable, params ):
+        if CACHE_ENABLE and memoize.match( sandable, params ):
             chains = memoize.chains()
         else:
             try:
@@ -52,7 +51,7 @@ def drawPage():
             except SandException as e:
                 errors = str(e)
                 chains = []
-            Chains.saveImage( chains, boundingBox, IMAGE_FILE, IMAGE_WIDTH, IMAGE_HEIGHT, cfg.imgType )
+            Chains.saveImage( chains, boundingBox, IMAGE_FILE, IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_TYPE )
             memoize.save( sandable, params, chains )
 
         # If 'Draw in Sand' has been requested then do it!
@@ -60,9 +59,8 @@ def drawPage():
             with schedapi.schedapi() as sched:
                 sched.demoHalt()
             History.history( params, sandable, chains )
-            Chains.makeGCode( chains, boundingBox, cfg.maxFeed, GCODE_FILE, MACHINE_UNITS, TABLE_UNITS )
             with mach.mach() as e:
-                e.run( GCODE_FILE )
+                e.run( chains, boundingBox, MACHINE_FEED, TABLE_UNITS, MACHINE_UNITS )
 
         # If 'Abort' has been requested stop the drawing
         if action == 'abort' or action == 'Abort!':
@@ -92,7 +90,7 @@ def drawPage():
                 Chains.makeSVG( chains, "%s%s.svg" % (DATA_PATH, name))
 
         # Estimate the amount of time it will take to draw
-        seconds, distance, pointCount = Chains.estimateMachiningTime( chains, boundingBox, cfg.maxFeed, TABLE_ACCEL )
+        seconds, distance, pointCount = Chains.estimateMachiningTime( chains, boundingBox, MACHINE_FEED, MACHINE_ACCEL )
         help = '' if not sand.__doc__ else '&nbsp;&nbsp;&nbsp;&nbsp;<span class="navigation"><a href="dhelp/%s" target="_blank">Help!</a></span>' % sandable
         drawinfo = 'Draw time %s &nbsp;&nbsp;&nbsp; %.1f feet &nbsp;&nbsp;&nbsp; Points %d' % (timedelta( 0, int( seconds )), distance / 12.0, pointCount)
 

@@ -32,12 +32,11 @@ sections of the drawing that aren't connected to one-another.
 """
 
     def __init__( self, width, length ):
-        cfg = LoadConfig()
         self.editor = [
             DialogFile(  "filename",            "File Name",                default = CLIPART_PATH, filter = '.dxf' ),
             DialogInt(   "iterations",          "Number of Fill Iterations",default = 0, min = 0, max = 200 ),
             DialogFloat( "decrement",           "Fill Decrement",           units = "inches", default = 0.5, min = 0.0, max = 2.0 ),
-            DialogFloat( "ballSize",            "Ball Size",                units = "inches", default = cfg.ballSize, min = 0.25 ),
+            DialogFloat( "ballSize",            "Ball Size",                units = "inches", default = BALL_SIZE, min = 0.25 ),
             DialogBreak(),
             DialogFloat( "xOffset",             "X Origin",                 units = "inches", default = 0.0 ),
             DialogFloat( "yOffset",             "Y Origin",                 units = "inches", default = 0.0 ),

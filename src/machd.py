@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3 -u
 import logging
 import socket
 import json
@@ -9,39 +9,37 @@ from tcpserver import *
 from threading import Thread, Event 
 from Sand import *
 
+REQ_BUF_SIZE = 10 * 1024 * 1024
 
 class MyHandler(socketserver.BaseRequestHandler):
     def setup(self):
         self.machine = self.server.machine
 
     def handle(self):
-        data = json.loads( self.request.recv(1024).decode('utf-8')).strip().split()
-        logging.debug( "Data: %s" % data )
-        if len(data):
-            command = data[0]
-            if command != 'status':
-                logging.info( "Command: %s" % command )
-            if command == '*':
-                self.machine.send( " ".join(data[1:]) + '\r') 
-            elif command == 'run':
-                self.run(data[1], data[2])
-            elif command == 'halt':
-                self.machine.halt()
-            elif command == 'restart':
-                self.restart()
+        command, data = json.loads( self.request.recv(REQ_BUF_SIZE).decode('utf-8'))
+        if command != 'status':
+            logging.info( "Command: %s" % command )
+        if command == 'send':
+            self.machine.send( data['string'] )
+        elif command == 'run':
+            self.run(data)
+        elif command == 'halt':
+            self.machine.halt()
+        elif command == 'restart':
+            self.restart()
 
         state = {'pos':self.machine.pos, 'state':self.machine.ready}
         self.request.send(bytes(json.dumps(state),encoding='utf-8'))
 
-    def run(self,fileName,wait):
-        fileName = fileName
-        logging.info( "Executing: run %s" % fileName )
-        self.machine.flush()
+    def run(self, data):
+        logging.info( data )
+        chains = data['chains']
+        units = data['units']
+        feed = data['feed']
+        wait = data['wait']
 
-        # FIX: Convert to metric
-        with open(fileName, 'r') as file:
-            for num,line in enumerate(file):
-                self.machine.send(line.upper())
+        self.machine.flush()
+        self.machine.run( chains, units, feed )
                 
         if wait == 'True':
              logging.info( "Waiting for drawing to finish" )
@@ -105,16 +103,16 @@ def main():
     # Check settings update file
     fullInitialization = True
     try:
-        with open(VER_FILE,'rb') as f:
-            oldVersion = pickle.load(f)
+        with open(VER_FILE,'r') as f:
+            oldVersion = json.load(f)
         if oldVersion == MACHINE_PARAMS:
             fullInitialization = False
     except Exception as e:
         logging.error(e)
 
     if fullInitialization:
-        with open(VER_FILE,'wb') as f:
-            pickle.dump(MACHINE_PARAMS, f, protocol=4)
+        with open(VER_FILE,'w') as f:
+            json.dump(MACHINE_PARAMS, f)
 
     runMachine(machiner, MACHINE_PARAMS, fullInitialization)
 

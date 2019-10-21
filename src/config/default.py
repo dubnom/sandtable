@@ -21,5 +21,6 @@ LED_MAPPING         = None
 
 MACHINE             = "nomachine"
 MACHINE_UNITS       = "inches"
+MACHINE_FEED        = 1.
 MACHINE_PARAMS      = {}
 

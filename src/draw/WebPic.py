@@ -34,7 +34,6 @@ Use the "Pictures" tab in the main navigation to more easily select photos.
 """
 
     def __init__( self, width, length ):
-        cfg = LoadConfig()
         self.editor = [
             DialogStr(   "desc",                "Search Term",              length = 40 ),
             DialogList(  "color",               "Image Color",              default = 'gray', list=['all','color','gray','transparent'] ),
@@ -44,7 +43,7 @@ Use the "Pictures" tab in the main navigation to more easily select photos.
             DialogInt(   "iterations",          "Number of Fill Iterations",default = 0, min = 0, max = 100 ),
             DialogFloat( "decrement",           "Fill Decrement",           units = "inches", default = 0.5, min = 0.0, max = 10.0 ),
             DialogBreak(),
-            DialogFloat( "ballSize",            "Ball Size",                units = "inches", default = cfg.ballSize, min = 0.25),
+            DialogFloat( "ballSize",            "Ball Size",                units = "inches", default = BALL_SIZE, min = 0.25),
             DialogFloat( "xOffset",             "X Origin",                 units = "inches", default = 0.0 ),
             DialogFloat( "yOffset",             "Y Origin",                 units = "inches", default = 0.0 ),
             DialogFloat( "width",               "Width (x)",                units = "inches", default = width, min = 1.0, max = 1000.0 ),

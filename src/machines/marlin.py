@@ -28,6 +28,7 @@ class machiner(Machine):
         self.writer.start()
 
         # Initialize the board
+        fullInit = True     # FIX
         initialize = []
         if fullInit:
             logging.info( 'Full machine initialization.' )
@@ -39,6 +40,14 @@ class machiner(Machine):
         # Home the machine
         self.home()
         self.ready = True
+
+    def run(self, chains, units, feed):
+        self.send( 'G1 F%g' % feed )
+        for chain in chains:
+            for point in chain:
+                s =  'G1 X%g Y%g' % (round(point[0],1), round(point[1],1))
+                logging.info( s )
+                self.send( s )
 
     def home(self):
         self.send( 'G28.2X0Y0' )

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh -e
 
 # Sandtable services
 /var/www/sandtable/bin/runloop.sh /var/www/sandtable/src/machd.py >/var/log/machd.log 2>&1 &
@@ -6,5 +6,5 @@
 /var/www/sandtable/bin/runloop.sh /var/www/sandtable/src/scheduler.py >/var/log/scheduler.log 2>&1 &
 
 # Actual SandTable server
-/var/www/sandtable/bin/runloop.sh /var/www/sandtable/src/server.py >/var/log/sandtable.log 2>&1 &
+/var/www/sandtable/bin/runloop.sh /var/www/sandtable/src/sandtable.py >/var/log/sandtable.log 2>&1 &
 

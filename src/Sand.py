@@ -1,17 +1,52 @@
 # List of supported drawing classes
 sandables = [
-        "Sun","Spiral", "Text",
-        "Waves", "Lissajous", "Grid",
-        "Maze", "Snowflake", "Spirograph",
-        "Wood", "Dragon", "Hilbert",
-        "Clipart", "Checkers", "Man",
-        "Lorenz", "Shingles", "Rose",
-        "Star", "Fermat", "Move",
-        "Lindenmayer", "Harmonograph", "Func3d",
-        "Rocks", "SpiralArms", "Sines",
-        "Picture", "WebPic", "RandomDraw",
-        "Bulbs", "Engine", "ESpiral",
-        "Grass", "Nautilus", "Sisyphus",
+        "Spiral",
+        "Rose",
+        "Star",
+
+        "Fermat",
+        "Spirograph",
+        "Sines",
+
+        "Lissajous",
+        "Harmonograph",
+        "Nautilus",
+
+        "Text",
+        "Maze",
+        "Sun",
+
+        "Snowflake",
+        "Dragon",
+        "Hilbert",
+
+        "Waves",
+        "Grid",
+        "Checkers",
+
+        "Lorenz",
+        "Shingles",
+        "Lindenmayer",
+
+        "Rocks",
+        "Wood",
+        "Grass",
+
+        "WebPic", 
+        "Clipart",
+        "Picture",
+
+        "Sisyphus",
+        "Func3d",
+        "SpiralArms",
+
+        "Bulbs",
+        "Engine",
+        "ESpiral",
+
+        "Man",
+        "RandomDraw",
+        "Move",
         ]
 
 todo = [ "Tree", "Celtic", "LOGO", "GreekKey", "CropCircle", "Propogation", ]
@@ -40,8 +75,6 @@ STORE_PATH          = "store/"
 SOURCE_PATH         = "src/"
 CONFIG_PATH         = "config"
 TMP_PATH            = "/tmp/"
-
-CONFIG_FILE         = "%sconfig.pkl" % DATA_PATH
 
 MACH_HOST           = 'localhost'
 MACH_PORT           = 5007
@@ -81,29 +114,6 @@ exec("from %s.%s import *" % (CONFIG_PATH, hostmap[HOST_NAME]))
 
 IMAGE_HEIGHT        = int(IMAGE_WIDTH * (TABLE_LENGTH / TABLE_WIDTH))
 MACH_FILE           = '%smachines/%s.py' % (SOURCE_PATH, MACHINE)
-
-# Configurable "constants"
-import pickle as pickle
-
-class Config():
-    imgType     = True
-    maxFeed     = 600
-    ballSize    = .75
-    cache       = True
-    cgiDebug    = True
-    scheduler   = True
-    
-def LoadConfig():
-    try:
-        cfg = pickle.load( open( CONFIG_FILE, 'rb' ))
-    except:
-        cfg = Config()
-    return cfg
-
-def SaveConfig(cfg):
-    pickle.dump( cfg, open( CONFIG_FILE, 'wb' ))
-
-LoadConfig()
 
 class Sandable():
     editor = []

@@ -31,14 +31,13 @@ Use the "Pictures" tab in the main navigation to more easily select photos.
 """
 
     def __init__( self, width, length ):
-        cfg = LoadConfig()
         self.editor = [
             DialogFile(  "filename",            "File Name",                default = PICTURE_PATH, filter = '.png|.jpg|.gif|.bmp' ),
             DialogInt(   "turdSize",            "Turd Size",                default = 40, min = 0, max = 1000 ),
             DialogInt(   "iterations",          "Number of Fill Iterations",default = 0, min = 0, max = 100 ),
             DialogFloat( "decrement",           "Fill Decrement",           units = "inches", default = 0.5, min = 0.0, max = 10.0 ),
             DialogBreak(),
-            DialogFloat( "ballSize",            "Ball Size",                units = "inches", default = cfg.ballSize, min = 0.25 ),
+            DialogFloat( "ballSize",            "Ball Size",                units = "inches", default = BALL_SIZE, min = 0.25 ),
             DialogFloat( "size",                "Height (Picture)",         units = "inches", default = length ),
             DialogFloat( "xOffset",             "X Origin",                 units = "inches", default = 0.0 ),
             DialogFloat( "yOffset",             "Y Origin",                 units = "inches", default = 0.0 ),

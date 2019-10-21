@@ -28,7 +28,6 @@ Press the *Random* button to automatically make new drawings.
 
     def __init__( self, width, length ):
         rockSize = min(width,length) / 4.0
-        cfg = LoadConfig()
         self.editor = [
             DialogInt(   "rocks",           "Number of rocks",          default = 5, min = 1, max = 25 ),
             DialogFloat( "minRockSize",     "Minimum rock size",        units = "inches", min = .25, max = rockSize, default = 1.0 ),
@@ -36,7 +35,7 @@ Press the *Random* button to automatically make new drawings.
             DialogInt(   "rakeSize",        "Rake teeth",               units = "tines", min = 2, max = 8, default = 4 ),
             DialogInt(   "seed",            "Random Seed",              default = 1, min = 0, max = 10000, rbutton = True ),
             DialogBreak(),
-            DialogFloat( "ballSize",        "Ball size",                units = "inches", min = .25, default = cfg.ballSize ),
+            DialogFloat( "ballSize",        "Ball size",                units = "inches", min = .25, default = BALL_SIZE ),
             DialogFloat( "xOffset",         "X Origin",                 units = "inches", default = 0.0 ),
             DialogFloat( "yOffset",         "Y Origin",                 units = "inches", default = 0.0 ),
             DialogFloat( "width",           "Width (x)",                units = "inches", default = width ),

@@ -71,11 +71,15 @@ Set the hostname of your machine
 cd sandtable
 bin/install.sh
 
-Configure your controller
-Configure your machine
-Give access to the USB port
+Configure your controller:
+* Copy an existing configuration and modify it to fit your machine.
+* Edit src/config/hostmap.py and add your host name and config file name.
 
-Reboot
+Restart the machine.
+
+You should be able to use a browser -
+* on the machine you can use: http:localhost
+* off the machine you can use: http:hostname (if your DNS/DHCP server is setup correctly
 
 Logs are written to:
 * Server logs - /var/logs/sandtable.log
@@ -95,6 +99,7 @@ Logs are written to:
 * Condense Polylines and Chains
 * Move gcode generation to machines
 * Add export gcode and make export svg return file
+* Add playlists
 
 ## Authors:
 

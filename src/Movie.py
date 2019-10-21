@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3 -u
 
 import os
 import sys
@@ -197,11 +197,9 @@ class drawer:
                 camera.capture( "%sIMG_%04d.jpg" % (TMP_PATH, self.frameNumber))
                 self.frameNumber += 1
         
-    def drawInSand( self, chain ):
-        cfg = LoadConfig()
-        Chains.makeGCode( chain, self.boundingBox, cfg.maxFeed, GCODE_FILE, MACHINE_UNITS, TABLE_UNITS )
+    def drawInSand( self, chains ):
         with mach.mach() as e:
-            e.run( GCODE_FILE, wait = True )
+            e.run( chains, self.boundingBox, MACHINE_FEED, TABLE_UNITS, MACHINE_UNITS, wait=True )
 
 
 class Thingy:

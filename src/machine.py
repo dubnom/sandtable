@@ -16,6 +16,7 @@ class Machine:
                          API, etc.) it expects:
                              machInitialize - settings like motor mapping, acceleration, etc.
                              This initialization should be sent if not None.
+            run - draw a pattern on the machine.
             home - home the machine.
             halt - halt the machine.
             stop - disconnect from the machine.
@@ -31,6 +32,9 @@ class Machine:
 
     def send(self, data):
         self.queue.put(data)
+
+    def run(self, chains, units, feed):
+        pass
 
     def home(self):
         pass

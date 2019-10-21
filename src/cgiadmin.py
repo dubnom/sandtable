@@ -8,54 +8,50 @@ import mach
 import schedapi
 import MovieStatus
 from cgistuff import *
-from dialog import *
 from ledstuff import *
 
 @route('/admin/status')     # FIX: Remove this
 @post('/admin/status')
 def status():
-    results = {}
+    results = [
+        ('Table Width',     '%g %s' % (TABLE_WIDTH, TABLE_UNITS)),
+        ('Table Length',    '%g %s' % (TABLE_LENGTH, TABLE_UNITS)),
+        ('Ball Diameter',   '%g %s' % (BALL_SIZE, TABLE_UNITS)),
+        ('Machine Type',    MACHINE),
+        ('Machine Feed',    '%g %s' % (MACHINE_FEED, MACHINE_UNITS)),
+        ('Machine Accel',   '%g %s' % (MACHINE_ACCEL, MACHINE_UNITS)),
+    ]
+
     try:
         with mach.mach() as e:
-            results[ 'tableState'   ] = ["Busy","Ready"][e.getState()]
-            results[ 'ballPosition' ] = e.getPosition()
+            results.append( [ 'State', ["Busy","Ready"][e.getState()]] )
+            results.append( [ 'Position', '%g, %g' %  e.getPosition()] )
             # FIX: type of drawing, Estimated time, estimated remaining time, points, length, remaining points, remaining length
     except:
-        results[ 'tableState' ] = 'Unknown'
-        results[ 'ballPosition' ] = None
+        results.append( ('State', 'Unknown' ))
+        results.append( ('Position', 'Unknown'))
 
     try:
         with schedapi.schedapi() as sched:
-            results[ 'demoMode' ] = sched.status()
+            results.append( ('Demo Mode', '%s' % sched.status()))
     except:
-        results[ 'demoMode' ] = { 'state': 'Unknown' }
+        results.append( ('Demo Mode', 'Unknown'))
 
     try:
         with ledApi() as api:
-            results[ 'ledStatus' ] = api.status()
+            results.append( ('LED Status', '%s' % api.status()))
     except:
-        results[ 'ledStatus' ] = { 'running': 'Unknown', 'pattern': 'Unknown' }
+        results.append( ('LED Status', 'Unknown'))
 
-    results[ 'movieStatus' ] = MovieStatus.MovieStatus().load() 
-    return results 
+    results.append( ('Movie Status', MovieStatus.MovieStatus().load()))
+    return {'stuff':results}
 
 
 @route('/admin')
 @post('/admin')
 @get('/admin')
 def adminPage():
-    cfg = LoadConfig()
-    editor = [
-        Dialog2Choices( "imgType",      "Image Type",           default = cfg.imgType, list = ['Schematic','Realistic'] ),
-        DialogInt(      "maxFeed",      "Maximum Feed Rate",    units = "inches/minute", default = cfg.maxFeed, min = 1.0 ),
-        DialogFloat(    "ballSize",     "Ball Size",            units = "inches", default = cfg.ballSize, min = 0.25, max = 2.0 ),
-        DialogYesNo(    "cache",        "Enable Cache",         default = cfg.cache ),
-        DialogYesNo(    "cgiDebug",     "Show CGI Errors",      default = cfg.cgiDebug ),
-        DialogYesNo(    "scheduler",    "Enable Nightly Demos", default = cfg.scheduler ),
-    ]
-    
     actions = {
-            "update":       (_update,       None),
             "server_log":   (_serverLog,    "Server Log - View the web server log"),
             "led_log":      (_ledsLog,      "Led Log - View the ledaemon log (lighting system"),
             "led_res":      (_ledsReset,    "Led Reset - Reset the lighting system"),
@@ -71,24 +67,21 @@ def adminPage():
             "demo_halt":    (_schedHalt,    "Demo mode - Exit"),
             "movie_log":    (_movieLog,     "Movie Log - View the log of the movie system"),
             "movie_halt":   (_movieHalt,    "Movie Halt - Stop the movie system"),
-            "restore":      (_restoreDef,   "Restore parameters to defaults"),
     }
 
     cstuff = cgistuff( 'Admin', jQuery=True )
 
     form = request.forms
-    d = Dialog( editor, form, None )
-    params = d.getParams()
-    action = d.getAction()
+    action = form.action
 
     if action in actions:
-        message, message2 = actions[ action ][0]( params )
+        message, message2 = actions[ action ][0]()
     else:
         message, message2 = None, None
     
     return [
         cstuff.standardTopStr(),
-        template( 'admin-page', message=message, message2=message2, form=d.html(), actions=actions ), 
+        template( 'admin-page', message=message, message2=message2, actions=actions ), 
         cstuff.endBodyStr() ] 
 
 def _escapeFile( filename ):
@@ -99,85 +92,70 @@ def _escapeFile( filename ):
         msg = '' 
     return '<pre class="text">' + msg + '</pre>'
 
-def _home(params):
+def _home():
     with mach.mach() as e:
         e.home()
     return "HOMING THE MACHINE!!!", None
 
-def _machLog(params):
+def _machLog():
     return 'machd.log', _escapeFile( MACH_LOG ) 
     
-def _ledsLog(params):
+def _ledsLog():
     return 'ledaemon.log', _escapeFile( LED_LOG )
 
-def _serverLog(params):
+def _serverLog():
     return 'server.log', _escapeFile( SERVER_LOG )
 
-def _machGcode(params):
+def _machGcode():
     return 'G-Code', _escapeFile( GCODE_FILE )
 
-def _update(params):
-    cfg = Config();
-    cfg.imgType     = params.imgType 
-    cfg.maxFeed     = params.maxFeed
-    cfg.ballSize    = params.ballSize
-    cfg.cache       = params.cache
-    cfg.cgiDebug    = params.cgiDebug
-    cfg.scheduler   = params.scheduler
-    SaveConfig(cfg)
-    return 'Updated Parameters', None
-
-def _ledsReset(params):
+def _ledsReset():
     with ledApi() as api:
         api.restart()
     return 'Restarting ledaemon', None
 
-def _machReset(params):
+def _machReset():
     with mach.mach() as e:
         e.restart()
     return 'Restarting machine', None 
 
-def _machResetA(params):
+def _machResetA():
     try:
         with open(VER_FILE,'w') as f:
             f.truncate()
     except:
         pass
-    return _machReset(params)
+    return _machReset()
 
-def _schedLog(params):
+def _schedLog():
     return "scheduler.log", _escapeFile( SCHEDULER_LOG )
 
-def _schedReset(params):
+def _schedReset():
     with schedapi.schedapi() as sched:
         sched.restart()
     return 'Restarting scheduler', None
 
-def _schedOnce(params):
+def _schedOnce():
     with schedapi.schedapi() as sched:
         sched.demoOnce()
     return 'Single Demo Mode', None
 
-def _schedDemo(params):
+def _schedDemo():
     with schedapi.schedapi() as sched:
         sched.demoContinuous()
     return 'Continuous Demo Mode', None
 
-def _schedHalt(params):
+def _schedHalt():
     with schedapi.schedapi() as sched:
         sched.demoHalt()
     return 'Halting Demo Mode', None
 
-def _restoreDef(params):
-    os.remove( CONFIG_FILE )
-    return 'Restoring Sandtable Defaults', None
-
-def _movieLog(params):
+def _movieLog():
     ms = MovieStatus.MovieStatus()
     ms.load()
     return str(ms), _escapeFile( MOVIE_STATUS_LOG ) 
 
-def _movieHalt(params):
+def _movieHalt():
     ms = MovieStatus.MovieStatus()
     ms.load()
     try:

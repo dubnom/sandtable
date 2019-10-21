@@ -1,12 +1,16 @@
 <div class="admingood" id="stats">STATS</div>
 <script>
 function updateStats(data,status) {
- document.getElementById('stats').innerHTML =
-  '<span>Ball:' + data.ballPosition + '</span><br>' +
-  '<span>Table:' + data.tableState + '</span><br>' +
-  '<span>Demo Mode: ' + data.demoMode.state + '</span><br>' +
-  '<span>Leds: ' + data.ledStatus.running + ' ' + data.ledStatus.pattern + '</span><br>' +
-  '<span>Movie Status: ' + data.movieStatus + '</span><br>';
+ stuff = data.stuff
+ document.getElementById('stats').innerHTML = formatStuff(stuff);
+}
+function formatStuff(stuff) {
+ text = '<table>\n';
+ for (k of stuff) {
+  text += '<tr><td>' + k[0] + '</td><td>' + k[1] + '</td></tr>';
+ };
+ text += '</table>';
+ return( text );
 }
 function updater() {
  $.post("admin/status", {}, updateStats);
@@ -22,15 +26,9 @@ setInterval(updater, 2500);
  %end
 %else:
  <div class="adminwarn">
-  This is for SandTable administrative tasks.<br>
-  Please leave immediately unless you really know what you are doing.
+  This is for SandTable administrative tasks.
  </div>
 %end
-
-<form method="post" action="admin">
- {{!form}}
- <button class="doit" name="action" type="submit" value="update">Update</button>
-</form>
 
 <form method="post" action="admin">
 %for k,v in iter(sorted(actions.items())):

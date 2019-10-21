@@ -37,7 +37,7 @@ class History():
         with open( "%s%s.sand" % (STORE_PATH, name), 'wb' ) as f:
             pickle.dump( params, f )
         boundingBox = [ (0.0, 0.0), (TABLE_WIDTH, TABLE_LENGTH) ]
-        Chains.saveImage( chains, boundingBox, "%s%s.png" % (STORE_PATH, name), int(IMAGE_WIDTH / 2), int(IMAGE_HEIGHT / 2))
+        Chains.saveImage( chains, boundingBox, "%s%s.png" % (STORE_PATH,name), int(IMAGE_WIDTH/2), int(IMAGE_HEIGHT/2), IMAGE_TYPE)
     
     @staticmethod
     def delete( name ):

@@ -27,7 +27,6 @@ class Machine:
     count = 0
 
     def __init__(self, params, fullInit):
-        # FIX: Add machine specific parameters as a dictionary
         self.queue = queue.Queue()
         self.initialize(params, fullInit)
 

@@ -1,8 +1,9 @@
 from math import sin, cos, radians, sqrt
+import logging
 from Sand import *
 from dialog import *
 from Chains import *
-import logging
+from thr import *
 
 class Sander( Sandable ):
     """
@@ -39,17 +40,7 @@ Download tracks from [Dropbox](https://www.dropbox.com/sh/n2l29huvdrjalyx/AAA69j
         xc, yc = self.xc, self.yc
         aplus = radians(params.rotation)
         if filename.endswith( '.thr'):
-            with open(filename, 'r') as f:
-                while True:
-                    line = f.readline().strip()
-                    if len(line) == 0:
-                        break
-                    if line.startswith('#'):
-                        continue
-                    parts = line.split(' ')
-                    angle, radius = float(parts[0])+aplus, float(parts[1])
-                    x, y = xc + sin(angle) * radius * multiplier, yc + cos(angle) * radius * multiplier
-                    chain += [ (x, y) ]
+            chain = loadThr( filename, xc, yc, aplus, multiplier )
 
             if params.background == 'Spiral':
                 background = Chains.spiral(xc,yc,self.multiplier,linesPerInch=2.,angleRate=7.,radiusEnd=0.)

@@ -3,6 +3,7 @@
 import os
 import sys
 import traceback
+import math
 
 from optparse import OptionParser
 
@@ -220,6 +221,7 @@ def MakeMovie( script, previewMode, ms ):
     
     # Draw the movie frames
     d = drawer( previewMode, movie.eraser, ms )
+    oldThingies = []
     for frame in movie.frames:
         # Calculate an array of thingies (type, name, params) for later drawing
         thingies = []

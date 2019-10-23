@@ -4,9 +4,6 @@ from Sand import *
 from cgistuff import *
 
 class ftBase():
-    def delete(self, nm, fn):
-        return (False, 'Not implemented')
-
     def delete(self, f, filename):
         os.remove( filename )
         return (True, 'Deleted')

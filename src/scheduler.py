@@ -156,7 +156,7 @@ class Demo(Thread):
 
     def _drawWait(self):
         with mach.mach() as e:
-            while self._state == self.RUNNING and not e.getStatus()['ready']
+            while self._state == self.RUNNING and not e.getStatus()['ready']:
                 time.sleep( POLLING_DELAY )
 
     def _drawHalt(self):

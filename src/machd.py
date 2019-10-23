@@ -6,7 +6,6 @@ import time
 import socketserver
 from importlib import import_module
 from tcpserver import *
-from threading import Thread, Event 
 from Sand import *
 
 REQ_BUF_SIZE = 10 * 1024 * 1024

@@ -1,5 +1,5 @@
 from Sand import *
-from os import getenv, listdir, rename, remove
+from os import listdir, rename, remove
 from Chains import *
 import pickle as pickle
 

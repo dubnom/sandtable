@@ -1,7 +1,12 @@
 from math import sqrt, atan2, ceil, sin, cos, radians
 from Chains import *
 
-# Thr - Theta Radius files
+"""
+    Thr - Theta Radius files - unit polar coordinates
+
+    Load and save .thr format files.
+    Convert chains (polylines) into thr arrays.
+"""
 
 
 def thetaRadius(x, y):
@@ -26,6 +31,8 @@ def chainsToThr( chains, minLength=.05 ):
             x1,y1 = (x - xl) / rng, (y - yl) / rng
             if x0 != None:
                 xd,yd = x1-x0, y1-y0
+                # Interpolate the line into minLength units if the line is too large.
+                # This is done to create "straight lines" in polar coordinates.
                 length = sqrt(xd*xd+yd*yd)
                 if length > minLength:
                     add = 1+ceil(length / minLength)

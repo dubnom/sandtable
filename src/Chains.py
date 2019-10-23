@@ -1,9 +1,7 @@
 import PIL.Image as Image
 import PIL.ImageDraw as ImageDraw
-import PIL.ImageFilter as ImageFilter
 import numpy as np
 from scipy import interpolate
-import sys
 import math
 
 class Chains():
@@ -363,10 +361,13 @@ class Chains():
         yScale = float(imageHeight - 1) / (extents[1][1] - extents[0][1])
         scale  = ( min(xScale,yScale), min(xScale,yScale) )
 
+        oldX, oldY = None, None
         for chain in Chains._makeReadyToDraw( Chains.scale( Chains.transform( Chains.bound( chains, box), offset), scale), imageHeight-1 ):
-            for start, end in zip( chain, chain[1:] ):
-                for x,y,c in Chains._lines:
-                    draw.line( [ (start[0]+x, start[1]+y), (end[0]+x, end[1]+y) ], fill=c )
+            for newX, newY in chain:
+                if oldX != None:
+                    for x,y,c in Chains._lines:
+                        draw.line( [ (oldX+x, oldY+y), (newX+x, newY+y) ], fill=c )
+                oldX, oldY = newX, newY
         return pic
 
     @staticmethod
@@ -578,7 +579,7 @@ class Chains():
                     x, y = sgn(u) * abs((u * r)/v), sgn(v) * r 
 
             if False:   # FG-Squircular Mapping
-                if abs(u) < Chai2Yns.EPSILON or abs(v) < Chains.EPSILON:
+                if abs(u) < Chains.EPSILON or abs(v) < Chains.EPSILON:
                     x, y = u, v
                 else:
                     r = math.sqrt( u**2+v**2-math.sqrt((u**2+v**2)*(u**2+v**2-4*u**2*v**2)))
@@ -623,7 +624,7 @@ class Chains():
     @staticmethod
     def deDistances( chains, epsilon=.1 ):
         """Simplify chains"""
-        return [ deDistance( chain, epsilon ) for chain in chains ]
+        return [ Chains.deDistance( chain, epsilon ) for chain in chains ]
 
     @staticmethod
     def Spline( chain, expansion=5 ):

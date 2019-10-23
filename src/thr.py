@@ -1,4 +1,4 @@
-from math import sqrt, atan2, ceil, sin, cos, radians
+from math import sqrt, atan2, ceil, sin, cos
 from Chains import *
 
 """

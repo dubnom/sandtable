@@ -1,6 +1,4 @@
-from socket import *
 from array import *
-import colorsys
 from LedsBase import LedsBase
 
 # These parameters (LED_PARAMS) need to be defined in the machine's version file:

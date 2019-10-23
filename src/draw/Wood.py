@@ -1,5 +1,4 @@
 from math import sqrt, radians, sin, cos
-import Chains
 from Sand import *
 from dialog import *
 

@@ -1,8 +1,6 @@
 import serial
 import logging
-import queue
 from threading import Thread
-import json
 from machine import Machine
 
 

@@ -1,6 +1,6 @@
 from Sand import *
 from dialog import *
-from random import random, randint
+from random import randint
 from palettes import palettes
 
 class Lighter( Ledable ):

@@ -1,4 +1,4 @@
-from bottle import request, route, post, get, template
+from bottle import request, route, post, template
 import os
 
 from Sand import *

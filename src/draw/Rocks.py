@@ -1,6 +1,5 @@
 from math import sin, cos, radians, floor
 from Chains import *
-from Sand import *
 from dialog import *
 from Sand import *
 

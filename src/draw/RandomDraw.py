@@ -27,6 +27,6 @@ class Sander( Sandable ):
             p = Params( sand.editor )
             p.randomize( sand.editor )
             chains = sand.generate( p )
-            t, d, p = Chains.estimateMachiningTime( chains, boundingBox, TABLE_FEED, TABLE_ACCEL )
+            t, d, p = Chains.estimateMachiningTime( chains, boundingBox, MACHINE_FEED, MACHINE_ACCEL )
             if params.drawTimeMin <= t/60.0 <= params.drawTimeMax:
                 return chains 

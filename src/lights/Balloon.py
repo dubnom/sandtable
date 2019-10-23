@@ -1,7 +1,6 @@
 from Sand import *
 from dialog import *
 import random
-import logging
 
 class BalloonData(object):
     position        = 0

@@ -11,7 +11,7 @@ class machiner(Machine):
     
     def intialize(self, params, fullInit):
         self.socket = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
-        self.socket.connect( (params['host'], params['port') )
+        self.socket.connect( (params['host'], params['port']) )
         self.readThread = ListenerThread( self, self.socket )
         self.readThread.start()
 

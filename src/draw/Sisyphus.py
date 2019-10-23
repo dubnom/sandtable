@@ -1,5 +1,4 @@
-from math import sin, cos, radians, sqrt
-import logging
+from math import radians, sqrt
 from Sand import *
 from dialog import *
 from Chains import *

@@ -1,7 +1,5 @@
-import sys
 import serial
 from threading import Thread
-import queue
 import logging
 import re
 

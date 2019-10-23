@@ -1,5 +1,4 @@
 #!/usr/bin/python3 -u
-import sched
 import time
 import logging
 import json

@@ -3,8 +3,7 @@ Thanks to Chris Radek <chris@timeguy.com> for creating TrueTypeTracer
 which was the inspiration for this python native code.
 """
 from fontTools import ttLib
-from fontTools.pens.basePen import BasePen, _TestPen
-from fontTools.pens.transformPen import TransformPen
+from fontTools.pens.basePen import BasePen
 
 MYFSIZE=64
 TTFONT="/usr/share/fonts/truetype/freefont/FreeSerifBoldItalic.ttf"

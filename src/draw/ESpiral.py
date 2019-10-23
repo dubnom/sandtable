@@ -1,4 +1,4 @@
-from math import sqrt, radians, sin, cos, pi
+from math import radians, sin, cos, pi
 from Sand import *
 from dialog import *
 from Chains import *
@@ -39,7 +39,7 @@ class Sander( Sandable ):
             # FIX: Simplify the math
             if ring > 0:
                 ringRadius          = ring * params.radius * 2.0
-                ringCircumfrence    = 2.0 * math.pi * ringRadius
+                ringCircumfrence    = 2.0 * pi * ringRadius
                 spiralCount         = int(ringCircumfrence / (2.0 * params.radius))
                 anglePerSpiral      = 360.0 / spiralCount
                 angleEnd            = 45.0 + anglePerSpiral

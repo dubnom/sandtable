@@ -1,4 +1,4 @@
-from math import radians, sin, cos, floor, fabs
+from math import radians, sin, fabs
 from Sand import *
 from dialog import *
     

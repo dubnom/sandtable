@@ -19,8 +19,6 @@ from string import *
 from math import *
 from random import *
 from struct import *
-import os
-import sys
 import PIL.Image as Image
 import PIL.ImageDraw as ImageDraw
 

@@ -1,6 +1,5 @@
 import logging
-import queue
-from threading import Thread, Event 
+from threading import Thread
 from machine import Machine
 
 

@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-import os
 import time
 import logging
 import json
@@ -11,7 +10,6 @@ from threading import Thread
 from importlib import import_module
 
 from Sand import *
-from LedsBase import LedsBase
  
 # The specific LED driver is specified in the machine configuration
 Leds = import_module('machines.%s' % LED_DRIVER)

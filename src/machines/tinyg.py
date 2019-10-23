@@ -1,9 +1,7 @@
-import sys
 import serial
 from threading import Thread
 import json
 import time
-import queue
 import logging
 from machine import Machine
 

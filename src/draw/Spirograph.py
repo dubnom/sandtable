@@ -1,8 +1,8 @@
-from math import pi, sin, cos
-from Sand import *
+from sandable import Sandable
 from dialog import *
 from Chains import *
 from functools import reduce
+from math import pi, sin, cos
 
 class Sander( Sandable ):
     """
@@ -44,15 +44,17 @@ Sand Dollar | 50,12,-4 | 7
 
     MAX_POINTS = 25000
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
+        self.width = width
+        self.length = length
         self.editor = [
             DialogInts(  "teeths",          "Wheel Teeth",              units = "n1,n2,...", default=[40,-30], min=-60, max=60, minNums=2, maxNums=3 ),
             DialogInt(	 "resolution",      "Resolution",               default = 7, min = 1, max = 60 ),
             DialogYesNo( "fitToTable",      "Fit to table"          ),
             DialogBreak(),
-            DialogFloat( "xCenter",         "X Center",                 units = "inches", default = width / 2.0 ),
-            DialogFloat( "yCenter",         "Y Center",                 units = "inches", default = length / 2.0 ),
-            DialogFloat( "radius",          "Radius",                   units = "inches", default = min(width,length)/2, min = 1.0 ),
+            DialogFloat( "xCenter",         "X Center",                 units = units, default = width / 2.0 ),
+            DialogFloat( "yCenter",         "Y Center",                 units = units, default = length / 2.0 ),
+            DialogFloat( "radius",          "Radius",                   units = units, default = min(width,length)/2, min = 1.0 ),
         ]
 
     def generate( self, params ):
@@ -93,7 +95,7 @@ Sand Dollar | 50,12,-4 | 7
             chain.append( (x,y) )
         chains = Chains.autoScaleCenter( [chain], [ (params.xCenter-params.radius, params.yCenter-params.radius), (params.xCenter+params.radius,params.yCenter+params.radius) ] )
         if params.fitToTable:
-            chains = [ Chains.circleToTable( c, TABLE_WIDTH, TABLE_LENGTH ) for c in chains ]
+            chains = [ Chains.circleToTable( c, self.width, self.length ) for c in chains ]
         return chains
 
     def gcd( self, a, b ):

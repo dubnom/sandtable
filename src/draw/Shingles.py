@@ -1,5 +1,5 @@
 from math import radians, sin
-from Sand import *
+from sandable import Sandable
 from dialog import *
     
 class Sander( Sandable ):
@@ -17,14 +17,14 @@ This is a pretty boring pattern. Try something more fun.
 * **Width** and **Length** - how big the figure should be. Probably not worth changing.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
         self.editor = [
-            DialogFloat( "sHeight",         "Shingle Height",       units = "inches", default = 2.0, min = 0.1, max = length ),
+            DialogFloat( "sHeight",         "Shingle Height",       units = units, default = 2.0, min = 0.1, max = length ),
             DialogBreak(),
-            DialogFloat( "xOffset",         "X Origin",             units = "inches", default = 0.0 ),
-            DialogFloat( "yOffset",         "Y Origin",             units = "inches", default = 0.0 ),
-            DialogFloat( "width",           "Width (x)",            units = "inches", default = width ),
-            DialogFloat( "length",          "Length (y)",           units = "inches", default = length ),
+            DialogFloat( "xOffset",         "X Origin",             units = units, default = 0.0 ),
+            DialogFloat( "yOffset",         "Y Origin",             units = units, default = 0.0 ),
+            DialogFloat( "width",           "Width (x)",            units = units, default = width ),
+            DialogFloat( "length",          "Length (y)",           units = units, default = length ),
         ]
 
     def generate( self, params ):

@@ -1,4 +1,4 @@
-from Sand import *
+from sandable import Sandable
 from dialog import *
 
 class Sander( Sandable ):
@@ -15,17 +15,17 @@ class Sander( Sandable ):
 * **Width** and **Length** - how big the figure should be. Probably not worth changing.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
         self.editor = [
             DialogInt(   "xSquares",        "Columns (X)",              default = 2, min = 1, max = width ),
             DialogInt(   "ySquares",        "Rows (Y)",                 default = 2, min = 1, max = length ),
-            DialogInt(   "xLines",          "X Lines",                  default = 4, min = 1, max = 16 ),
-            DialogInt(   "yLines",          "Y Lines",                  default = 4, min = 1, max = 16 ),
+            DialogInt(   "xLines",          "X Fill Lines",             default = 4, min = 1, max = 16 ),
+            DialogInt(   "yLines",          "Y Fill Lines",             default = 4, min = 1, max = 16 ),
             DialogBreak(),
-            DialogFloat( "xOffset",         "X Origin",                 units = "inches", default = 0.0 ),
-            DialogFloat( "yOffset",         "Y Origin",                 units = "inches", default = 0.0 ),
-            DialogFloat( "width",           "Width",                    units = "inches", default = width, min = 1.0, max = width ),
-            DialogFloat( "length",          "Length",                   units = "inches", default = length, min = 1.0, max = length ),
+            DialogFloat( "xOffset",         "X Origin",                 units = units, default = 0.0 ),
+            DialogFloat( "yOffset",         "Y Origin",                 units = units, default = 0.0 ),
+            DialogFloat( "width",           "Width",                    units = units, default = width, min = 1.0, max = width ),
+            DialogFloat( "length",          "Length",                   units = units, default = length, min = 1.0, max = length ),
         ]
 
     def generate( self, params ):

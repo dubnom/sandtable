@@ -1,4 +1,4 @@
-from Sand import *
+from sandable import Sandable
 from dialog import *
 from Chains import *
 import math
@@ -19,7 +19,7 @@ Read the Wikipedia article on [Lorenz Systems](http://en.wikipedia.org/wiki/Lore
 * **Width** and **Length** - how big the figure should be. Probably not worth changing.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
         self.editor = [
             DialogFloat( "h",               "Coefficient 'H'",          default = 0.01, min = .001, max = .05 ),
             DialogFloat( "a",               "Coefficient 'A'",          default = 10.0, min = .5, max = 45.0 ),
@@ -27,10 +27,10 @@ Read the Wikipedia article on [Lorenz Systems](http://en.wikipedia.org/wiki/Lore
             DialogFloat( "c",               "Coefficient 'C'",          default = 8.0 / 3.0, min = .1, max = 5.0 ),
             DialogInt(   "points",          "Number of points",         default = 5000 ),
             DialogBreak(),
-            DialogFloat( "xOffset",         "X Origin",                 units = "inches", default = 0.0 ),
-            DialogFloat( "yOffset",         "Y Origin",                 units = "inches", default = 0.0 ),
-            DialogFloat( "width",           "Width",                    units = "inches", default = width, min = 1.0, max = 1000.0 ),
-            DialogFloat( "length",          "Length",                   units = "inches", default = length, min = 1.0, max = 1000.0 ),
+            DialogFloat( "xOffset",         "X Origin",                 units = units, default = 0.0 ),
+            DialogFloat( "yOffset",         "Y Origin",                 units = units, default = 0.0 ),
+            DialogFloat( "width",           "Width",                    units = units, default = width, min = 1.0, max = 1000.0 ),
+            DialogFloat( "length",          "Length",                   units = units, default = length, min = 1.0, max = 1000.0 ),
         ]
 
     def generate( self, params ):

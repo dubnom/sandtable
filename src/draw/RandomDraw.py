@@ -1,14 +1,20 @@
-from Sand import *
+from random import randint
+from Sand import MACHINE_FEED, MACHINE_ACCEL, drawers
+from sandable import Sandable, sandableFactory
 from Chains import *
 from dialog import *
-from random import randint
 
 class Sander( Sandable ):
     """
 ### Draw a random pattern
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
+        self.width = width
+        self.length = length
+        self.ballSize = ballSize
+        self.units = units
+
         self.editor = [
             DialogInt(   "seed",        "Random seed",              default = randint(0,10000000), min = 0, max = 10000000, rbutton = True ),
             DialogBreak(),
@@ -19,11 +25,11 @@ class Sander( Sandable ):
     def generate( self, params ):
         if not params.seed or params.drawTimeMax - params.drawTimeMin < 5.0:
             return []
-        boundingBox = [ (0.0, 0.0), (TABLE_WIDTH, TABLE_LENGTH) ]
+        boundingBox = [ (0.0, 0.0), (self.width, self.length) ]
         random.seed( params.seed )
         while True:
-            sandable = sandables[ random.randint(0,len(sandables)-1) ]
-            sand = sandableFactory( sandable )
+            sandable = drawers[ random.randint(0,len(drawers)-1) ]
+            sand = sandableFactory( sandable, self.width, self.length, self.ballSize, self.units )
             p = Params( sand.editor )
             p.randomize( sand.editor )
             chains = sand.generate( p )

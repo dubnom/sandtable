@@ -1,5 +1,6 @@
 from math import radians, sin, fabs
 from Sand import *
+from sandable import Sandable
 from dialog import *
     
 class Sander( Sandable ):
@@ -25,16 +26,16 @@ Check out the Wikipedia description of the [Lissajous Curve](http://en.wikipedia
 
     EPSILON = 1E-4
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
         self.editor = [
             DialogFloat( "aFreq",           "A Frequency",          default = 8.0, min = 0.001, max = 100.0, rRound=0 ),
             DialogFloat( "bFreq",           "B Frequency",          default = 9.0, min = 0.001, max = 100.0, rRound=0 ),
             DialogFloat( "delta",           "Delta",                units = "degrees", default = 0.0 ),
             DialogBreak(),
-            DialogFloat( "xCenter",         "X Center",             units = "inches", default = width / 2.0 ),
-            DialogFloat( "yCenter",         "Y Center",             units = "inches", default = length / 2.0 ),
-            DialogFloat( "width",           "Width (x)",            units = "inches", default = width, min = 1.0, max = 1000.0 ),
-            DialogFloat( "length",          "Length (y)",           units = "inches", default = length, min = 1.0, max = 1000.0 ),
+            DialogFloat( "xCenter",         "X Center",             units = units, default = width / 2.0 ),
+            DialogFloat( "yCenter",         "Y Center",             units = units, default = length / 2.0 ),
+            DialogFloat( "width",           "Width (x)",            units = units, default = width, min = 1.0, max = 1000.0 ),
+            DialogFloat( "length",          "Length (y)",           units = units, default = length, min = 1.0, max = 1000.0 ),
         ]
 
     def generate( self, params ):

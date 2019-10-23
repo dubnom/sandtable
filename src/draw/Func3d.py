@@ -1,4 +1,4 @@
-from Sand import *
+from sandable import Sandable
 from dialog import *
 from Chains import *
 from math import *
@@ -53,7 +53,7 @@ class Sander( Sandable ):
   Exponential Bumps | -x*exp(-x**2-y**2) | X and Y (-2, 2, 45)
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
         self.editor = [
             DialogStr(   "expression",      "Expression",           default = 'cos( 3.*radians( sqrt(x*x+y*y )))', length=45 ),
             DialogFloat( "xStart",          "X Start",              default = -180.0 ),
@@ -68,10 +68,10 @@ class Sander( Sandable ):
             DialogFloat( "zoom",            "Zoom",                 default = 1.0, min = 0.25, max = 10.0 ),
             DialogYesNo( "topDown",         "Top Down",             default = True ),
             DialogBreak(),
-            DialogFloat( "xOffset",         "X Origin",             units = "inches", default = 0.0 ),
-            DialogFloat( "yOffset",         "Y Origin",             units = "inches", default = 0.0 ),
-            DialogFloat( "width",           "Width",                units = "inches", default = width, min = 1.0, max = 1000.0 ),
-            DialogFloat( "length",          "Length",               units = "inches", default = length, min = 1.0, max = 1000.0 ),
+            DialogFloat( "xOffset",         "X Origin",             units = units, default = 0.0 ),
+            DialogFloat( "yOffset",         "Y Origin",             units = units, default = 0.0 ),
+            DialogFloat( "width",           "Width",                units = units, default = width, min = 1.0, max = width*4 ),
+            DialogFloat( "length",          "Length",               units = units, default = length, min = 1.0, max = length*4 ),
         ]
 
     def generate( self, params ):

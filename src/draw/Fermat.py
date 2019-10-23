@@ -1,5 +1,5 @@
 from math import sqrt, radians, sin, cos
-from Sand import *
+from sandable import Sandable
 from dialog import *
 from Chains import *
 
@@ -24,17 +24,19 @@ You can read more on WikiPedia's [Fermat's spiral](https://en.wikipedia.org/wiki
 * **X Center** and **Y Center** - where the center of the spiral will be relative to the table.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
+        self.width = width
+        self.length = length
         self.editor = [
-            DialogFloat( "radius",          "Radius",               units = "inches", default = min(width,length)/2, min = 1.0, max = max(width,length)*2.0 ),
+            DialogFloat( "radius",          "Radius",               units = units, default = min(width,length)/2, min = 1.0, max = max(width,length)*2.0 ),
             DialogFloat( "turns",           "Turns",                default = 10.0, min = .1, max = 200.0 ),
             DialogFloat( "angleStart",      "Starting angle",       units = "degrees" ),
             DialogFloat( "angleRate",       "Sample rate",          units = "degrees", min = 1, default = 5.0 ),
             DialogYesNo( "fill",            "Fill",                 default = False ),
             DialogYesNo( "fitToTable",      "Fit to table"          ),
             DialogBreak(),
-            DialogFloat( "xCenter",         "X Center",             units = "inches", default = width / 2.0 ),
-            DialogFloat( "yCenter",         "Y Center",             units = "inches", default = length / 2.0 ),
+            DialogFloat( "xCenter",         "X Center",             units = units, default = width / 2.0 ),
+            DialogFloat( "yCenter",         "Y Center",             units = units, default = length / 2.0 ),
         ]
 
     def generate( self, params ):
@@ -61,6 +63,6 @@ You can read more on WikiPedia's [Fermat's spiral](https://en.wikipedia.org/wiki
             results = chain1 + chain2[::-1]
 
         if params.fitToTable:
-            results = Chains.circleToTable( results, TABLE_WIDTH, TABLE_LENGTH )
+            results = Chains.circleToTable( results, self.width, self.length )
 
         return [results]

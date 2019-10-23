@@ -1,7 +1,8 @@
 from math import pow, radians, sin, cos
-from Sand import *
 from dialog import *
 from Chains import *
+from sandable import Sandable
+
 
 class Sander( Sandable ):
     """
@@ -28,11 +29,13 @@ Try playing with **Sample rate** first.
 * **X Center** and **Y Center** - where the center of the spiral will be relative to the table.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
+        self.width = width
+        self.length = length
         self.editor = [
-            DialogFloat( "innerRadius",     "Inner radius",         units = "inches", min = 0.0, max = max(width,length) ),
-            DialogFloat( "outerRadius",     "Outer radius",         units = "inches", default = min(width,length)/2, min = 1.0, max = 100.0 ),
-            DialogFloat( "linesPerInch",    "Lines per Inch",       default = 1.0, min = 0.1, max = 24.0 ),
+            DialogFloat( "r1",              "First radius",         units = units, min = 0.0, max = max(width,length)*2 ),
+            DialogFloat( "r2",              "Second radius",        units = units,  default = min(width,length)/2, min = 0.0, max = max(width,length)*2 ),
+            DialogFloat( "turns",           "Turns",                default =10., min = 0.1, max = 100. ),
             DialogFloat( "angleStart",      "Starting angle",       units = "degrees", min = 0.0, max = 360.0, step = 15. ),
             DialogFloat( "angleRate",       "Sample rate",          units = "degrees", default = 15.0, min = -180.0, max = 180.0 ),
             DialogFloat( "base",            "Growth base power",    default = 1.0, min = 0.25, max = 10.0 ),
@@ -46,33 +49,10 @@ Try playing with **Sample rate** first.
     def generate( self, params ):
         if not params.angleRate:
             raise SandException( "Sample Rate cannot be zero" )
-        if params.innerRadius > params.outerRadius:
-            params.innerRadius, params.outerRadius = params.outerRadius, params.innerRadius
 
-        xCenter = params.xCenter
-        yCenter = params.yCenter
-        
-        thickness = params.outerRadius - params.innerRadius
-        points = int( (360.0 / abs(params.angleRate)) * params.linesPerInch * (params.outerRadius - params.innerRadius))
-        divisor = pow((points * abs(params.angleRate)) / 360.0, params.base)
-        point360 = 360.0 / abs( params.angleRate )
-        
-        chain = []
-        for point in range( points ):
-            angle   = radians( params.angleStart + point * params.angleRate )
-            if params.fill:
-                if point > point360:
-                    radius  = params.innerRadius + thickness * (pow((((point - point360) * abs(params.angleRate)) / 360.0), params.base) / divisor)
-                else:
-                    radius = params.innerRadius
-                x = xCenter + (cos( angle ) * radius)
-                y = yCenter + (sin( angle ) * radius)
-                chain.append( (x,y) )
-            radius  = params.innerRadius + thickness * (pow(((point * abs(params.angleRate)) / 360.0), params.base) / divisor)
-            x = xCenter + (cos( angle ) * radius)
-            y = yCenter + (sin( angle ) * radius)
-            chain.append( (x,y) )
+        xC, yC = params.xCenter, params.yCenter
+        chain = Chains.spiral(xC,yC,params.r1,params.r2,params.turns,params.angleRate,params.angleStart,params.base,params.fill)
 
         if params.fitToTable:
-            chain = Chains.circleToTable( chain, TABLE_WIDTH, TABLE_LENGTH )
+            chain = Chains.circleToTable( chain, self.width, self.length )
         return [chain]

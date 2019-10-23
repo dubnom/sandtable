@@ -1,15 +1,16 @@
 # Constants
-global TABLE_FEED, BALL_SIZE
-
 HOST_ADDR           = '0.0.0.0'
 HOST_PORT           = 80
+
+CACHE_ENABLE        = True
+IMAGE_TYPE          = 'Realistic'
+BALL_SIZE           = 0.75      # Diameter of ball
+LOGGING_LEVEL       = "debug"
+SCHEDULER_ENABLE    = True
 
 TABLE_UNITS         = "inches"
 TABLE_WIDTH         = 36.0
 TABLE_LENGTH        = 16.0
-TABLE_FEED          = 600.0     # Inches per minute
-TABLE_ACCEL         = 30.0      # Inches per second squared
-BALL_SIZE           = 0.75      # Diameter of ball
 
 LED_DRIVER          = "LedsOPC"
 LED_PARAMS          = {'host':'localhost','port':7890}
@@ -21,6 +22,8 @@ LED_MAPPING         = list(range(0,60))+list(range(60,90))+list(range(149,89,-1)
 
 MACHINE             = "tinyg"
 MACHINE_UNITS       = "inches"
+MACHINE_FEED        = 600.0     # Inches per minute
+MACHINE_ACCEL       = 30.0      # Inches per second squared
 
 MACHINE_PARAMS = {
     'port': "/dev/ttyUSB0",

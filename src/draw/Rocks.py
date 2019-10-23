@@ -1,7 +1,7 @@
 from math import sin, cos, radians, floor
+from sandable import Sandable, inchesToUnits
 from Chains import *
 from dialog import *
-from Sand import *
 
 from random import random, uniform, seed
     
@@ -25,20 +25,20 @@ Press the *Random* button to automatically make new drawings.
 * **Starting locations** - where on the table the maze should be drawn. Also normally not worth changing.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
         rockSize = min(width,length) / 4.0
         self.editor = [
             DialogInt(   "rocks",           "Number of rocks",          default = 5, min = 1, max = 25 ),
-            DialogFloat( "minRockSize",     "Minimum rock size",        units = "inches", min = .25, max = rockSize, default = 1.0 ),
-            DialogFloat( "maxRockSize",     "Maximum rock size",        units = "inches", min = .25, max = rockSize, default = 1.0 ),
+            DialogFloat( "minRockSize",     "Minimum rock size",        units = units, min = .25, max = rockSize, default = inchesToUnits(1.0,units)),
+            DialogFloat( "maxRockSize",     "Maximum rock size",        units = units, min = .25, max = rockSize, default = inchesToUnits(1.0,units)),
             DialogInt(   "rakeSize",        "Rake teeth",               units = "tines", min = 2, max = 8, default = 4 ),
             DialogInt(   "seed",            "Random Seed",              default = 1, min = 0, max = 10000, rbutton = True ),
             DialogBreak(),
-            DialogFloat( "ballSize",        "Ball size",                units = "inches", min = .25, default = BALL_SIZE ),
-            DialogFloat( "xOffset",         "X Origin",                 units = "inches", default = 0.0 ),
-            DialogFloat( "yOffset",         "Y Origin",                 units = "inches", default = 0.0 ),
-            DialogFloat( "width",           "Width (x)",                units = "inches", default = width ),
-            DialogFloat( "length",          "Length (y)",               units = "inches", default = length ),
+            DialogFloat( "ballSize",        "Ball size",                units = units, min = .25, default = ballSize ),
+            DialogFloat( "xOffset",         "X Origin",                 units = units, default = 0.0 ),
+            DialogFloat( "yOffset",         "Y Origin",                 units = units, default = 0.0 ),
+            DialogFloat( "width",           "Width (x)",                units = units, default = width ),
+            DialogFloat( "length",          "Length (y)",               units = units, default = length ),
         ]
 
     def generate( self, params ):

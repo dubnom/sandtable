@@ -1,4 +1,4 @@
-from Sand import *
+from sandable import Sandable
 from dialog import *
 import mach
 
@@ -16,7 +16,7 @@ To avoid drawing over things, move the ball away!
 * **X and Y Origin** - location on the table to move the ball to.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
         try:
             with mach.mach() as e:
                 x,y = e.getStatus()['pos']
@@ -24,8 +24,8 @@ To avoid drawing over things, move the ball away!
             x,y = 0.,0.
 
         self.editor = [
-            DialogFloat( "xOffset",         "X Origin",                 units = "inches", default = x ),
-            DialogFloat( "yOffset",         "Y Origin",                 units = "inches", default = y ),
+            DialogFloat( "xOffset",         "X Origin",                 units = units, default = x ),
+            DialogFloat( "yOffset",         "Y Origin",                 units = units, default = y ),
         ]
 
     def generate( self, params ):

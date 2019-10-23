@@ -1,14 +1,16 @@
 # Constants
-global TABLE_FEED, BALL_SIZE
-
 HOST_ADDR           = '0.0.0.0'
 HOST_PORT           = 80
 
+CACHE_ENABLE        = True
+IMAGE_TYPE          = 'Realistic'
+BALL_SIZE           = 0.75      # Diameter of ball
+LOGGING_LEVEL       = "debug"
+SCHEDULER_ENABLE    = True
+
+TABLE_UNITS         = "inches"
 TABLE_WIDTH         = 30.0
 TABLE_LENGTH        = 20.0
-TABLE_FEED          = 400.0     # Inches per minute
-TABLE_ACCEL         = 30.0      # Inches per second squared
-BALL_SIZE           = 0.75      # Diameter of ball
 
 LED_DRIVER          = "LedsDS"
 LED_PARAMS          = None
@@ -20,6 +22,8 @@ LED_MAPPING         = None
 
 MACHINE             = "tinyg"
 MACHINE_UNITS       = "inches"
+MACHINE_FEED        = 400.0     # Inches per minute
+MACHINE_ACCEL       = 30.0      # Inches per second squared
 
 MACHINE_PARAMS = {
     'port':     "/dev/ttyUSB0",

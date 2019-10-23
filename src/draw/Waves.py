@@ -1,3 +1,4 @@
+from sandable import Sandable, inchesToUnits
 from math import radians, sin
 from Sand import *
 from dialog import *
@@ -23,18 +24,18 @@ Try changing **Shift per line** first.
  * **Width** and **Length** - how big the figure should be. Probably not worth changing.
  """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
         self.editor = [
-            DialogFloat( "wHeight",          "Wave Height",          units = "inches", default = 1.0, min = 0.0, max = length ),
-            DialogFloat( "linesPerInch",    "Lines per Inch",       default = 2.0, min = 0.001, max = 10.0 ),
+            DialogFloat( "wHeight",         "Wave Height",          units = units, default = inchesToUnits(1.0,units), min = 0.0, max = length ),
+            DialogInt(   "lines",           "Lines",                default = 40, min = 5, max = 100 ),
             DialogFloat( "waves",           "Waves per Line",       default = 3.0, min = 0.0, max = 500.0 ),
             DialogFloat( "shift",           "Shift per Line",       units = "degrees", default = 5.0, min = 0.0 ),
             DialogFloat( "increment",       "Wave increment",       units = "percent", default = 100.0 ),
             DialogBreak(),
-            DialogFloat( "xOffset",         "X Origin",             units = "inches", default = 0.0 ),
-            DialogFloat( "yOffset",         "Y Origin",             units = "inches", default = 0.0 ),
-            DialogFloat( "width",           "Width",                units = "inches", default = width, min = 1.0, max = 1000.0 ),
-            DialogFloat( "length",          "Length",               units = "inches", default = length, min = 1.0, max = 1000.0 ),
+            DialogFloat( "xOffset",         "X Origin",             units = units, default = 0.0 ),
+            DialogFloat( "yOffset",         "Y Origin",             units = units, default = 0.0 ),
+            DialogFloat( "width",           "Width",                units = units, default = width, min = 1.0, max = 1000.0 ),
+            DialogFloat( "length",          "Length",               units = units, default = length, min = 1.0, max = 1000.0 ),
         ]
 
     def generate( self, params ):
@@ -42,8 +43,8 @@ Try changing **Shift per line** first.
         xCount = int( xPerInch * params.width )
         xScale = params.width / xCount
         xyScale = (360.0 * params.waves) / xCount
-        yCount = int( params.length * params.linesPerInch )
-        yScale = 1.0 / params.linesPerInch
+        yCount = params.lines
+        yScale = params.length / params.lines
         waveMultiplier = 1.0
         increment = params.increment * 0.01
         

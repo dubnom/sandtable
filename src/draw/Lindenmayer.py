@@ -1,4 +1,4 @@
-from Sand import *
+from sandable import Sandable
 from dialog import *
 from PolyLine import *
 from Chains import *
@@ -57,7 +57,7 @@ for ever increment. The final length of **Axiom**, and the number of points in t
 to keep from running out of memory.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units):
         self.editor = [
             DialogInt(   "repetitions",     "Repetitions",          default = 3, min = 1, max = 20 ),
             DialogFloat( "angle",           "Angle",                units = "degrees", default = 90.0 ),
@@ -70,10 +70,10 @@ to keep from running out of memory.
             DialogStr(   "rule5",           "Rule 5",               length = 30 ),
             DialogStr(   "rule6",           "Rule 6",               length = 30 ),
             DialogBreak(),
-            DialogFloat( "xOrigin",         "X Origin",             units = "inches", default = 0.0 ),
-            DialogFloat( "yOrigin",         "Y Origin",             units = "inches", default = 0.0 ),
-            DialogFloat( "width",           "Width",                units = "inches", default = width ),
-            DialogFloat( "length",          "Length",               units = "inches", default = length ),
+            DialogFloat( "xOrigin",         "X Origin",             units = units, default = 0.0 ),
+            DialogFloat( "yOrigin",         "Y Origin",             units = units, default = 0.0 ),
+            DialogFloat( "width",           "Width",                units = units, default = width ),
+            DialogFloat( "length",          "Length",               units = units, default = length ),
         ]
         self.MAX_LEN = 5000
 

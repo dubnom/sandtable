@@ -113,9 +113,9 @@ class Chains():
         return newChains
 
     @staticmethod
-    def spiral(xCenter,yCenter,radiusStart,linesPerInch=1.0,angleRate=15.0,angleStart=0.0,radiusEnd=0.0,base=1.0,fill=False,angleEnd=None):
+    def spiral(xCenter,yCenter,radiusStart,radiusEnd=0.0,turns=1.0,angleRate=15.0,angleStart=0.0,base=1.0,fill=False,angleEnd=None):
         thickness = radiusEnd - radiusStart
-        points = int( abs( thickness * linesPerInch * 360.0 / angleRate))
+        points = int( abs( turns * 360. / angleRate))
         divisor = pow((points * abs(angleRate)) / 360.0, base)
         point360 = 360.0 / abs( angleRate )
 

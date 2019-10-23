@@ -1,5 +1,5 @@
 from math import sqrt, radians, sin, cos
-from Sand import *
+from sandable import Sandable
 from dialog import *
 
 from random import random, seed
@@ -28,16 +28,16 @@ Drawing random wood boards requires a lot of compute time. Be patient.
 
     def __init__( self, width, length ):
         self.editor = [
-            DialogInt(   "knots",           "Number of Knots",          default = 5, min = 0, max = 100 ),
-            DialogFloat( "rKnot",           "Maximum Knot Radius",      units = "inches", default = 5.0, min = 1.0, max = 10.0 ),
+            DialogInt(   "knots",           "Number of Knots",          default = 5, min = 0, max = 20 ),
+            DialogFloat( "rKnot",           "Maximum Knot Radius",      units = units, default = inchesToUnits(5.0,units), min = inchesToUnits(1.0,units), max = max(width,length) ),
             DialogInt(   "seed",            "Random Seed",              default = 1, min = 0, max = 10000, rbutton = True ),
-            DialogFloat( "xLinesPerInch",   "X Lines per Inch",         default = 10.0, min = 0.001, max = 60.0 ),
-            DialogFloat( "yLinesPerInch",   "Y Lines per Inch",         default = 2.0, min = 0.001, max = 10.0 ),
+            DialogInt(   "xLines",          "Number of points/line",    default = 200, min = 50, max = 600),
+            DialogInt(   "yLines",          "Number of lines",          default = 40, min = 5, max = 100 ),
             DialogBreak(),
-            DialogFloat( "xOffset",         "X Origin",                 units = "inches", default = 0.0 ),
-            DialogFloat( "yOffset",         "Y Origin",                 units = "inches", default = 0.0 ),
-            DialogFloat( "width",           "Width (x)",                units = "inches", default = width ),
-            DialogFloat( "length",          "Length (y)",               units = "inches", default = length ),
+            DialogFloat( "xOffset",         "X Origin",                 units = units, default = 0.0 ),
+            DialogFloat( "yOffset",         "Y Origin",                 units = units, default = 0.0 ),
+            DialogFloat( "width",           "Width (x)",                units = units, default = width ),
+            DialogFloat( "length",          "Length (y)",               units = units, default = length ),
         ]
 
     def generate( self, params ):

@@ -1,5 +1,5 @@
 from math import radians, sin, cos, exp, pi, sqrt 
-from Sand import *
+from sandable import Sandable
 from dialog import *
 from Chains import *
 
@@ -20,9 +20,11 @@ The Nautilus or [Logarithmic spiral](https://en.wikipedia.org/wiki/Logarithmic_s
 * **X Center** and **Y Center** - where the center of the spiral will be relative to the table.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
+        self.width = width
+        self.length = length
         self.editor = [
-            DialogFloat( "innerRadius",     "Inner radius",         units = "inches", min = 0.0, max = min(width,length) / 2. ),
+            DialogFloat( "innerRadius",     "Inner radius",         units = units, min = 0.0, max = min(width,length) / 2. ),
             DialogFloat( "turns",           "Turns",                default = 5., min = 1.0, max = 50.0 ),
             DialogFloat( "angleRate",       "Sample rate",          units = "degrees", default = 11.0, min = 1, max = 45.0 ),
             DialogFloat( "curveFactor",     "Curve factor",         default = 1., min = -6., max = 6. ),
@@ -30,8 +32,8 @@ The Nautilus or [Logarithmic spiral](https://en.wikipedia.org/wiki/Logarithmic_s
             DialogFloat( "logGrowth",       "Logarithmic growth",   units = "percent", default = 0., min = 0., max = 2. ),
             DialogYesNo( "fitToTable",      "Fit to table"          ),
             DialogBreak(),
-            DialogFloat( "xCenter",         "X Center",             units = "inches", default = width / 2.0 ),
-            DialogFloat( "yCenter",         "Y Center",             units = "inches", default = length / 2.0 ),
+            DialogFloat( "xCenter",         "X Center",             units = units, default = width / 2.0 ),
+            DialogFloat( "yCenter",         "Y Center",             units = units, default = length / 2.0 ),
         ]
         self.maxRadius = 2. * sqrt(width**2 + length**2)
 
@@ -72,6 +74,6 @@ The Nautilus or [Logarithmic spiral](https://en.wikipedia.org/wiki/Logarithmic_s
                 break
 
         if params.fitToTable:
-            chain = Chains.circleToTable( chain, TABLE_WIDTH, TABLE_LENGTH )
+            chain = Chains.circleToTable( chain, self.width, self.length )
         return [chain]
 

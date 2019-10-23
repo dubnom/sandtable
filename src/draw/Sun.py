@@ -1,7 +1,7 @@
-from math import radians, sin, cos
-from Sand import *
+from sandable import Sandable
 from dialog import *
 from Chains import *
+from math import radians, sin, cos
     
 class Sander( Sandable ):
     """
@@ -19,7 +19,9 @@ Set **Ray width**=0 for a cool effect.
 * **Inner radius** and **Outer radius** - how far from the center the rays should start and end.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
+        self.width = width
+        self.length = length
         radius = max(width,length) / 2.0
         self.editor = [
             DialogInt(   "rays",            "Ray count",            default = 12, min = 1, max = 60 ),
@@ -27,10 +29,10 @@ Set **Ray width**=0 for a cool effect.
             DialogFloat( "ripples",         "Number of ripples" ,   default = 2.0, min = 0.0, max = 20.0 ),
             DialogYesNo( "fitToTable",      "Fit to table"          ),
             DialogBreak(),
-            DialogFloat( "xCenter",         "X Center",             units = "inches", default = width / 2.0 ),
-            DialogFloat( "yCenter",         "Y Center",             units = "inches", default = length / 2.0 ),
-            DialogFloat( "innerRadius",     "Inner radius",         units = "inches", default = 2.0, min = 0.0, max = radius ),
-            DialogFloat( "outerRadius",     "Outer radius",         units = "inches", default = min(width,length)/2, min = 1.0, max = radius),
+            DialogFloat( "xCenter",         "X Center",             units = units, default = width / 2.0 ),
+            DialogFloat( "yCenter",         "Y Center",             units = units, default = length / 2.0 ),
+            DialogFloat( "innerRadius",     "Inner radius",         units = units, default = 2.0, min = 0.0, max = radius ),
+            DialogFloat( "outerRadius",     "Outer radius",         units = units, default = min(width,length)/2, min = 1.0, max = radius),
         ]
 
     def generate( self, params ):
@@ -54,7 +56,7 @@ Set **Ray width**=0 for a cool effect.
             chain.extend( self.ray( angle + params.rayWidth, -1 ))
         chain.append( chain[0] )
         if params.fitToTable:
-            chain = Chains.circleToTable( chain, TABLE_WIDTH, TABLE_LENGTH )
+            chain = Chains.circleToTable( chain, self.width, self.length )
         return [chain]
         
     def ray( self, angle, dir ):

@@ -2,6 +2,7 @@ from bottle import request, route, post, get, template
 from datetime import timedelta
 
 from Sand import *
+from sandable import sandableFactory, SandException
 from Chains import *
 from cgistuff import *
 from dialog import Dialog
@@ -25,12 +26,12 @@ def drawPage():
         params = History.load( name )
         sandable = params.sandable
     else:
-        sandable = form.method or request.query.method or sandables[0]
+        sandable = form.method or request.query.method or drawers[0]
 
     # Take action
     editor, errors = '', None 
-    if sandable in sandables:
-        sand = sandableFactory( sandable )
+    if sandable in drawers:
+        sand = sandableFactory( sandable, TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS )
         d = Dialog( sand.editor, form, params )
         params = d.getParams()
         action = d.getAction()
@@ -103,5 +104,5 @@ def drawPage():
 
     return [ 
         cstuff.standardTopStr(),
-        template( 'draw-page', sandables=sandables, sandable=sandable, imagefile=imagefile, width=IMAGE_WIDTH, height=IMAGE_HEIGHT, errors=errors, editor=editor ),
+        template( 'draw-page', sandables=drawers, sandable=sandable, imagefile=imagefile, width=IMAGE_WIDTH, height=IMAGE_HEIGHT, errors=errors, editor=editor ),
         cstuff.endBodyStr() ]

@@ -1,5 +1,5 @@
 from math import sin, exp, radians
-from Sand import *
+from sandable import Sandable
 from dialog import *
 
 class Sander( Sandable ):
@@ -17,7 +17,6 @@ curves are gradually decaying, similar to a pendulum.
 
 #### Parameters
 
-* **X and Y Center** - the center of drawing. Usually these should be left alone.
 * **Decay Rate** - the rate at which the pendulum amplitudes decay for ever point drawn.  Lower numbers will make
      the pendulums decay slower and therefore draw lines that are closer together. Higher numbers would do the oposite.
 * **Number of Steps** - the number of points used to draw the harmonograph.  More points will allow the pendulums
@@ -31,6 +30,7 @@ curves are gradually decaying, similar to a pendulum.
      the frequencies are all "in-phase", or directly related to one another.  Changing the phase changes this relationship
      and tends to skew different portions of the harmonograph curve.  Try playing with different numbers to get interesting
      variations.
+* **X and Y Center** - the center of drawing. Usually these should be left alone.
 
 #### Examples 
  
@@ -46,24 +46,25 @@ Mouth | 1, 1, 2, 1 | 9, 9, 4, 4 | 90, 0, 0, 0
 Infinity | 1, 1, 2, 1 | 9, 9, 4, 4 | 0, 0, 0, 0
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
         self.editor = [
-            DialogFloat( "xCenter",         "X Center",             units = "inches", default = width / 2.0 ),
-            DialogFloat( "yCenter",         "Y Center",             units = "inches", default = length / 2.0 ),
             DialogFloat( "decay",           "Decay Rate",           default = 0.0001, min = .00000001 ),
             DialogInt(   "steps",           "Number of Steps",      default = 1000, min = 1000, max = 20000 ),
             DialogFloat( "f1",              "X1 Frequency",         default = 5.0, min = 0.1, max = 30.0, rRound=0 ),
             DialogFloat( "f2",              "X2 Frequency",         default = 10.0, min = 0.1, max = 30.0, rRound=0 ),
             DialogFloat( "f3",              "Y1 Frequency",         default = 7.0, min = 0.1, max = 30.0, rRound=0 ),
             DialogFloat( "f4",              "Y2 Frequency",         default = 12.0, min = 0.1, max = 30.0, rRound=0 ),
-            DialogFloat( "a1",              "X1 Amplitude",         units = "inches", default = width / 4.0, min = 0.0 ),
-            DialogFloat( "a2",              "X2 Amplitude",         units = "inches", default = width / 4.0, min = 0.0 ),
-            DialogFloat( "a3",              "Y1 Amplitude",         units = "inches", default = length / 4.0, min = 0.0 ),
-            DialogFloat( "a4",              "Y2 Amplitude",         units = "inches", default = length / 4.0, min = 0.0 ),
+            DialogFloat( "a1",              "X1 Amplitude",         units = units, default = width / 4.0, min = 0.0 ),
+            DialogFloat( "a2",              "X2 Amplitude",         units = units, default = width / 4.0, min = 0.0 ),
+            DialogFloat( "a3",              "Y1 Amplitude",         units = units, default = length / 4.0, min = 0.0 ),
+            DialogFloat( "a4",              "Y2 Amplitude",         units = units, default = length / 4.0, min = 0.0 ),
             DialogFloat( "p1",              "X1 Phase",             units = "degrees", default = 0.0, min = 0.0, max = 180.0, rRound=0 ),
             DialogFloat( "p2",              "X2 Phase",             units = "degrees", default = 0.0, min = 0.0, max = 180.0, rRound=0 ),
             DialogFloat( "p3",              "Y1 Phase",             units = "degrees", default = 0.0, min = 0.0, max = 180.0, rRound=0 ),
             DialogFloat( "p4",              "Y2 Phase",             units = "degrees", default = 0.0, min = 0.0, max = 180.0, rRound=0 ),
+            DialogBreak(),
+            DialogFloat( "xCenter",         "X Center",             units = units, default = width / 2.0 ),
+            DialogFloat( "yCenter",         "Y Center",             units = units, default = length / 2.0 ),
         ]
 
     def generate( self, params ):

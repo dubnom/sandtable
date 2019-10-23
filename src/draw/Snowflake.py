@@ -1,8 +1,8 @@
-from math import sqrt, radians, sin, cos
-import random
-from Sand import *
+from sandable import Sandable
 from dialog import *
 from Chains import * 
+import random
+from math import sqrt, radians, sin, cos
     
 class Sander( Sandable ):
     """
@@ -28,7 +28,7 @@ Depth | Probability | Size Decrease | Seed
 3 | 0.5 | 0.1 | 3737
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
         self.editor = [
             DialogInt(   "depth",               "Depth of fractility",      default = 2, max = 10 ),
             DialogFloat( "branchProbability",   "Probability of branching", default = 0.7, min = 0.0, max = 1.0 ),
@@ -36,8 +36,8 @@ Depth | Probability | Size Decrease | Seed
             DialogYesNo( "round",               "Rounded crystals",         default = False ),
             DialogInt(   "seed",                "Random seed",              default = 1, min = 0, max = 10000, rbutton = True ),
             DialogBreak(),
-            DialogFloat( "xCenter",             "X Center",                 units = "inches", default = width / 2.0 ),
-            DialogFloat( "yCenter",             "Y Center",                 units = "inches", default = length / 2.0 ),
+            DialogFloat( "xCenter",             "X Center",                 units = units, default = width / 2.0 ),
+            DialogFloat( "yCenter",             "Y Center",                 units = units, default = length / 2.0 ),
         ]
         self.table = [(0.0,0.0),(width,length)]
 

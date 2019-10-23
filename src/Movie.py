@@ -11,6 +11,7 @@ from xml.sax.handler import ContentHandler
 from xml.sax import parse
 
 from Sand import *
+from sandable import sandableFactory
 from Chains import *
 from dialog import *
 import mach
@@ -227,9 +228,9 @@ def MakeMovie( script, previewMode, ms ):
         thingies = []
         for thing in frame.things:
             # Import the sandable and invoke it
-            if not thing.Type in sandables:
+            if not thing.Type in drawers:
                 raise ValueError( 'Unsupported Thing Type "%s"' % (thing.Type))
-            sand = sandableFactory( thing.Type )
+            sand = sandableFactory( thing.Type, TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS )
     
             # Create the parameters
             params = Params(sand.editor)
@@ -245,7 +246,7 @@ def MakeMovie( script, previewMode, ms ):
         if frame.Steps <= 1:
             chains = []
             for thingy in thingies:
-                sand = sandableFactory( thingy.type )
+                sand = sandableFactory( thingy.Type, TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS )
                 chains += sand.generate( thingy.params )
             d.draw( chains, repeat = frame.Repeat )
 
@@ -258,7 +259,7 @@ def MakeMovie( script, previewMode, ms ):
             
             for thingy in thingies:
                 oldThingy = findThingy( oldThingies, thingy.name )
-                sand = sandableFactory( thingy.type )
+                sand = sandableFactory( thingy.Type, TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS )
                 
                 # If there was an old version, create chains by interpolating the parameters
                 if oldThingy:
@@ -274,7 +275,7 @@ def MakeMovie( script, previewMode, ms ):
                 if len( oldThingies ):
                     oldMorphChains = []
                     for thingy in oldThingies:
-                        sand = sandableFactory( thingy.type )
+                        sand = sandableFactory( thingy.Type, TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS )
                         oldMorphChains += sand.generate( thingy.params )
                 else:
                     oldMorphChains = newMorphChains
@@ -335,9 +336,9 @@ def eraserToChains( eraser ):
     chains = []
     for thing in things:
         # Import the sandable and invoke it
-        if not thing.Type in sandables:
+        if not thing.Type in drawers:
             raise ValueError( 'Unsupported Thing Type "%s"' % (thing.Type))
-        sand = sandableFactory( thing.Type )
+        sand = sandableFactory( thing.Type, TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS )
 
         # Create the parameters
         params = Params()

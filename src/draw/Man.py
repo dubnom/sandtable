@@ -1,5 +1,5 @@
 from math import radians, sin, cos
-from Sand import *
+from sandable import Sandable, inchesToUnits
 from dialog import *
 
 class Sander( Sandable ):
@@ -21,14 +21,15 @@ Everything is referenced to the figure's neck location.
   **Elbow and Calf Angles** are relative to their attached shoulder or thigh.  When these angles
   are set to 0, the extremity points straight out in the same direction of what they are attached to.  Positive
   angles point down while negative point up.
-* **Sizes** - size, in inches, of each extremity.  Generally **Angles** should be changed more frequently
+* **Sizes** - size of each extremity.  Generally **Angles** should be changed more frequently
   than **Sizes**.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
+        size1 = inchesToUnits(1, units)
         self.editor = [
-            DialogFloat( "xNeck",                   "X Location of Neck",       units = "inches", default = width / 2.0 ),
-            DialogFloat( "yNeck",                   "Y Location of Neck",       units = "inches", default = length / 1.5 ),
+            DialogFloat( "xNeck",                   "X Location of Neck",       units = units, default = width / 2.0 ),
+            DialogFloat( "yNeck",                   "Y Location of Neck",       units = units, default = length / 1.5 ),
             DialogBreak(),
             DialogFloat( "leftShoulderAngle",       "Left shoulder angle",      units = "degrees", default = -20.0, min = -60.0, max = 60.0 ),
             DialogFloat( "leftElbowAngle",          "Left elbow angle",         units = "degrees", default = -20.0, min = -60.0, max = 60.0 ),
@@ -39,13 +40,13 @@ Everything is referenced to the figure's neck location.
             DialogFloat( "rightKneeAngle",          "Right thigh angle",        units = "degrees", default = 60.0,  min = -60.0, max = 60.0 ),
             DialogFloat( "rightCalfAngle",          "Right calf angle",         units = "degrees", default = 20.0,  min = -60.0, max = 60.0 ),
             DialogBreak(),
-            DialogFloat( "headSize",                "Head Size (radius)",       units = "inches", default = 1.0 ),
-            DialogFloat( "neckLength",              "Neck length",              units = "inches", default = 1.0 ),
-            DialogFloat( "bodyLength",              "Body length",              units = "inches", default = 4.0 ),
-            DialogFloat( "thighLength",             "Thigh length",             units = "inches", default = 2.0 ),
-            DialogFloat( "calfLength",              "Calf length",              units = "inches", default = 2.0 ),
-            DialogFloat( "upperArmLength",          "Upper arm length",         units = "inches", default = 2.0 ),
-            DialogFloat( "foreArmLength",           "Forearm length",           units = "inches", default = 2.0 ),
+            DialogFloat( "headSize",                "Head Size (radius)",       units = units, default = size1 ),
+            DialogFloat( "neckLength",              "Neck length",              units = units, default = size1 ),
+            DialogFloat( "bodyLength",              "Body length",              units = units, default = size1*4 ),
+            DialogFloat( "thighLength",             "Thigh length",             units = units, default = size1*2 ),
+            DialogFloat( "calfLength",              "Calf length",              units = units, default = size1*2 ),
+            DialogFloat( "upperArmLength",          "Upper arm length",         units = units, default = size1*2 ),
+            DialogFloat( "foreArmLength",           "Forearm length",           units = units, default = size1*2 ),
         ]
     
     def generate( self, params ):

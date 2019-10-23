@@ -1,4 +1,5 @@
-from Sand import *
+from Sand import CLIPART_PATH
+from sandable import Sandable, inchesToUnits
 from dialog import *
 
 import cam
@@ -30,17 +31,17 @@ sections of the drawing that aren't connected to one-another.
 * **Starting locations** - where on the table the drawing should be drawn. Also normally not worth changing.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
         self.editor = [
             DialogFile(  "filename",            "File Name",                default = CLIPART_PATH, filter = '.dxf' ),
-            DialogInt(   "iterations",          "Number of Fill Iterations",default = 0, min = 0, max = 200 ),
-            DialogFloat( "decrement",           "Fill Decrement",           units = "inches", default = 0.5, min = 0.0, max = 2.0 ),
-            DialogFloat( "ballSize",            "Ball Size",                units = "inches", default = BALL_SIZE, min = 0.25 ),
+            DialogInt(   "iterations",          "Number of Fill Iterations",default = 0, min = 0, max = 60 ),
+            DialogFloat( "decrement",           "Fill Decrement",           units = units, default = 0.5, min = 0.0, max = inchesToUnits(2.0,units)),
+            DialogFloat( "ballSize",            "Ball Size",                units = units, default = ballSize, min = inchesToUnits(0.25,units)),
             DialogBreak(),
-            DialogFloat( "xOffset",             "X Origin",                 units = "inches", default = 0.0 ),
-            DialogFloat( "yOffset",             "Y Origin",                 units = "inches", default = 0.0 ),
-            DialogFloat( "width",               "Width (x)",                units = "inches", default = width, min = 1.0, max = 1000.0 ),
-            DialogFloat( "length",              "Length (y)",               units = "inches", default = length, min = 1.0, max = 1000.0 ),
+            DialogFloat( "xOffset",             "X Origin",                 units = units, default = 0.0 ),
+            DialogFloat( "yOffset",             "Y Origin",                 units = units, default = 0.0 ),
+            DialogFloat( "width",               "Width (x)",                units = units, default = width, min = 1.0, max = width*2 ),
+            DialogFloat( "length",              "Length (y)",               units = units, default = length, min = 1.0, max = length*2 ),
         ]
 
     def generate( self, params ):

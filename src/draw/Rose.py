@@ -1,5 +1,5 @@
 from math import radians, sin, cos
-from Sand import *
+from sandable import Sandable
 from dialog import *
 from Chains import *
 
@@ -22,7 +22,9 @@ Read the Wikipedia article on [Rose (mathematics)](http://en.wikipedia.org/wiki/
 * **Inner radius** and **Outer radius** - how far from the center the should start and end.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
+        self.width = width
+        self.length = length
         radius = min(width,length) / 2.0
         mRadius = max(width,length) / 2.0
         self.editor = [
@@ -30,13 +32,13 @@ Read the Wikipedia article on [Rose (mathematics)](http://en.wikipedia.org/wiki/
             DialogFloat( "angleStart",      "Starting angle",       units = "degrees", min = -180., max = 180. ),
             DialogFloat( "angleShift",      "Shift angle",          units = "degrees", default = 0.0, min = -10.0, max = 10.0 ),
             DialogFloat( "angleRate",       "Sample rate",          units = "degrees", default = 3.0, min = 1.0, max = 10.0 ),
-            DialogFloat( "linesPerInch",    "Lines per Inch",       default = 1.0, min = 0.001, max = 16.0 ),
+            DialogInt(   "turns",           "Turns",                default = int(min(width,length)), min = 1, max = int(mRadius/ballSize * 4) ),
             DialogYesNo( "fitToTable",      "Fit to table"          ),
             DialogBreak(),
-            DialogFloat( "xCenter",         "X Center",             units = "inches", default = width / 2.0 ),
-            DialogFloat( "yCenter",         "Y Center",             units = "inches", default = length / 2.0 ),
-            DialogFloat( "innerRadius",     "Inner radius",         units = "inches", default = radius * .15, min = 0.0, max = mRadius ),
-            DialogFloat( "outerRadius",     "Outer radius",         units = "inches", default = radius, min = 1.0, max = mRadius ),
+            DialogFloat( "xCenter",         "X Center",             units = units, default = width / 2.0 ),
+            DialogFloat( "yCenter",         "Y Center",             units = units, default = length / 2.0 ),
+            DialogFloat( "innerRadius",     "Inner radius",         units = units, default = radius * .15, min = 0.0, max = mRadius ),
+            DialogFloat( "outerRadius",     "Outer radius",         units = units, default = radius, min = 1.0, max = mRadius ),
         ]
 
     def generate( self, params ):
@@ -49,7 +51,7 @@ Read the Wikipedia article on [Rose (mathematics)](http://en.wikipedia.org/wiki/
             k = params.petals / 2.0
 
             thickness = params.outerRadius - params.innerRadius
-            lines = int( thickness * params.linesPerInch )
+            lines = params.turns
             points = int( 360.0 / params.angleRate )
             angleStart = radians( params.angleStart )
             for line in range( lines ):
@@ -64,7 +66,7 @@ Read the Wikipedia article on [Rose (mathematics)](http://en.wikipedia.org/wiki/
                     chain.append( (x,y) )
                 angleStart += radians( params.angleShift )
         if params.fitToTable:
-            chain = Chains.circleToTable( chain, TABLE_WIDTH, TABLE_LENGTH )
+            chain = Chains.circleToTable( chain, self.width, self.length )
         return [chain]
 
 

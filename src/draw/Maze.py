@@ -1,6 +1,8 @@
 import random
 from Sand import *
 from dialog import *
+from sandable import Sandable
+
 
 class Sander( Sandable ):
     """
@@ -33,23 +35,24 @@ Pressing the *Random* button will draw a new maze.
     B_DOWN  = 0x08
     B_SET   = 0x10
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
+        width / (ballSize * 2)
         self.editor = [
-            DialogFloat( "columns",     "Columns per inch",         default = 1.0, min = 0.1, max = 3 ),
-            DialogFloat( "rows",        "Rows per inch",            default = 1.0, min = 0.1, max = 3 ),
+            DialogInt(   "columns",     "Columns",                  default = int(width/ballSize), min = 3, max = width*3 ),
+            DialogInt(   "rows",        "Rows",                     default = int(length/ballSize), min = 3, max = length*3 ),
             DialogInt(   "seed",        "Random seed",              default = 1, min = 0, max = 10000.0, rbutton = True ),
             DialogBreak(),
-            DialogFloat( "width",       "Width (x)",                default = width, units = "inches", min = 1.0, max = width ),
-            DialogFloat( "length",      "Length (y)",               default = length, units = "inches", min = 1.0, max = length ),
-            DialogFloat( "xOffset",     "Starting x location",      default = 0.0, units = "inches" ),
-            DialogFloat( "yOffset",     "Starting y location",      default = 0.0, units = "inches" ),
+            DialogFloat( "width",       "Width (x)",                default = width, units = units, min = 1.0, max = width ),
+            DialogFloat( "length",      "Length (y)",               default = length, units = "units", min = 1.0, max = length ),
+            DialogFloat( "xOffset",     "Starting x location",      default = 0.0, units = units ),
+            DialogFloat( "yOffset",     "Starting y location",      default = 0.0, units = units ),
         ]
 
     def generate( self, params ):
         random.seed( params.seed )
         
-        cols = int( .9999999 + params.width * params.columns )
-        rows = int( .9999999 + params.length * params.rows )
+        cols = params.columns
+        rows = params.rows
         maze = self.makeMaze( cols, rows )
         
         # turn the maze into chains

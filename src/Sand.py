@@ -1,5 +1,5 @@
 # List of supported drawing classes
-sandables = [
+drawers = [
         "Spiral",
         "Rose",
         "Star",
@@ -115,24 +115,8 @@ exec("from %s.%s import *" % (CONFIG_PATH, hostmap[HOST_NAME]))
 IMAGE_HEIGHT        = int(IMAGE_WIDTH * (TABLE_LENGTH / TABLE_WIDTH))
 MACH_FILE           = '%smachines/%s.py' % (SOURCE_PATH, MACHINE)
 
-class Sandable():
-    editor = []
-    def generate( self, params ):
-        return []
-
 class Ledable():
     editor = []
     def generator( self, leds, cols, rows, params ):
         pass
 
-def sandableFactory( sandable ):
-    from importlib import import_module
-    
-    if sandable in sandables:
-        sm = import_module('draw.%s' % sandable)
-        return sm.Sander(TABLE_WIDTH, TABLE_LENGTH)
-    else:
-        return None
-
-class SandException( BaseException ):
-    pass 

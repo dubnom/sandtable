@@ -1,7 +1,7 @@
-from math import radians, sin, cos
-from Sand import *
+from sandable import Sandable
 from dialog import *
 from Chains import *
+from math import radians, sin, cos
 
 class Sander( Sandable ):
     """
@@ -25,7 +25,9 @@ Smaller **CW and CCW angular distances** make drawings that look more like flowe
 * **X Center** and **Y Center** - where the center of the drawing will be relative to the table.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
+        self.width = width
+        self.length = length
         radius = min(width,length) / 2.0
         mRadius = max(width,length) / 2.0
         self.editor = [
@@ -36,10 +38,10 @@ Smaller **CW and CCW angular distances** make drawings that look more like flowe
             DialogInt(   "points",          "Points per arm",       default = 10, min = 2 ),
             DialogYesNo( "fitToTable",      "Fit to table"          ),
             DialogBreak(),
-            DialogFloat( "xCenter",         "X Center",             units = "inches", default = width / 2.0 ),
-            DialogFloat( "yCenter",         "Y Center",             units = "inches", default = length / 2.0 ),
-            DialogFloat( "innerRadius",     "Inner radius",         units = "inches", default = radius * 0.15, min = 0.0, max = mRadius ),
-            DialogFloat( "outerRadius",     "Outer radius",         units = "inches", default = radius, min = 1.0, max = mRadius ),
+            DialogFloat( "xCenter",         "X Center",             units = units, default = width / 2.0 ),
+            DialogFloat( "yCenter",         "Y Center",             units = units, default = length / 2.0 ),
+            DialogFloat( "innerRadius",     "Inner radius",         units = units, default = radius * 0.15, min = 0.0, max = mRadius ),
+            DialogFloat( "outerRadius",     "Outer radius",         units = units, default = radius, min = 1.0, max = mRadius ),
         ]
 
     def generate( self, params ):
@@ -48,7 +50,7 @@ Smaller **CW and CCW angular distances** make drawings that look more like flowe
             self._arms( params.xCenter, params.yCenter, params.innerRadius, params.outerRadius, params.ccwArms, params.ccwAngular, params.points)
         ]
         if params.fitToTable:
-            chains = [ Chains.circleToTable( c, TABLE_WIDTH, TABLE_LENGTH ) for c in chains ]
+            chains = [ Chains.circleToTable( c, self.width, self.length ) for c in chains ]
         return chains
 
     def _arms( self, xCenter, yCenter, innerRadius, outerRadius, arms, angularDistance, armPoints ):

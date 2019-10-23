@@ -1,6 +1,7 @@
 from bottle import route, get, template
 from cgi import escape
 from Sand import *
+from sandable import sandableFactory
 
 overview = escape( """
 Movies are specified in an XML file that expresses the various keyframes that should be drawn.
@@ -31,4 +32,4 @@ The other columns briefly describe the fields and their units.""", quote=True)
 @route('/help')
 @get('/help')
 def helpPage():
-    return [ template('help-page', overview=overview, sandables=sandables, sandableFactory=sandableFactory) ]
+    return [ template('help-page', overview=overview, sandables=drawers, sandableFactory=sandableFactory) ]

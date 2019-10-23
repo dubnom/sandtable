@@ -527,7 +527,6 @@ def read_DXF(filename):
       direction = "CCW"
       while line < nlines:
          if (find(str[line],"$ANGDIR") == 0):
-            print("angdir")
             while 1:
                if (strip(str[line]) == "70"):
                   line += 1
@@ -568,7 +567,6 @@ def read_DXF(filename):
                else:
                   line += 1 # end POLYLINE
          elif (find(str[line],"ARC") == 0):
-            print("ARC")
             line += 1
             segment += 1
             boundary.append([])

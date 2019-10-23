@@ -2,11 +2,12 @@ from bottle import route, template
 #import textwrap
 import markdown
 
-from Sand import *
+from Sand import drawers
+from sandable import sandableFactory
 
 @route('/dhelp/<method>')
 def main(method):
-    method = method if method in sandables else sandables[0]
+    method = method if method in drawers else drawers[0]
     sandable = sandableFactory( method )
     if sandable:
         doc = markdown.markdown( sandable.__doc__, extensions=['tables'] ) if sandable.__doc__ else 'No documentation available'

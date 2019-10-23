@@ -3,7 +3,8 @@ from io import BytesIO
 from PIL import Image
 import potrace
 import numpy as np
-from Sand import *
+from Sand import PICTURE_PATH
+from sandable import Sandable, SandException, inchesToUnits
 from dialog import *
 from Chains import *
 import gsearch
@@ -33,7 +34,7 @@ Use the "Pictures" tab in the main navigation to more easily select photos.
 * **Starting locations** - where on the table the drawing should be drawn. Also normally not worth changing.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
         self.editor = [
             DialogStr(   "desc",                "Search Term",              length = 40 ),
             DialogList(  "color",               "Image Color",              default = 'gray', list=['all','color','gray','transparent'] ),
@@ -41,13 +42,13 @@ Use the "Pictures" tab in the main navigation to more easily select photos.
             DialogList(  "size",                "Image Size",               default = 'all', list=['all','icon','medium','large'] ),
             DialogInt(   "turdSize",            "Turd Size",                default = 40, min = 0, max = 1000 ),
             DialogInt(   "iterations",          "Number of Fill Iterations",default = 0, min = 0, max = 100 ),
-            DialogFloat( "decrement",           "Fill Decrement",           units = "inches", default = 0.5, min = 0.0, max = 10.0 ),
+            DialogFloat( "decrement",           "Fill Decrement",           units = units, default = inchesToUnits(0.5,units), min = 0.0, max = inchesToUnits(10.0,units) ),
             DialogBreak(),
-            DialogFloat( "ballSize",            "Ball Size",                units = "inches", default = BALL_SIZE, min = 0.25),
-            DialogFloat( "xOffset",             "X Origin",                 units = "inches", default = 0.0 ),
-            DialogFloat( "yOffset",             "Y Origin",                 units = "inches", default = 0.0 ),
-            DialogFloat( "width",               "Width (x)",                units = "inches", default = width, min = 1.0, max = 1000.0 ),
-            DialogFloat( "length",              "Length (y)",               units = "inches", default = length, min = 1.0, max = 1000.0 ),
+            DialogFloat( "ballSize",            "Ball Size",                units = units, default = ballSize, min = 0.25),
+            DialogFloat( "xOffset",             "X Origin",                 units = units, default = 0.0 ),
+            DialogFloat( "yOffset",             "Y Origin",                 units = units, default = 0.0 ),
+            DialogFloat( "width",               "Width (x)",                units = units, default = width, min = 1.0, max = 1000.0 ),
+            DialogFloat( "length",              "Length (y)",               units = units, default = length, min = 1.0, max = 1000.0 ),
             DialogList(  "draw",                "Draw Method",              default = 'smartdraw', list=['scanalize','smartdraw'] ),
         ]
 

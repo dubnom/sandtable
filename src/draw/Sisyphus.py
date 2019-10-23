@@ -1,5 +1,6 @@
 from math import radians, sqrt
 from Sand import *
+from sandable import Sandable
 from dialog import *
 from Chains import *
 from thr import *
@@ -18,7 +19,8 @@ Download tracks from [Dropbox](https://www.dropbox.com/sh/n2l29huvdrjalyx/AAA69j
   directories.  Search through the directories to find interesting things to draw.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
+        self.ballSize = ballSize
         self.multiplier = min(width, length) / 2.
         self.xc, self.yc = width / 2, length / 2
         self.fullRadius = sqrt(max(width,length)**2)
@@ -42,9 +44,11 @@ Download tracks from [Dropbox](https://www.dropbox.com/sh/n2l29huvdrjalyx/AAA69j
             chain = loadThr( filename, xc, yc, aplus, multiplier )
 
             if params.background == 'Spiral':
-                background = Chains.spiral(xc,yc,self.multiplier,linesPerInch=2.,angleRate=7.,radiusEnd=0.)
+                turns = int(self.multiplier / self.ballSize)
+                background = Chains.spiral(xc,yc,self.multiplier,0,turns=turns,angleRate=7.)
             elif params.background == 'Full Spiral':
-                background = Chains.spiral(xc,yc,self.fullRadius,linesPerInch=2.,angleRate=7.,radiusEnd=0.)
+                turns = int(self.fullRadius / self.ballSize)
+                background = Chains.spiral(xc,yc,self.fullRadius,0,turns=turns,angleRate=7.)
 
         return [ background, chain ]
 

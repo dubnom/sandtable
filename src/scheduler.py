@@ -10,6 +10,7 @@ from collections import deque
 import random
 
 from Sand import *
+from sandable import sandableFactory
 from ledstuff import *
 from dialog import *
 from Chains import *
@@ -135,8 +136,8 @@ class Demo(Thread):
         while True:
             if self._state == self.HALT:
                 return
-            sandable = sandables[ random.randint(0,len(sandables)-1) ]
-            sand = sandableFactory( sandable )
+            drawer = drawers[ random.randint(0,len(drawers)-1) ]
+            sand = sandableFactory( drawer, TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS )
             params = Params( sand.editor )
             params.randomize( sand.editor )
             try:

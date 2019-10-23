@@ -1,4 +1,4 @@
-from Sand import *
+from sandable import Sandable
 from dialog import *
 from Chains import *
 
@@ -20,15 +20,15 @@ Read the Wikipedia article on [Hilbert curvers](http://en.wikipedia.org/wiki/Hil
 * **Width** and **Length** - how big the figure should be. Probably not worth changing.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
         self.editor = [
             DialogInt(   "depth",               "Depth of fractility",      default = 2, min = 1, max = 7 ),
             DialogYesNo( "fit",                 "Auto-fit to table",        default = False ),
             DialogBreak(),
-            DialogFloat( "xOffset",             "X Origin",                 units = "inches", default = 0.0 ),
-            DialogFloat( "yOffset",             "Y Origin",                 units = "inches", default = 0.0 ),
-            DialogFloat( "width",               "Width (x)",                units = "inches", default = width ),
-            DialogFloat( "length",              "Length (y)",               units = "inches", default = length ),
+            DialogFloat( "xOffset",             "X Origin",                 units = units, default = 0.0 ),
+            DialogFloat( "yOffset",             "Y Origin",                 units = units, default = 0.0 ),
+            DialogFloat( "width",               "Width (x)",                units = units, default = width ),
+            DialogFloat( "length",              "Length (y)",               units = units, default = length ),
         ]
 
     def generate( self, params ):

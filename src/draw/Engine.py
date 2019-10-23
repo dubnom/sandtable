@@ -1,5 +1,5 @@
 from math import sqrt, radians, sin, cos
-from Sand import *
+from sandable import Sandable
 from dialog import *
 from Chains import *
 
@@ -20,18 +20,18 @@ class Sander( Sandable ):
 * **Width** and **Length** - size of the pattern (spirals can go outside of the bounds).
 """
     
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
         self.editor = [
             DialogInt(   "rows",            "Rows",                 default=int(length/2), min=1, max=length ),
             DialogInt(   "cols",            "Columns",              default=int(width/2), min=1, max=width ),
-            DialogFloat( "linesPerInch",    "Lines per Inch",       default=1.0, min=0.1, max=15.0 ),
+            DialogFloat( "turns",           "Turns",                default=3.0, min=0.1, max=15.0 ),
             DialogFloat( "angleRate",       "Sample Rate",          units="degrees", default=15.0, min=-360.0, max=360.0 ),
             DialogFloat( "sizeModifier",    "Size Modifier",        units="percent", default=1., min=.75, max=1.25 ),
             DialogBreak(),
-            DialogFloat( "xCorner",         "X Corner",             units="inches", default=0.0, min=0.0, max=width, randRange=(0.,0.) ),
-            DialogFloat( "yCorner",         "Y Corner",             units="inches", default=0.0, min=0.0, max=length, randRange=(0.,0.) ),
-            DialogFloat( "width",           "Width",                units="inches", default=width, min=1.0, max=width, randRange=(width,width) ),
-            DialogFloat( "length",          "Length",               units="inches", default=length, min=1.0, max=length, randRange=(length,length) ),
+            DialogFloat( "xCorner",         "X Corner",             units=units, default=0.0, min=0.0, max=width, randRange=(0.,0.) ),
+            DialogFloat( "yCorner",         "Y Corner",             units=units, default=0.0, min=0.0, max=length, randRange=(0.,0.) ),
+            DialogFloat( "width",           "Width",                units=units, default=width, min=1.0, max=width, randRange=(width,width) ),
+            DialogFloat( "length",          "Length",               units=units, default=length, min=1.0, max=length, randRange=(length,length) ),
         ]
 
     def generate( self, params ):
@@ -39,30 +39,17 @@ class Sander( Sandable ):
             params.angleRate=15.0
 
         radius = min(params.width / params.cols, params.length / params.rows) * sqrt(2.0) * .5 * params.sizeModifier
-        points = int( (360.0 / abs(params.angleRate)) * params.linesPerInch * radius)
-        point360 = 360.0 / abs( params.angleRate )
-        angleOffset = ((points-1) * params.angleRate - 90) % 360
         rowSize, colSize = params.length / params.rows, params.width / params.cols
         rowHalf, colHalf = rowSize / 2, colSize / 2
 
         chains = []
         for row in range(params.rows):
+            aE = 180 if row%2 else 0
             for col in range(params.cols):
                 rev = params.cols-col-1 if row%2 else col
-                xCenter = params.xCorner + rev * colSize + colHalf
-                yCenter = params.yCorner + row * rowSize + rowHalf
-                chain = []
-                for point in range( points ):
-                    angle = radians( point * params.angleRate - angleOffset)
-                    r = radius * (point / float(points))
-                    x = xCenter + cos( angle ) * r
-                    y = yCenter + sin( angle ) * r
-                    chain.append( (x,y) )
-                if row%2:
-                    if rev-1 >= 0:
-                        chain.append( (x - colSize,y) )
-                elif col+1 < params.cols:
-                    chain.append( (x + colSize,y) )
+                xC = params.xCorner + rev * colSize + colHalf
+                yC = params.yCorner + row * rowSize + rowHalf
+                chain = Chains.spiral(xC,yC,0,radius,params.turns,params.angleRate,angleEnd=aE)
                 chains.append(chain)
 
         return chains

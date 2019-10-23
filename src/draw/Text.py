@@ -1,11 +1,6 @@
-from Sand import *
+from sandable import Sandable, inchesToUnits
 from dialog import *
 from Chains import *
-
-#import os
-#import popen2
-#import re
-#import sys
 from ttt import TrueTypeTracer
 
 class Sander( Sandable ):
@@ -28,20 +23,17 @@ There are hundreds of different fonts, try some.
 * **X and Y Origin** - either the center or bottom left corner of the text.
 """
 
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
         self.editor = [
             DialogMulti( "text",            "Text",                 default = "Text" ),
             DialogFont(  "font",            "Font" ,                default = '/usr/share/fonts/truetype/msttcorefonts/Arial.ttf' ),
-            DialogFloat( "cHeight",         "Height",               units="inches", default=4.0, min=1.0, max=length, step=.5 ),
+            DialogFloat( "cHeight",         "Height",               units=units, default=inchesToUnits(4.0,units), min=inchesToUnits(1.0,units), max=length, step=inchesToUnits(.5,units) ),
             DialogFloat( "lineSpacing",     "Line Spacing",         default=1.0, min=1.0, max=2.0, step=.25 ),
             DialogInt(   "rotate",          "Rotation Angle",       units="degrees", default=0., min=-180, max=180 ),
             DialogList(  "origin",          "Origin",               list=[ 'BottomLeft', 'Center' ], default='Center' ),
-            DialogFloat( "xOffset",         "X Origin",             units="inches", default=width / 2.0 ),
-            DialogFloat( "yOffset",         "Y Origin",             units="inches", default=length / 2.0 ),
+            DialogFloat( "xOffset",         "X Origin",             units=units, default=width / 2.0 ),
+            DialogFloat( "yOffset",         "Y Origin",             units=units, default=length / 2.0 ),
         ]
-
-        # Regular expression used to read motion commands
-        # self.reg = re.compile( "G0?.* X \\[([0-9,\\.,\\-]+).*\\] Y \\[([0-9,\\.,\\-]+).*\\].*" )
 
     def generate( self, params ):
         results = []
@@ -100,13 +92,5 @@ There are hundreds of different fonts, try some.
                 xHigh = x
         # Return the end of chain + start of chain
         return chain[index:] + chain[:index+1]
-
-    #def _randomWord( self ):
-    #    from wordnik import *
-    #    apiUrl = 'http://api.wordnik.com/v4'
-    #    apiKey = ''
-    #    client = swagger.ApiClient(apiKey,apiUrl)
-    #    wordsApi = WordsApi.WordApi(client)
-    #    return wordsApi.getRandomWord()
         
 

@@ -17,8 +17,8 @@ class Sander( Sandable ):
 
     def __init__( self, width, length, ballSize, units ):
         self.editor = [
-            DialogInt(   "xSquares",        "Columns (X)",              default = 2, min = 1, max = width ),
-            DialogInt(   "ySquares",        "Rows (Y)",                 default = 2, min = 1, max = length ),
+            DialogInt(   "xSquares",        "Columns (X)",              default = 2, min = 1, max = 40 ),
+            DialogInt(   "ySquares",        "Rows (Y)",                 default = 2, min = 1, max = 40 ),
             DialogInt(   "xLines",          "X Fill Lines",             default = 4, min = 1, max = 16 ),
             DialogInt(   "yLines",          "Y Fill Lines",             default = 4, min = 1, max = 16 ),
             DialogBreak(),

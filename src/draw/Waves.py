@@ -1,6 +1,5 @@
 from sandable import Sandable, inchesToUnits
 from math import radians, sin
-from Sand import *
 from dialog import *
     
 class Sander( Sandable ):

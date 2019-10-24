@@ -22,11 +22,13 @@ Set **Ray width**=0 for a cool effect.
     def __init__( self, width, length, ballSize, units ):
         self.width = width
         self.length = length
+        rippleSize = min(width,length) * .05
         radius = max(width,length) / 2.0
         self.editor = [
             DialogInt(   "rays",            "Ray count",            default = 12, min = 1, max = 60 ),
             DialogInt(   "rayWidth",        "Ray width",            units = "degrees", default = 10, min = 1, max = 60 ),
             DialogFloat( "ripples",         "Number of ripples" ,   default = 2.0, min = 0.0, max = 20.0 ),
+            DialogFloat( "rippleSize",      "Size of ripples",      units = units, default = rippleSize, min = 0., max = 3*rippleSize),
             DialogYesNo( "fitToTable",      "Fit to table"          ),
             DialogBreak(),
             DialogFloat( "xCenter",         "X Center",             units = units, default = width / 2.0 ),
@@ -43,10 +45,10 @@ Set **Ray width**=0 for a cool effect.
         self.rayStep	= 20
         self.rayScale	= params.outerRadius - params.innerRadius
         self.innerRadius= params.innerRadius
-        
-        self.rippleSize	= 0.5
+
         self.ripples   	= params.ripples
-         
+        self.rippleSize = params.rippleSize
+
         raySpacing = 360.0 / params.rays
 
         chain = []

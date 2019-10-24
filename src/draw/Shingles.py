@@ -1,5 +1,5 @@
 from math import radians, sin
-from sandable import Sandable
+from sandable import Sandable, inchesToUnits
 from dialog import *
     
 class Sander( Sandable ):
@@ -19,7 +19,7 @@ This is a pretty boring pattern. Try something more fun.
 
     def __init__( self, width, length, ballSize, units ):
         self.editor = [
-            DialogFloat( "sHeight",         "Shingle Height",       units = units, default = 2.0, min = 0.1, max = length ),
+            DialogFloat( "sHeight",         "Shingle Height",       units = units, default = inchesToUnits(2,units), min = inchesToUnits(0.1,units), max = inchesToUnits(5,units)),
             DialogBreak(),
             DialogFloat( "xOffset",         "X Origin",             units = units, default = 0.0 ),
             DialogFloat( "yOffset",         "Y Origin",             units = units, default = 0.0 ),

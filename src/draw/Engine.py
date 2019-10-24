@@ -21,10 +21,11 @@ class Sander( Sandable ):
 """
     
     def __init__( self, width, length, ballSize, units ):
+        scale = width / length
         self.editor = [
-            DialogInt(   "rows",            "Rows",                 default=int(length/2), min=1, max=length ),
-            DialogInt(   "cols",            "Columns",              default=int(width/2), min=1, max=width ),
-            DialogFloat( "turns",           "Turns",                default=3.0, min=0.1, max=15.0 ),
+            DialogInt(   "rows",            "Rows",                 default=8, min=1, max=20 ),
+            DialogInt(   "cols",            "Columns",              default=int(8*scale), min=1, max=int(20*scale) ),
+            DialogFloat( "turns",           "Turns",                default=3.0, min=1, max=15.0 ),
             DialogFloat( "angleRate",       "Sample Rate",          units="degrees", default=15.0, min=-360.0, max=360.0 ),
             DialogFloat( "sizeModifier",    "Size Modifier",        units="percent", default=1., min=.75, max=1.25 ),
             DialogBreak(),

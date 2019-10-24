@@ -1,5 +1,4 @@
 import random
-from Sand import *
 from dialog import *
 from sandable import Sandable
 
@@ -37,8 +36,8 @@ Pressing the *Random* button will draw a new maze.
 
     def __init__( self, width, length, ballSize, units ):
         self.editor = [
-            DialogInt(   "columns",     "Columns",                  default = int(width/(ballSize*3)), min = 3, max = int(width/ballSize) ),
-            DialogInt(   "rows",        "Rows",                     default = int(length/(ballSize*3)), min = 3, max = int(length/ballSize) ),
+            DialogInt(   "columns",     "Columns",                  default = int(width/(ballSize*1.25)), min = 3, max = int(width/ballSize) ),
+            DialogInt(   "rows",        "Rows",                     default = int(length/(ballSize*1.25)), min = 3, max = int(length/ballSize) ),
             DialogInt(   "seed",        "Random seed",              default = 1, min = 0, max = 10000.0, rbutton = True ),
             DialogBreak(),
             DialogFloat( "width",       "Width",                    default = width, units = units, min = 1.0, max = width ),

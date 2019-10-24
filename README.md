@@ -107,6 +107,7 @@ Logs are written to:
 * Condense Polylines and Chains
 * Add export gcode, thr, svg and perhaps dxf. Make export return files.
 * Add playlists
+* Fix units display (and estimation) in Chains and cgidraw
 
 ## Authors:
 

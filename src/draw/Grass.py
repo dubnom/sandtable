@@ -1,4 +1,4 @@
-from sandable import Sandable
+from sandable import Sandable, inchesToUnits
 from dialog import *
 from Chains import *
 import random
@@ -18,12 +18,14 @@ class Sander( Sandable ):
     def __init__( self, width, length, ballSize, units ):
         self.editor = [
             DialogFloat( "maxHeight",       "Maximum height",       units = units, default = length * .75, min = 1.0, max=length ),
-            DialogFloat( "maxWind",         "Maximum wind",         units = units, default = 1., min=0., max = 4. ),
+            DialogFloat( "maxWind",         "Maximum wind",         units = units, default = inchesToUnits(1.,units), min=0., max = inchesToUnits(4.,units) ),
             DialogInt(   "blades",          "Blades of grass",      default = 100, min = 1, max = 250 ),
             DialogYesNo( "dWind",           "Directional wind",     ),
         ]
         self.width  = width
         self.length = length
+        self.thickness = inchesToUnits(1, units)
+        self.steps = 5
 
     def generate( self, params ):
         chains = []
@@ -37,16 +39,15 @@ class Sander( Sandable ):
                 w = random.random() * directionalWind
             else:
                 w = random.uniform( -params.maxWind, params.maxWind )
-            thickness = 1.
-            steps = 5
             h = 0
-            for step in range(steps):
+            thickness = self.thickness
+            for step in range(self.steps):
                 chain1.append( (x,h) )
                 chain2.append( (x+thickness,h) )
-                h += mh / steps
+                h += mh / self.steps
                 x += w
                 w *= 1.5
-                thickness *= (1.0 - 1./steps) 
+                thickness *= (1.0 - 1./self.steps) 
             chain2.reverse()
             chains.append( Chains.Spline( chain1 ))
             chains.append( Chains.Spline( chain2 ))

@@ -7,14 +7,10 @@ IMAGE_TYPE          = 'Realistic'
 LOGGING_LEVEL       = "debug"
 SCHEDULER_ENABLE    = True
 
-#TABLE_UNITS         = "inches"
-#TABLE_WIDTH         = 30.0
-#TABLE_LENGTH        = 20.0
-
-BALL_SIZE           = 0.75 * 2.54      # Diameter of ball
-TABLE_UNITS         = "cm"
-TABLE_WIDTH         = 30.0 * 2.54
-TABLE_LENGTH        = 20.0 * 2.54
+BALL_SIZE           = 0.75
+TABLE_UNITS         = "inches"
+TABLE_WIDTH         = 30.0
+TABLE_LENGTH        = 20.0
 
 LED_DRIVER          = "LedsDS"
 LED_PARAMS          = None

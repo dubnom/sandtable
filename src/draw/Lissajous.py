@@ -1,5 +1,4 @@
 from math import radians, sin, fabs
-from Sand import *
 from sandable import Sandable
 from dialog import *
     

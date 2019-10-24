@@ -1,5 +1,4 @@
 from math import radians, sqrt
-from Sand import *
 from sandable import Sandable
 from dialog import *
 from Chains import *

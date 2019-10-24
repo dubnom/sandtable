@@ -26,12 +26,13 @@ Press the *Random* button to automatically make new drawings.
 """
 
     def __init__( self, width, length, ballSize, units ):
-        rockSize = min(width,length) / 4.0
+        self.ballSize = ballSize
+        rockSize = inchesToUnits(3,units)
         self.editor = [
             DialogInt(   "rocks",           "Number of rocks",          default = 5, min = 1, max = 25 ),
-            DialogFloat( "minRockSize",     "Minimum rock size",        units = units, min = .25, max = rockSize, default = inchesToUnits(1.0,units)),
-            DialogFloat( "maxRockSize",     "Maximum rock size",        units = units, min = .25, max = rockSize, default = inchesToUnits(1.0,units)),
-            DialogInt(   "rakeSize",        "Rake teeth",               units = "tines", min = 2, max = 8, default = 4 ),
+            DialogFloat( "minRockSize",     "Minimum rock size",        units = units, min = inchesToUnits(.25,units), max = rockSize, default = inchesToUnits(1.0,units)),
+            DialogFloat( "maxRockSize",     "Maximum rock size",        units = units, min = inchesToUnits(.25,units), max = rockSize, default = inchesToUnits(1.0,units)),
+            DialogInt(   "rakeSize",        "Rake teeth",               units = "tines", min = 2, max = 5, default = 3 ),
             DialogInt(   "seed",            "Random Seed",              default = 1, min = 0, max = 10000, rbutton = True ),
             DialogBreak(),
             DialogFloat( "ballSize",        "Ball size",                units = units, min = .25, default = ballSize ),
@@ -42,7 +43,7 @@ Press the *Random* button to automatically make new drawings.
         ]
 
     def generate( self, params ):
-        rockLPI     = 16.0
+        rakeSize = self.ballSize * params.rakeSize 
 
         seed( params.seed )
         rocks = [ (params.width * random(), params.length * random()) for n in range( params.rocks ) ]
@@ -52,23 +53,10 @@ Press the *Random* button to automatically make new drawings.
         for rock in rocks:
             rockSize = uniform( params.minRockSize, params.maxRockSize )
             # draw inside tight 16 lpi spiral
-            chain = self._transform( self._spiral( 1. / rockLPI, 0.0, floor( rockSize * rockLPI ) ), rock )
+            chain = Chains.spiral(rock[0],rock[1],0.,rockSize,10)
+
             # draw outside loose ball lpi spiral ending on left side
-            chain += self._transform( self._spiral( params.ballSize, rockSize, params.rakeSize ), rock )
+            chain += Chains.spiral(rock[0],rock[1],rockSize,rockSize+rakeSize,params.rakeSize)
             chains.append( chain )
 
         return Chains.scanalize( chains, params.xOffset, params.yOffset, params.width, params.length, 1.0 / params.ballSize )
-
-    
-    def _spiral( self, lineWidth, innerRadius, rotations, angleRate = 15.0 ):
-        chain = []
-        points = int(floor( (360.0 / angleRate) * rotations ))
-        radiusFactor = (rotations * lineWidth) / points
-        for point in range(int(points)):
-            angle = radians( point * angleRate )
-            radius = innerRadius + point * radiusFactor 
-            chain.append( (cos( angle ) * radius, sin( angle ) * radius))
-        return chain
-
-    def _transform( self, chain, offset ):
-        return [ (x + offset[0], y + offset[1]) for (x,y) in chain ]

@@ -1,5 +1,4 @@
 from math import radians, sin, cos, pi
-from Sand import *
 from sandable import Sandable
 from dialog import *
 from Chains import *
@@ -20,9 +19,10 @@ class Sander( Sandable ):
 """
 
     def __init__( self, width, length, ballSize, units  ):
+        radius = min(width,length)*.1
         self.editor = [
-            DialogFloat( "radius",          "Radius",               units=units, default=min(width,length)/8., min=1.0, max=min(width,length)),
-            DialogInt(   "rings",           "Rings",                default=3, min=1, max=max(width,length)),
+            DialogFloat( "radius",          "Radius",               units=units, default=radius, min=1.0, max=radius*4),
+            DialogInt(   "rings",           "Rings",                default=3, min=1, max=8),
             DialogFloat( "turns",           "Turns",                default=3, min=0.1, max=24.0 ),
             DialogFloat( "angleRate",       "Sample rate",          units="degrees", default=15.0, min=-720.0, max=720.0 ),
             DialogFloat( "factor",          "Spacing factor",       default=1.0, min=.5, max=1.5 ),

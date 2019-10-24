@@ -377,7 +377,7 @@ class Chains():
         """Convert between measurement units"""
         if fromUnits == toUnits:
             return chains
-        unitConv = self.conversion[toUnits] / self.conversion[fromUnits]
+        unitConv = Chains.conversion[toUnits] / Chains.conversion[fromUnits]
         return [[ (p[0]*unitConv, p[1]*unitConv) for p in chain] for chain in chains ]
 
     @staticmethod

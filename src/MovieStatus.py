@@ -1,7 +1,7 @@
 import os
 import pickle
-from Sand import *
-from datetime import *
+from Sand import MOVIE_STATUS_FILE
+from datetime import datetime
 
 class MovieStatus:
     """MovieStatus is used to maintain the status of spawned processes making movies"""

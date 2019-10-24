@@ -139,7 +139,7 @@ def filerPage():
         name, ext = os.path.splitext( fUpload.filename )
         logging.info( 'name: %s, extension: %s' % (name,ext))
         logging.info( 'path: ' + path )
-        if ext[1:] in filetype.filter and filetype.allowUpload():
+        if ext[1:] in filetype.filter and filetype.allowUpload:
             logging.info( 'saving picture to: %s%s%s ' % (path, name, ext) )
             fUpload.save( '%s%s%s' % (path, name, ext))
 
@@ -175,7 +175,7 @@ def filerPage():
         res += '</tr>' if not (imgNum % columns) else ''
     res += '</tr>' if imgNum % columns else ''
     
-    upload = filetype.allowUpload()
+    upload = filetype.allowUpload
     ftfilter = ','.join(['.'+s for s in filetype.filter]) if upload else ""
 
     return [

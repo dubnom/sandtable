@@ -1,8 +1,8 @@
 from math import sqrt, radians, sin, cos
-from sandable import Sandable
+import random
+from sandable import Sandable, inchesToUnits
 from dialog import *
-
-from random import random, seed
+from Chains import *
     
 class Sander( Sandable ):
     """
@@ -15,22 +15,20 @@ Drawing random wood boards requires a lot of compute time. Be patient.
 #### Parameters
 
 * **Number of Knots** - number of knots that the piece of wood should have.
-* **Maximum Knot Radius** - largest radius (in inches) of a random knot.
+* **Maximum Knot Radius** - largest radius of a random knot.
 * **Random seed** - used to generate random drawings.  Different seeds generate different locations
   and sizes for the knots. The *Random* button will create new seeds automatically.
-* **X Lines per Inch** - The straightness/curviness of the wood grain lines.
-* **Y Lines per Inch** - The density of wood grain per inch.
+* **Number of points/line** - The smoothness of the wood grain lines.
+* **Number of lines** - Number of grain lines..
 * **X and Y Origin** - lower left corner of the drawing. Usually not worth changing.
 * **Width** and **Length** - how big the figure should be. Probably not worth changing.
 """
 
-    SPIRAL_LPI = 4.0
-
-    def __init__( self, width, length ):
+    def __init__( self, width, length, ballSize, units ):
         self.editor = [
             DialogInt(   "knots",           "Number of Knots",          default = 5, min = 0, max = 20 ),
             DialogFloat( "rKnot",           "Maximum Knot Radius",      units = units, default = inchesToUnits(5.0,units), min = inchesToUnits(1.0,units), max = max(width,length) ),
-            DialogInt(   "seed",            "Random Seed",              default = 1, min = 0, max = 10000, rbutton = True ),
+            DialogInt(   "seed",            "Random seed",              default = 1, min = 0, max = 10000, rbutton = True ),
             DialogInt(   "xLines",          "Number of points/line",    default = 200, min = 50, max = 600),
             DialogInt(   "yLines",          "Number of lines",          default = 40, min = 5, max = 100 ),
             DialogBreak(),
@@ -41,13 +39,13 @@ Drawing random wood boards requires a lot of compute time. Be patient.
         ]
 
     def generate( self, params ):
-        seed( params.seed )
+        random.seed( params.seed )
         knots = []
         attempts = 200
         while len( knots ) < params.knots and attempts > 0:
-            x = params.xOffset + 1.0 + random()*(params.width-2.0)
-            y = params.yOffset + 1.0 + random()*(params.length-2.0)
-            r = int(self.SPIRAL_LPI * max(1.0,random() * params.rKnot))
+            r = random.random() * params.rKnot
+            x = params.xOffset + r + random.random()*(params.width-(2*r))
+            y = params.yOffset + r + random.random()*(params.length-(2*r))
             # Check for circular overlap
             for knot in knots:
                 if self._overlap( x, y, r, knot ):
@@ -60,13 +58,14 @@ Drawing random wood boards requires a lot of compute time. Be patient.
         chains = self._grid( params )
         for c, s in knots:
             self._knot( chains, c, s )
-            chains.insert( 0, self._transform( self._spiral( 1.0 / self.SPIRAL_LPI, 0.0, s ), c))
+            # FIX: Get rid of hardcoded 6
+            chains.insert( 0, Chains.spiral(c[0],c[1],0.,s,6))
         chains.insert( len( knots ), [ (params.xOffset+params.width, params.yOffset) ] )
         return chains
     
     def _grid( self, params ):
-        xCount = int( params.width * params.xLinesPerInch )
-        yCount = int( params.length * params.yLinesPerInch )
+        xCount = params.xLines
+        yCount = params.yLines
         xSpacing = params.width / xCount
         ySpacing = params.length / yCount
         
@@ -78,27 +77,15 @@ Drawing random wood boards requires a lot of compute time. Be patient.
                 chain.reverse()
             chains.append( chain )
         return chains
-    
+
     def _knot( self, chains, knotCenter, knotRadius ):
         for chain in chains:
             for point in chain:
                 distance = sqrt( (knotCenter[0]-point[0]) ** 2 + (knotCenter[1]-point[1]) ** 2 )
-                if distance > 0.001:
-                    point[0] += knotRadius/self.SPIRAL_LPI * ((point[0] - knotCenter[0]) / distance)
-                    point[1] += knotRadius/self.SPIRAL_LPI * ((point[1] - knotCenter[1]) / distance)
+                if distance > 0.01:
+                    point[0] += knotRadius * ((point[0] - knotCenter[0]) / distance)
+                    point[1] += knotRadius * ((point[1] - knotCenter[1]) / distance)
 
-    def _spiral( self, lineWidth, innerRadius, rotations, angleRate = 15.0 ):
-        chain = []
-        points = int((360.0 / angleRate) * rotations )
-        radiusFactor = (rotations * lineWidth) / points
-        for point in range(int(points)):
-            angle = radians( point * angleRate )
-            radius = innerRadius + point * radiusFactor 
-            chain.append( [cos( angle ) * radius, sin( angle ) * radius])
-        return chain
-
-    def _transform( self, chain, offset ):
-        return [ [x + offset[0], y + offset[1]] for (x,y) in chain ]
 
     def _overlap( self, x1, y1, r1, rock ):
         ((x2, y2), r2) = rock

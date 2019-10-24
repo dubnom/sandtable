@@ -26,7 +26,7 @@ Use the "Pictures" tab in the main navigation to more easily select photos.
      automatically stop when it becomes too small (try 25).
 * **Fill Decrement** - amount to shrink the outside image(s) by for the purpose of filling-in the drawing.
      The smaller the **Fill Decrement** is the tighter the lines are (try .25).
-* **Height** - scale the resulting drawing to the specified height in inches.
+* **Height** - scale the resulting drawing to the specified height.
 * **Width** and **Length** - how big the drawing should be. Probably not worth changing.
 * **Starting locations** - where on the table the drawing should be drawn. Also normally not worth changing.
 """

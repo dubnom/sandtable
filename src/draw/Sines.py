@@ -9,8 +9,7 @@ class Sander( Sandable ):
 
 #### Parameters
 
-* **Lines per Inch** - number of lines drawn within an inch of the spiral.
-  Changing this can make the lines closer together (try a number like 10) or farther apart (try 0.5).
+* **Turns** - number of lines drawn within the spiral.
 * **Starting angle** - the angle the spiral starts at. The default of 0.0 starts to the right of center.
 * **Sample rate** - how frequently points are calculated around the spiral.  Smaller numbers create rounder
   spirals while larger numbers create interesting shapes.  Try 120 to get a triangle;
@@ -25,7 +24,7 @@ class Sander( Sandable ):
   and create patterns that "interfere" with one another (in a pleasant way).  
   More than one frequency can be given. When this is combined with different **Wave amplitudes** and **Wave phases**
   complex and interesting figures emerge.
-* **Wave amplitude(s)** - the height, in inches, of each wave.
+* **Wave amplitude(s)** - the height of each wave.
 * **Wave phase(s)** - the starting phase, in degrees, of each wave.
 * **Inner radius** and **Outer radius** - how far from the center the spiral should start and end.
 * **X Center** and **Y Center** - where the center of the spiral will be relative to the table.
@@ -47,7 +46,7 @@ Messy Triangle | 1.25 | 0 | 5 | 1 | 3.1, 25.5 | 1, .5 | 0 | 0 | 1 | 8
         radius = min(width,length) / 2.0
         mRadius = max(width,length) / 2.0
         self.editor = [
-            DialogFloat( "turns",           "Turns",                default = radius, min = 1, max = max(width,length)*4 ),
+            DialogFloat( "turns",           "Turns",                default = 10, min = 1, max = max(width,length)*4 ),
             DialogFloat( "angleStart",      "Starting angle",       units = "degrees" ),
             DialogFloat( "angleRate",       "Sample rate",          units = "degrees", default = 5.0 ),
             DialogFloat( "base",            "Growth base power",    default = 1.0, min = 0.001 ),

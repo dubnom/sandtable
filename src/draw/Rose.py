@@ -17,7 +17,7 @@ Read the Wikipedia article on [Rose (mathematics)](http://en.wikipedia.org/wiki/
 * **Starting angle** - amount to rotate the flower.
 * **Shift angle** - amount to rotate each subsequent petal. 
 * **Sample rate** - how frequently to draw a point when going around the flower.
-* **Lines per Inch** - number of flowers to draw per inch. 
+* **Turns** - number of lines per petal.
 * **X Center** and **Y Center** - where the center of the flower will be relative to the table.
 * **Inner radius** and **Outer radius** - how far from the center the should start and end.
 """
@@ -32,7 +32,7 @@ Read the Wikipedia article on [Rose (mathematics)](http://en.wikipedia.org/wiki/
             DialogFloat( "angleStart",      "Starting angle",       units = "degrees", min = -180., max = 180. ),
             DialogFloat( "angleShift",      "Shift angle",          units = "degrees", default = 0.0, min = -10.0, max = 10.0 ),
             DialogFloat( "angleRate",       "Sample rate",          units = "degrees", default = 3.0, min = 1.0, max = 10.0 ),
-            DialogInt(   "turns",           "Turns",                default = int(min(width,length)), min = 1, max = int(mRadius/ballSize * 4) ),
+            DialogInt(   "turns",           "Turns",                default = 20, min = 1, max = int(mRadius/ballSize * 4) ),
             DialogYesNo( "fitToTable",      "Fit to table"          ),
             DialogBreak(),
             DialogFloat( "xCenter",         "X Center",             units = units, default = width / 2.0 ),
@@ -68,5 +68,3 @@ Read the Wikipedia article on [Rose (mathematics)](http://en.wikipedia.org/wiki/
         if params.fitToTable:
             chain = Chains.circleToTable( chain, self.width, self.length )
         return [chain]
-
-

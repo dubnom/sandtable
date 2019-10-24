@@ -14,11 +14,11 @@ as it goes around - small numbers create ripples, large numbers create cool inte
 #### Parameters 
 
 * **Major frequency** - number of bumps to put on the spiral.
-* **Major amplitude** - size of the bumps in inches.
+* **Major amplitude** - size of the bumps.
 * **Minor frequency** - how often to bend the major bumps forward and backward (numbers close to Major frequency are a good place to start).
 * **Minor amplitude** - size of the bending in degrees. Smaller numbers are more subtle, larger numbers create greater folds.
 * **Inner radius** and **Outer radius** - how far from the center the spiral should start and end.
-* **Lines per Inch** - number of lines drawn within an inch of the spiral. Changing this can make the lines closer together (try a number like 10) or farther apart (try 0.5).
+* **Turns** - number of lines drawn within the spiral.
 * **Sample rate** - angular spacing between points calculated around a 360 degree spiral. Smaller numbers create rounder drawings while larger numbers create spiked shapes.
 * **X Center** and **Y Center** - where the center of the spiral will be relative to the table.
 """

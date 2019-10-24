@@ -14,10 +14,9 @@ There are hundreds of different fonts, try some.
 #### Parameters
 
 * **Text** - one or more lines to draw.
-* **Height** - height in inches of the characters.
+* **Height** - height of the characters.
 * **Font** - font used to draw the text.
-* **Line Spacing** - the relative distance of multiple lines of **Text**.  The default
- of 1.25 and **Height**=4 would add an extra inch (1.25 * 4 = 5) between the lines.
+* **Line Spacing** - the relative distance of multiple lines of **Text**.
 * **Rotation Angle** - angle to rotate the text.
 * **Origin** - where the text should be drawn relative to **X and Y Origin**.
 * **X and Y Origin** - either the center or bottom left corner of the text.

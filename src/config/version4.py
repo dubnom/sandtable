@@ -4,13 +4,17 @@ HOST_PORT           = 80
 
 CACHE_ENABLE        = True
 IMAGE_TYPE          = 'Realistic'
-BALL_SIZE           = 0.75      # Diameter of ball
 LOGGING_LEVEL       = "debug"
 SCHEDULER_ENABLE    = True
 
-TABLE_UNITS         = "inches"
-TABLE_WIDTH         = 30.0
-TABLE_LENGTH        = 20.0
+#TABLE_UNITS         = "inches"
+#TABLE_WIDTH         = 30.0
+#TABLE_LENGTH        = 20.0
+
+BALL_SIZE           = 0.75 * 2.54      # Diameter of ball
+TABLE_UNITS         = "cm"
+TABLE_WIDTH         = 30.0 * 2.54
+TABLE_LENGTH        = 20.0 * 2.54
 
 LED_DRIVER          = "LedsDS"
 LED_PARAMS          = None

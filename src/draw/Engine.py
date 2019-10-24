@@ -10,7 +10,7 @@ class Sander( Sandable ):
 #### Parameters
 
 * **Rows** and **Columns** - number of rows and columns to create the engine-turned pattern with.
-* **Lines per Inch** - number of lines drawn within an inch of the spiral.
+* **Turns** - number of lines drawn within a spiral.
   Changing this can make the lines closer together (try a number like 10) or farther apart (try 0.5).
 * **Sample Rate** - how frequently points are calculated around the spiral.  Smaller numbers create rounder
   spirals while larger numbers create interesting shapes.  Try 120 to get a triangle;

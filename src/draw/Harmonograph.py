@@ -23,8 +23,8 @@ curves are gradually decaying, similar to a pendulum.
      to decay closer to the center.
 * **Frequencies** - frequencies of the "pen" (X1, Y1) and the "surface" (X2, Y2).  Smaller numbers yield simpler
      images.  Non-integers yield drawings that look more like scribbles or freeform.
-* **Amplitudes** - amplitudes indicate the amount of "energy" in each pendulum axis. Higher numbers, specified in
-     inches, means that the pendulums are swinging over a larger area. The amplitudes do not change the frequencies, and
+* **Amplitudes** - amplitudes indicate the amount of "energy" in each pendulum axis. Higher numbers
+     mean that the pendulums are swinging over a larger area. The amplitudes do not change the frequencies, and
      amplitudes decay over time.
 * **Phases** - phases indicate the angular offsets between each of the frequencies. When all of the phases are 0,
      the frequencies are all "in-phase", or directly related to one another.  Changing the phase changes this relationship

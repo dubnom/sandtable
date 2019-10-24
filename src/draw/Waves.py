@@ -13,8 +13,9 @@ Try changing **Shift per line** first.
 
 #### Parameters
 
- * **Wave Height** - height in inches of each of the waves.
- * **Lines per Inch** - number of vertical lines of waves per inch.
+ * **Wave Height** - height of each of the waves.
+ * **Lines** - number of horizontal wave lines.
+ * **Points per line** - number of points that make up each line.
  * **Waves per Line** - number of waves per horizontal line.
  * **Shift per Line** - amount to shift waves over each line.
  * **Wave increment** - percent to increase/decrease number of waves for each line.
@@ -28,9 +29,10 @@ Try changing **Shift per line** first.
         self.editor = [
             DialogFloat( "wHeight",         "Wave Height",          units = units, default = inchesToUnits(1.0,units), min = 0.0, max = length ),
             DialogInt(   "lines",           "Lines",                default = 40, min = 5, max = 100 ),
-            DialogFloat( "waves",           "Waves per Line",       default = 3.0, min = 0.0, max = 500.0 ),
-            DialogFloat( "shift",           "Shift per Line",       units = "degrees", default = 5.0, min = 0.0 ),
-            DialogFloat( "increment",       "Wave increment",       units = "percent", default = 100.0 ),
+            DialogInt(   "xCount",          "Points per line",      default = 100, min = 10, max = 160 ),
+            DialogFloat( "waves",           "Waves per Line",       default = 3.0, min = 0.0, max = 45.0 ),
+            DialogFloat( "shift",           "Shift per Line",       units = "degrees", default = 5.0, min = 0.0, max = 10.0 ),
+            DialogFloat( "increment",       "Wave increment",       units = "percent", default = 100.0, min = 95.0, max = 105.0 ),
             DialogBreak(),
             DialogFloat( "xOffset",         "X Origin",             units = units, default = 0.0 ),
             DialogFloat( "yOffset",         "Y Origin",             units = units, default = 0.0 ),
@@ -39,9 +41,9 @@ Try changing **Shift per line** first.
         ]
 
     def generate( self, params ):
-        xPerInch = 3 
-        xCount = int( xPerInch * params.width )
+        xCount = params.xCount
         xScale = params.width / xCount
+
         xyScale = (360.0 * params.waves) / xCount
         yCount = params.lines
         yScale = params.length / params.lines

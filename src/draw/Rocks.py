@@ -17,7 +17,7 @@ Press the *Random* button to automatically make new drawings.
 
 * **Number of rocks** - number of rocks in the garden.
 * **Min and Max rock size** - smallest and largest possible rock sizes (radius).
-* **Ball size** - size of the ball in inches for making rake lines.
+* **Ball size** - size of the ball for making rake lines.
 * **Rake teeth** - Number of tines in the rake for cirlces around the rocks.
 * **Random seed** - this is used to generate random gardens.  Different seeds generate different drawings.
     The *Random* button will create new seeds automatically.

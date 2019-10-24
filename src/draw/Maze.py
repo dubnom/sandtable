@@ -16,8 +16,8 @@ Pressing the *Random* button will draw a new maze.
 
 #### Parameters
 
-* **Columns and Rows per inch** - number of maze lines per inch. Higher numbers (try 2) create a denser,
-  harder maze while smaller numbers (try .5) create a sparser, easier maze.
+* **Columns and Rows** - number of maze lines. Higher numbers create a denser,
+  harder maze while smaller numbers create a sparser, easier maze.
 * **Random seed** - this is used to generate random mazes.  Different seeds generate different mazes.
   The *Random* button will create new seeds (and mazes)  automatically.
 * **Width** and **Length** - how big the maze should be. Probably not worth changing.
@@ -36,14 +36,13 @@ Pressing the *Random* button will draw a new maze.
     B_SET   = 0x10
 
     def __init__( self, width, length, ballSize, units ):
-        width / (ballSize * 2)
         self.editor = [
-            DialogInt(   "columns",     "Columns",                  default = int(width/ballSize), min = 3, max = width*3 ),
-            DialogInt(   "rows",        "Rows",                     default = int(length/ballSize), min = 3, max = length*3 ),
+            DialogInt(   "columns",     "Columns",                  default = int(width/(ballSize*3)), min = 3, max = int(width/ballSize) ),
+            DialogInt(   "rows",        "Rows",                     default = int(length/(ballSize*3)), min = 3, max = int(length/ballSize) ),
             DialogInt(   "seed",        "Random seed",              default = 1, min = 0, max = 10000.0, rbutton = True ),
             DialogBreak(),
-            DialogFloat( "width",       "Width (x)",                default = width, units = units, min = 1.0, max = width ),
-            DialogFloat( "length",      "Length (y)",               default = length, units = "units", min = 1.0, max = length ),
+            DialogFloat( "width",       "Width",                    default = width, units = units, min = 1.0, max = width ),
+            DialogFloat( "length",      "Length",                   default = length, units = "units", min = 1.0, max = length ),
             DialogFloat( "xOffset",     "Starting x location",      default = 0.0, units = units ),
             DialogFloat( "yOffset",     "Starting y location",      default = 0.0, units = units ),
         ]

@@ -14,9 +14,8 @@ Try playing with **Sample rate** first.
 
 #### Parameters
 
-* **Inner radius** and **Outer radius** - how far from the center the spiral should start and end.
-* **Lines per Inch** - number of lines drawn within an inch of the spiral.
-  Changing this can make the lines closer together (try a number like 10) or farther apart (try 0.5).
+* **First radius** and **Second radius** - how far from the center the spiral should start and end.
+* **Turns** - number of lines drawn within the spiral.
 * **Starting angle** - the angle the spiral starts at. The default of 0.0 starts to the right of center.
 * **Sample rate** - how frequently points are calculated around the spiral.  Smaller numbers create rounder
   spirals while larger numbers create interesting shapes.  Try 120 to get a triangle;
@@ -26,6 +25,7 @@ Try playing with **Sample rate** first.
   and 0.5 for a spiral that is big in the center.
 * **Fill in spiral** - draw lines between points of each subsequent spiral arm.
   This creates a full filled-in spiral that looks pretty neat in sand.
+* **Fit to table** - Warp the circular shape to the dimensions of the table.
 * **X Center** and **Y Center** - where the center of the spiral will be relative to the table.
 """
 
@@ -42,8 +42,8 @@ Try playing with **Sample rate** first.
             DialogYesNo( "fill",            "Fill in spiral"        ),
             DialogYesNo( "fitToTable",      "Fit to table"          ),
             DialogBreak(),
-            DialogFloat( "xCenter",         "X Center",             units = "inches", default = width / 2.0 ),
-            DialogFloat( "yCenter",         "Y Center",             units = "inches", default = length / 2.0 ),
+            DialogFloat( "xCenter",         "X Center",             units = units, default = width / 2.0 ),
+            DialogFloat( "yCenter",         "Y Center",             units = units, default = length / 2.0 ),
         ]
 
     def generate( self, params ):

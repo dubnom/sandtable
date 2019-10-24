@@ -40,6 +40,8 @@ class Chains():
               (-1,-2,COLOR_LIGHT), (-1,-1,COLOR_LIGHT), (0,0,COLOR_DARK), (1,1,COLOR_DARK),
               (1,2,COLOR_DARK), (2,1,COLOR_DARK), (2,2,COLOR_DARK) ]
 
+    conversion = {'inches':1, 'mm':25.4, 'cm':2.54}
+
     @staticmethod
     def calcExtents( chains ):
         """Return two points that indicate the lower left and upper right extents of the chains"""
@@ -136,7 +138,7 @@ class Chains():
             radius  = radiusStart + thickness * (math.pow(((point * abs(angleRate)) / 360.0), base) / divisor)
             x = xCenter + math.cos( angle ) * radius
             y = yCenter + math.sin( angle ) * radius
-            chain.append( (x,y) )
+            chain.append( [x,y] )
         return chain
 
     @staticmethod
@@ -375,7 +377,7 @@ class Chains():
         """Convert between measurement units"""
         if fromUnits == toUnits:
             return chains
-        unitConv = 1./2.54 if toUnits=='inches' else 25.4
+        unitConv = self.conversion[toUnits] / self.conversion[fromUnits]
         return [[ (p[0]*unitConv, p[1]*unitConv) for p in chain] for chain in chains ]
 
     @staticmethod

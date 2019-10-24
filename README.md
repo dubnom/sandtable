@@ -2,6 +2,16 @@
 
 SandTable provides a web-based user interface to control artistic mechanisms built on CNC platforms, particularly machines that use an x/y motion stage to move a magnet and move a steel ball through sand.
 
+![alt-text](docs/sand-webpage.png "Web Interface")
+![alt-text](docs/sand-demo1.png "Demo 1")
+![alt-text](docs/sand-demo2.png "Demo 2")
+![alt-text](docs/sand-demo3.png "Demo 3")
+![alt-text](docs/sand-demo4.png "Demo 4")
+![alt-text](docs/sand-demo5.png "Demo 5")
+![alt-text](docs/sand-demo6.png "Demo 6")
+![alt-text](docs/sand-demo7.png "Demo 7")
+
+
 ## Getting Started
 
 ### Software:
@@ -88,16 +98,14 @@ Logs are written to:
 * Scheduler logs - /var/logs/scheduler.log
 
 ### To Do:
-* Add license file
 * Add test code
 * Improve scheduler interface
 * Improve lighting scenes
 * Make the web interface more interactive
-* Add upload function to Filer tab
 * Move common items from machines Leds into ledaemon
 * Rename code for more consistency (ledstuff, ledaemon, etc.)
 * Condense Polylines and Chains
-* Add export gcode and make export svg return file
+* Add export gcode, thr, svg and perhaps dxf. Make export return files.
 * Add playlists
 
 ## Authors:
@@ -106,7 +114,7 @@ Logs are written to:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
 ## Acknowledgments
 

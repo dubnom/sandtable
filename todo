@@ -9,7 +9,6 @@ Lighting
 
 Drawing
     Post-processors
-        Spline
         Fit to oval
         Wavy
         Distorted spiral
@@ -28,4 +27,3 @@ Drawing
 System
     Update from GIT in admin panel
     Reboot remotely from admin panel
-    !Add driver for Smoothieboard

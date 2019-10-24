@@ -46,7 +46,8 @@ class History():
     
     @staticmethod
     def load( name ):
-        params = pickle.load( open( "%s%s.sand" % (STORE_PATH, name), 'rb' ))
+        with open( open( "%s%s.sand" % (STORE_PATH, name), 'rb' )) as f:
+            params = pickle.load( f )
         return params
 
     @staticmethod

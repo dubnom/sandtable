@@ -37,8 +37,19 @@ function mySubmit(action,name,value,name2,value2) {
  </div>
 </form>
 
+%if upload:
+ <form enctype="multipart/form-data" method="post">
+  <div class="savebox">
+   <input type="hidden" name="filetype" value="{{ft}}"/>
+   <input type="hidden" name="directory" value="{{path}}"/>
+   <input class="upload" name="_file" type="file" accept="{{ftfilter}}" required/>
+   <button class="upload" name="action" type="submit" value="upload">Upload</Button>
+  </div>
+ </form>
+%end
+
 <form id="files" method="post" action="filer">
- <input type="hidden" name="filetype" value="{{ft}}">
+ <input type="hidden" name="filetype" value="{{ft}}"/>
  <span class="filerTitle">{{path}}</span>
  <table id="filetable">
   {{!table}}

@@ -1,5 +1,6 @@
 from bottle import request, route, get, post, template, SimpleTemplate
 import os
+import logging
 from Sand import *
 from cgistuff import *
 
@@ -19,7 +20,8 @@ class ftPictures(ftBase):
     def __init__(self):
         self.path       = PICTURE_PATH
         self.columns    = 6
-        self.filter     = ('png','jpg','gif')
+        self.filter     = ['png','jpg','gif']
+        self.allowUpload= True
 
     def imgFunc(self, f, fn, p):
         return """<button type="button" class="filer" onclick='mySubmit("draw", "method","Picture", "filename","%s")'>
@@ -31,7 +33,8 @@ class ftClipart(ftBase):
     def __init__(self):
         self.path       = CLIPART_PATH
         self.columns    = 6
-        self.filter     = ('dxf')
+        self.filter     = ['dxf']
+        self.allowUpload= True
 
     def imgFunc(self, f, fn, p):
         return """<button type="button" class="filer" onclick='mySubmit("draw", "method","Clipart", "filename","%s")'>
@@ -49,7 +52,8 @@ class ftScripts(ftBase):
     def __init__(self):
         self.path       = MOVIE_SCRIPT_PATH
         self.columns    = 6
-        self.filter     = ('xml')
+        self.filter     = ['xml']
+        self.allowUpload= True
 
     def imgFunc(self, f, fn, p):
         return """<button type="button" class="filer" onclick='mySubmit("movie", "action","load", "_loadname","%s")'>
@@ -61,7 +65,8 @@ class ftMovies(ftBase):
     def __init__(self):
         self.path       = MOVIE_OUTPUT_PATH
         self.columns    = 6
-        self.filter     = ('mp4')
+        self.filter     = ['mp4']
+        self.allowUpload= False
 
     def imgFunc(self, f, fn, p):
         return """<button type="button" class="filer" onclick='mySubmit("watch", "action","load", "_loadname","%s")'>
@@ -73,7 +78,8 @@ class ftDrawings(ftBase):
     def __init__(self):
         self.path       = STORE_PATH
         self.columns    = 3
-        self.filter     = ('sand')
+        self.filter     = ['sand']
+        self.allowUpload= False
 
     def imgFunc(self, f, fn, p):
         return """<button type="button" class="filer" onclick='mySubmit("draw", "action","load", "_loadname","%s")'>
@@ -125,6 +131,19 @@ def filerPage():
         if len(path) and path[0] in '/.~\\':
             path = filetype.path
 
+    # Check for uploads
+    action = form.action.lower() if form.action else ''
+    if action == 'upload':
+        logging.info( 'Uploading' )
+        fUpload = request.files.get('_file')
+        name, ext = os.path.splitext( fUpload.filename )
+        logging.info( 'name: %s, extension: %s' % (name,ext))
+        logging.info( 'path: ' + path )
+        if ext[1:] in filetype.filter and filetype.allowUpload():
+            logging.info( 'saving picture to: %s%s%s ' % (path, name, ext) )
+            fUpload.save( '%s%s%s' % (path, name, ext))
+
+    # Query and display the contents of the directory
     dirlist = os.listdir( path )
     dirlist.sort()
 
@@ -156,11 +175,14 @@ def filerPage():
         res += '</tr>' if not (imgNum % columns) else ''
     res += '</tr>' if imgNum % columns else ''
     
+    upload = filetype.allowUpload()
+    ftfilter = ','.join(['.'+s for s in filetype.filter]) if upload else ""
+
     return [
         cstuff.headerStr(),
         cstuff.startBodyStr(),
         cstuff.navigationStr(),
-        template( 'filer-page', options=options, ft=ft, path=path, table=res ),
+        template( 'filer-page', options=options, ft=ft, path=path, table=res, upload=upload, ftfilter=ftfilter ),
         cstuff.endBodyStr()]
 
 

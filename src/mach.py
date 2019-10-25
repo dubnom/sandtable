@@ -32,6 +32,7 @@ class mach:
     def run( self, chains, box, feed, tableUnits, machUnits,  wait = False ):
         chains = Chains.bound(chains, box)
         chains = Chains.convertUnits(chains, tableUnits, machUnits)
+        chains = Chains.round(chains, 2)
         self.command( 'run', {'chains': chains, 'wait':wait, 'feed':feed, 'units':machUnits})
 
     def stop( self ):

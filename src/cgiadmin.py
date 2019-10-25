@@ -10,6 +10,15 @@ import MovieStatus
 from cgistuff import *
 from ledstuff import *
 
+# FIX: This should be placed in a library
+_conversion = {'inches':1, 'mm':25.4, 'cm':2.54}
+def convert(val, fromUnits, toUnits):
+    if fromUnits == toUnits:
+        return val
+    unitConv = _conversion[toUnits] / _conversion[fromUnits]
+    return val*unitConv
+
+
 @route('/admin/status')     # FIX: Remove this
 @post('/admin/status')
 def status():
@@ -26,7 +35,14 @@ def status():
         with mach.mach() as e:
             status = e.getStatus()
             results.append( [ 'Machine State', ["Busy","Ready"][status['ready']]] )
-            results.append( [ 'Machine Position', '%g, %g' %  (status['pos'][0],status['pos'][1])])
+            results.append( [ 'Machine Position', '%.2f, %.2f %s' % (
+                    status['pos'][0],
+                    status['pos'][1],
+                    MACHINE_UNITS) ])
+            results.append( [ 'Table Position', '%.2f, %.2f %s' % (
+                    convert(status['pos'][0],MACHINE_UNITS,TABLE_UNITS),
+                    convert(status['pos'][1],MACHINE_UNITS,TABLE_UNITS),
+                    TABLE_UNITS) ])
             results.append( [ 'Drawing Percent', '%5.1f' % (100*status['percent'])] )
     except:
         results.append( ('State', 'Unknown' ))

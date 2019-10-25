@@ -15,7 +15,8 @@ class MyHandler(socketserver.BaseRequestHandler):
         self.machine = self.server.machine
 
     def handle(self):
-        command, data = json.loads( self.request.recv(REQ_BUF_SIZE).decode('utf-8'))
+        req = self.request.recv(REQ_BUF_SIZE).decode('utf-8')
+        command, data = json.loads( req )
         if command != 'status':
             logging.info( "Command: %s" % command )
         if command == 'send':

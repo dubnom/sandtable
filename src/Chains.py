@@ -72,6 +72,11 @@ class Chains():
         return [ [(p[0]*cos - p[1]*sin, p[0]*sin + p[1]*cos) for p in chain] for chain in chains ] 
     
     @staticmethod
+    def round( chains, precision ):
+        """Round the chains to a given precision"""
+        return [ [(round(p[0],precision),round(p[1],precision)) for p in chain] for chain in chains ]
+
+    @staticmethod
     def fit( chains, newExtents ):
         """Fit the chain to newExtents. This may stretch one or both axes"""
         oldExtents = Chains.calcExtents( chains )

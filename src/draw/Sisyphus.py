@@ -1,5 +1,6 @@
 from math import radians, sqrt
 from sandable import Sandable
+from Sand import CLIPART_PATH
 from dialog import *
 from Chains import *
 from thr import *

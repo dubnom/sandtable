@@ -32,7 +32,6 @@ This method is useful for "erasing" the table.
 
     def generate( self, params ):
         chains = []
-        fwd = True
 
         # Horizontal lines
         if params.ySpacing > 0.0:

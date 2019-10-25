@@ -1,4 +1,4 @@
-from math import sqrt, radians, sin, cos
+from math import sqrt
 import random
 from sandable import Sandable, inchesToUnits
 from dialog import *
@@ -42,6 +42,7 @@ Drawing random wood boards requires a lot of compute time. Be patient.
         random.seed( params.seed )
         knots = []
         attempts = 200
+        knotTurns = 6
         while len( knots ) < params.knots and attempts > 0:
             r = random.random() * params.rKnot
             x = params.xOffset + r + random.random()*(params.width-(2*r))
@@ -58,8 +59,7 @@ Drawing random wood boards requires a lot of compute time. Be patient.
         chains = self._grid( params )
         for c, s in knots:
             self._knot( chains, c, s )
-            # FIX: Get rid of hardcoded 6
-            chains.insert( 0, Chains.spiral(c[0],c[1],0.,s,6))
+            chains.insert( 0, Chains.spiral(c[0],c[1],0.,s,knotTurns))
         chains.insert( len( knots ), [ (params.xOffset+params.width, params.yOffset) ] )
         return chains
     

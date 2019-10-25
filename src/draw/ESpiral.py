@@ -10,6 +10,7 @@ class Sander( Sandable ):
 #### Parameters
 
 * **Radius** - Size of each spiral in the pattern.
+* **Rings** - Number of rings of spirals.
 * **Turns** - Number of turns that make up each spiral.
 * **Sample rate** - how frequently points are calculated around the spiral.  Smaller numbers create rounder
      spirals while larger numbers create interesting shapes.  Try 120 to get a triangle;
@@ -37,7 +38,6 @@ class Sander( Sandable ):
 
         chains = []
         for ring in range(params.rings):
-            # FIX: Simplify the math
             if ring > 0:
                 ringRadius          = ring * params.radius * 2.0
                 ringCircumfrence    = 2.0 * pi * ringRadius

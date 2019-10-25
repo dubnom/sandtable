@@ -23,7 +23,6 @@ def SmartDraw(chains,width,height,ballSize):
         for scanNum, line in enumerate(lines):
             intercepts = polygon.intersection(line)
             if intercepts:
-                #print "Int: %d %d %s" % (polyNum, scanNum, intercepts)
                 if intercepts.type == 'LineString':
                     for x,y in list(intercepts.coords):
                         intersections[scanNum].append( (x, polyNum) )
@@ -32,8 +31,6 @@ def SmartDraw(chains,width,height,ballSize):
                         intersections[scanNum].append( (pt.x, polyNum) )
                 elif intercepts.type == 'Point':
                     intersections[scanNum].append( (intercepts.x, polyNum) )
-
-    #print "\nintersections:\n",intersections
 
     # Sort each scan line into x order: [ (x,poly), (x1,poly1) ... (xN,polyN) ]
     # and convert polygon distances into left/right smallest distance table
@@ -50,10 +47,7 @@ def SmartDraw(chains,width,height,ballSize):
         updatePolyDistance(pn0, (d,pn1,x0,x1,scanNum))
         updatePolyDistance(pn1, (d,pn0,x1,x0,scanNum))
 
-    #print "\nScan lines:\n"
-
     for scanNum,scan in enumerate(intersections):
-        #print scanNum,sorted(scan)
         oldPolyNum = -1
         for x,polyNum in sorted(scan):
             if oldPolyNum >= 0:
@@ -61,19 +55,11 @@ def SmartDraw(chains,width,height,ballSize):
                     updatePolyDistances( oldPolyNum, polyNum, oldX, x, scanNum )
             oldX, oldPolyNum = x, polyNum
                 
-    #print "\npolyDistances:"
-    for polyNum,neighbs in enumerate(polysNeighbors):
-        neighbS = 'None' if len(neighbs) == 0 else ','.join(['%4d, %5.2f' % (ps[1],ps[0]) for ps in list(neighbs.values())])
-        #print " %4d:  %s" % (polyNum,neighbS)
-    #print
 
     def sortNeighbors(neighbors):
         s = list(neighbors.values())
         s.sort(key=lambda k:k[0])
         return s
-
-    #print"\nNeighbors"
-    #print polysNeighbors
 
     # Create a tree of all polygons by their shortest distance neighbor
     # with the first polygon as the root of the tree
@@ -86,15 +72,6 @@ def SmartDraw(chains,width,height,ballSize):
         return parent 
 
     makeTree(0)
-
-    #print "\ntree:\n",tree
-    # Run through the tree and print the drawing order
-    #def treeWalk(pn=0,depth=0):
-    #    print "%sPolygon %d" % (" " * depth, pn)
-    #    for child in tree[pn]:
-    #        treeWalk( child, depth+1 )
-    #
-    #treeWalk()
 
     # Create new chain using the new drawing order
     newChain = []
@@ -112,7 +89,6 @@ def SmartDraw(chains,width,height,ballSize):
 
     def makeChain(node=0,pointNumber=0):
         children = [polysNeighbors[node][c] for c in tree[node]]
-        #print children
         chain = chains[node]
         chain = chain[pointNumber:] + chain[:pointNumber+1]
         p1 = chain[0]
@@ -174,11 +150,5 @@ if __name__ == '__main__':
     for chain in chains:
         del(chain[0])
         del(chain[-1])
-
-    # Print Chains
-    #for chainNum,chain in enumerate(chains):
-    #    print "Chain %d" % chainNum
-    #    for pointNum,point in enumerate(chain):
-    #        print "  %05d: %5.2f, %5.2f" % (pointNum, point[0], point[1])
 
     SmartDraw( chains,30.,20.,1. )

@@ -1,4 +1,3 @@
-from math import sin, cos, radians, floor
 from sandable import Sandable, inchesToUnits
 from Chains import *
 from dialog import *

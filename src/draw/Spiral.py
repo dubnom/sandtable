@@ -1,4 +1,3 @@
-from math import pow, radians, sin, cos
 from dialog import *
 from Chains import *
 from sandable import Sandable

@@ -78,7 +78,6 @@ Messy Triangle | 1.25 | 0 | 5 | 1 | 3.1, 25.5 | 1, .5 | 0 | 0 | 1 | 8
             thickness = params.outerRadius - params.innerRadius
             points = int( params.turns * 360.0 / params.angleRate)
             divisor = pow((points * abs(params.angleRate)) / 360.0, params.base)
-            point360 = 360.0 / abs( params.angleRate )
             
             for point in range( points ):
                 angle   = params.angleStart + radians( point * params.angleRate )

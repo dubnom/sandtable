@@ -6,9 +6,6 @@ import traceback
 
 from optparse import OptionParser
 
-from xml.sax.handler import ContentHandler
-from xml.sax import parse
-
 from Sand import *
 from Chains import *
 import MovieStatus

@@ -1,4 +1,4 @@
-from math import sqrt, radians, sin, cos
+from math import sqrt
 from sandable import Sandable
 from dialog import *
 from Chains import *

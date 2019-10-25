@@ -1,4 +1,5 @@
 import socket
+import logging
 from threading import Thread
 from machine import Machine
 
@@ -12,7 +13,7 @@ class machiner(Machine):
     def intialize(self, params, fullInit):
         self.socket = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
         self.socket.connect( (params['host'], params['port']) )
-        self.readThread = ListenerThread( self, self.socket )
+        self.readThread = ReadThread( self, self.socket )
         self.readThread.start()
 
         self.send( 'hello EMC 1 1' )

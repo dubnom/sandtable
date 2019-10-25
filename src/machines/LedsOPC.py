@@ -16,7 +16,7 @@ class Leds(LedsBase):
         LedsBase.__init__(self, rows, cols )
 
     def connect( self ):
-        self.client = opc.Client( '%s:%d' % (host, port))
+        self.client = opc.Client( '%s:%d' % (self.host, self.port))
         self.mapping = list(range(0,60))+list(range(60,90))+list(range(149,89,-1))+list(range(179,149,-1))
 
     def refresh( self ):

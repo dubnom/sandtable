@@ -44,7 +44,7 @@ class machiner(Machine):
         for i in initialize:
             self.send( json.dumps(i)) 
         # After making settings we either need to reset (and wait) or just wait a little bit
-        if machInitialize:
+        if fullInit:
             self.send( "\x18" )
             time.sleep(6.)
         else:
@@ -100,13 +100,13 @@ class ReadThread(Thread):
                             self.machine.pos[1] = status['posy']
                         if 'stat' in status:
                             self.machine.state = status['stat']
-                            self.machine.ready = machine.state in (1,3,4)
+                            self.machine.ready = self.machine.state in (1,3,4)
                             logging.debug( "State: %d" % self.machine.state )
                     
                     # Parse queue reports
                     elif 'qr' in data:
-                        machine.queueDepth = data['qr']
-                        logging.debug( "QueueDepth: %d" % machine.queueDepth )
+                        self.machine.queueDepth = data['qr']
+                        logging.debug( "QueueDepth: %d" % self.machine.queueDepth )
 
                     # Parse responses
                     elif 'r' in data:
@@ -126,6 +126,7 @@ class ReadThread(Thread):
 
 class WriteThread(Thread):
     def __init__(self, machine, ser):
+        self.machine = machine
         self.ser = ser
         self.queue = machine.queue
         super(WriteThread, self).__init__()
@@ -135,9 +136,8 @@ class WriteThread(Thread):
         self.running = True
         while self.running:
             data = self.queue.get()
-            while machine.queueDepth > 0 and machine.state < 6:
+            while self.machine.queueDepth > 0 and self.machine.state < 6:
                 time.sleep(.1)
-            state[1] -= 1
             self.ser.write(bytes(data+'\n',encoding='UTF-8'))
             self.queue.task_done()
         logging.info( "Write thread exiting" )

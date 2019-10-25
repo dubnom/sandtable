@@ -1,7 +1,9 @@
 import serial
 from threading import Thread
 import logging
+from queue import Empty
 import re
+from machine import Machine
 
 
 POSITION_POLL_FREQ = 30     # Poll for status every 30 instructions
@@ -109,10 +111,6 @@ class WriteThread(Thread):
         super(WriteThread, self).__init__()
 
     def run(self):
-        self.stopFlag = Event()
-        thread = statusTimer(self.stopFlag,self)
-        thread.start()
-
         logging.info( "Write thread active" )
         self.running = True
         while self.running:
@@ -125,7 +123,7 @@ class WriteThread(Thread):
                 self.num += 1
                 if self.num % POSITION_POLL_FREQ == 0:
                     self._getStatus()
-            except Queue.Empty:
+            except Empty:
                 self._getStatus()
 
         logging.info( "Write thread exiting" )

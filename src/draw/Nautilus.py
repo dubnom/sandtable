@@ -62,14 +62,17 @@ The Nautilus or [Logarithmic spiral](https://en.wikipedia.org/wiki/Logarithmic_s
             angle = radians(point * angleRate)
             angleRate *= angleGrowth
 
-            pchain.append(pnt(angle, 0))
-            pchain.append(pnt(angle-curveAngle, -.5*pi))
-            pchain.append(pnt(angle-curveAngle, -1.5*pi))
-            pchain.append(pnt(angle-2.*pi, 0.))
-            nchain = Chains.Spline(pchain)
-            chain += nchain
-            nchain.reverse()
-            chain += nchain
+            try:
+                pchain.append(pnt(angle, 0))
+                pchain.append(pnt(angle-curveAngle, -.5*pi))
+                pchain.append(pnt(angle-curveAngle, -1.5*pi))
+                pchain.append(pnt(angle-2.*pi, 0.))
+                nchain = Chains.Spline(pchain)
+                chain += nchain
+                nchain.reverse()
+                chain += nchain
+            except OverflowError:
+                break
 
         if params.fitToTable:
             chain = Chains.circleToTable(chain, self.width, self.length)

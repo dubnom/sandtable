@@ -1,6 +1,6 @@
-from random import randint, Params
-from Sand import Ledable
-from dialog import DialogFloat, ledPatterns
+from random import randint
+from Sand import Ledable, ledPatterns
+from dialog import DialogFloat, Params
 from time import time
 from ledstuff import ledPatternFactory
 

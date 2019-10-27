@@ -15,7 +15,7 @@ import random
 
 from Sand import DATA_PATH, TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS,\
    MACHINE_UNITS, MACHINE_ACCEL, MACHINE_FEED,\
-   SCHEDULER_ENABLED, SCHEDULER_HOST, SCHEDULER_PORT, drawers
+   SCHEDULER_ENABLE, SCHEDULER_HOST, SCHEDULER_PORT, drawers
 from sandable import sandableFactory
 from ledstuff import ledPatternFactory, setLedPattern
 from dialog import Params
@@ -257,7 +257,7 @@ if __name__ == "__main__":
     # FIX: Kluge to clear out the scheduler and start a random drawing everyday at 3:00 am.
     def kluge():
         logging.info("Kluge triggered")
-        if SCHEDULER_ENABLED:
+        if SCHEDULER_ENABLE:
             logging.info("Running single demo")
             demo.demoOnce()
         else:

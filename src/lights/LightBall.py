@@ -26,7 +26,8 @@ class Lighter(Ledable):
             oldX, oldY = -1, -1
             while True:
                 # Poll EMC for the location
-                x, y = e.getPosition()
+                status = e.getStatus()
+                x, y = status['pos'][0], status['pos'][1]
                 if x != oldX or y != oldY:
                     col = min(int(xOffset + x * xSlope), LED_COLUMNS)
                     row = min(int(yOffset + y * ySlope), LED_ROWS)

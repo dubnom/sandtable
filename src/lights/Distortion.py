@@ -1,13 +1,14 @@
-from Sand import *
-from dialog import *
+from Sand import Ledable
+from dialog import DialogInt
 
-class Lighter( Ledable ):
-    def __init__( self, cols, rows ):
+
+class Lighter(Ledable):
+    def __init__(self, cols, rows):
         self.editor = [
-            DialogInt(   "steps",           "Transition Steps",         default = 20, min = 3, max = 200 ),
+            DialogInt("steps",           "Transition Steps",         default=20, min=3, max=200),
         ]
 
-    def generator( self, leds, cols, rows, params ):
+    def generator(self, leds, cols, rows, params):
         # Setup the groups
         self.groups = [
             leds.rectangle[0] + leds.rectangle[2],  # Top and bottom
@@ -15,19 +16,18 @@ class Lighter( Ledable ):
         ]
 
         # Setup the brightness table
-        brightness = [ None ] * params.steps
-        for step in range( params.steps ):
-            level = int( step * 255. / params.steps)
-            brightness[ step ] = (level, level, level)
+        brightness = [None] * params.steps
+        for step in range(params.steps):
+            level = int(step * 255. / params.steps)
+            brightness[step] = (level, level, level)
 
         # Alternate ramping up and down the brightness of the rows and columns
         groupNumber = 0
         while True:
-            for step in range( params.steps ):
-                bright = brightness[ step ]
-                list(map( lambda led: leds.set( led, bright ), self.groups[ groupNumber ] ))
-                bright = brightness[ params.steps - step - 1]
-                list(map( lambda led: leds.set( led, bright ), self.groups[ 1-groupNumber ] ))
+            for step in range(params.steps):
+                bright = brightness[step]
+                list(map(lambda led: leds.set(led, bright), self.groups[groupNumber]))
+                bright = brightness[params.steps - step - 1]
+                list(map(lambda led: leds.set(led, bright), self.groups[1-groupNumber]))
                 yield True
             groupNumber = 1 - groupNumber
-

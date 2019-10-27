@@ -1,6 +1,7 @@
 import socket
 import socketserver
 
+
 class StoppableTCPServer(socketserver.TCPServer):
     def server_bind(self):
         socketserver.TCPServer.server_bind(self)
@@ -28,6 +29,3 @@ class StoppableTCPServer(socketserver.TCPServer):
                 break
             except Exception:
                 break
-
-
-

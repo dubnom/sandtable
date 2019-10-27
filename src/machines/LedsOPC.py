@@ -7,21 +7,23 @@ from LedsBase import LedsBase
 #
 #  FIX: Mapping needs to be made more generic
 
+
 class Leds(LedsBase):
     """Communicate with an OPC compatible lighting system"""
-    def __init__( self, rows, cols, mapping, params ):
+
+    def __init__(self, rows, cols, mapping, params):
         self.mapping = mapping
-        self.host    = params['host']
-        self.port    = params['port']
-        LedsBase.__init__(self, rows, cols )
+        self.host = params['host']
+        self.port = params['port']
+        LedsBase.__init__(self, rows, cols)
 
-    def connect( self ):
-        self.client = opc.Client( '%s:%d' % (self.host, self.port))
-        self.mapping = list(range(0,60))+list(range(60,90))+list(range(149,89,-1))+list(range(179,149,-1))
+    def connect(self):
+        self.client = opc.Client('%s:%d' % (self.host, self.port))
+        self.mapping = list(range(0, 60))+list(range(60, 90))+list(range(149, 89, -1))+list(range(179, 149, -1))
 
-    def refresh( self ):
-        self.client.put_pixels( [self.leds[i] for i in self.mapping] if self.mapping else self.leds )
+    def refresh(self):
+        self.client.put_pixels([self.leds[i] for i in self.mapping] if self.mapping else self.leds)
 
-    def disconnect( self ):
+    def disconnect(self):
         self.client.disconnect()
         del self.client

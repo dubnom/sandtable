@@ -1,25 +1,26 @@
 from bottle import request, route, get, post, template
 
-from Sand import *
-from ledstuff import *
-from dialog import *
-from cgistuff import *
+from Sand import ledPatterns
+from ledstuff import ledPatternFactory, setLedPattern
+from dialog import Dialog
+from cgistuff import cgistuff
+
 
 @route('/lights')
 @get('/lights')
 @post('/lights')
 def lightsPage():
-    cstuff = cgistuff( 'Lights', jQuery=True )
+    cstuff = cgistuff('Lights', jQuery=True)
     form = request.forms
 
     ledPattern = form.method if form.method in ledPatterns else ledPatterns[0]
-    pattern = ledPatternFactory( ledPattern )
-    d = Dialog( pattern.editor, form, None, autoSubmit=True )
+    pattern = ledPatternFactory(ledPattern)
+    d = Dialog(pattern.editor, form, None, autoSubmit=True)
     params = d.getParams()
     if form.method:
-        setLedPattern( pattern, params )
+        setLedPattern(pattern, params)
 
     return [
         cstuff.standardTopStr(),
-        template( 'lights-page', pattern=ledPattern, ledPatterns=ledPatterns, editor=d.html()),
-        cstuff.endBodyStr() ]
+        template('lights-page', pattern=ledPattern, ledPatterns=ledPatterns, editor=d.html()),
+        cstuff.endBodyStr()]

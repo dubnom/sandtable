@@ -1,9 +1,9 @@
 from bottle import route, get, template
 from cgi import escape
-from Sand import *
+from Sand import drawers
 from sandable import sandableFactory
 
-overview = escape( """
+overview = escape("""
 Movies are specified in an XML file that expresses the various keyframes that should be drawn.
 Drawings (Things) with parameters (Params) are used within the keyframes (Frame) to control
 what is drawn and when.  Interpolation is automatically done between keyframes.
@@ -29,7 +29,8 @@ what is drawn and when.  Interpolation is automatically done between keyframes.
 The tables below list the Types of Things and the first column indicates the Name for Params.
 The other columns briefly describe the fields and their units.""", quote=True)
 
+
 @route('/help')
 @get('/help')
 def helpPage():
-    return [ template('help-page', overview=overview, sandables=drawers, sandableFactory=sandableFactory) ]
+    return [template('help-page', overview=overview, sandables=drawers, sandableFactory=sandableFactory)]

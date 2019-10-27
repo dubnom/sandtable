@@ -1,9 +1,9 @@
-from dialog import *
-from Chains import *
-from sandable import Sandable
+from dialog import DialogFloat, DialogYesNo, DialogBreak
+from Chains import Chains
+from sandable import Sandable, SandException
 
 
-class Sander( Sandable ):
+class Sander(Sandable):
     """
 ### Simple figures that create a surprisingly large number of beautiful paterns
 
@@ -28,30 +28,30 @@ Try playing with **Sample rate** first.
 * **X Center** and **Y Center** - where the center of the spiral will be relative to the table.
 """
 
-    def __init__( self, width, length, ballSize, units ):
+    def __init__(self, width, length, ballSize, units):
         self.width = width
         self.length = length
         self.editor = [
-            DialogFloat( "r1",              "First radius",         units = units, min = 0.0, max = max(width,length)*2 ),
-            DialogFloat( "r2",              "Second radius",        units = units,  default = min(width,length)/2, min = 0.0, max = max(width,length)*2 ),
-            DialogFloat( "turns",           "Turns",                default =10., min = 0.1, max = 100. ),
-            DialogFloat( "angleStart",      "Starting angle",       units = "degrees", min = 0.0, max = 360.0, step = 15. ),
-            DialogFloat( "angleRate",       "Sample rate",          units = "degrees", default = 15.0, min = -180.0, max = 180.0 ),
-            DialogFloat( "base",            "Growth base power",    default = 1.0, min = 0.25, max = 10.0 ),
-            DialogYesNo( "fill",            "Fill in spiral"        ),
-            DialogYesNo( "fitToTable",      "Fit to table"          ),
+            DialogFloat("r1",              "First radius",         units=units, min=0.0, max=max(width, length)*2),
+            DialogFloat("r2",              "Second radius",        units=units,  default=min(width, length)/2, min=0.0, max=max(width, length)*2),
+            DialogFloat("turns",           "Turns",                default=10., min=0.1, max=100.),
+            DialogFloat("angleStart",      "Starting angle",       units="degrees", min=0.0, max=360.0, step=15.),
+            DialogFloat("angleRate",       "Sample rate",          units="degrees", default=15.0, min=-180.0, max=180.0),
+            DialogFloat("base",            "Growth base power",    default=1.0, min=0.25, max=10.0),
+            DialogYesNo("fill",            "Fill in spiral"),
+            DialogYesNo("fitToTable",      "Fit to table"),
             DialogBreak(),
-            DialogFloat( "xCenter",         "X Center",             units = units, default = width / 2.0 ),
-            DialogFloat( "yCenter",         "Y Center",             units = units, default = length / 2.0 ),
+            DialogFloat("xCenter",         "X Center",             units=units, default=width / 2.0),
+            DialogFloat("yCenter",         "Y Center",             units=units, default=length / 2.0),
         ]
 
-    def generate( self, params ):
+    def generate(self, params):
         if not params.angleRate:
-            raise SandException( "Sample Rate cannot be zero" )
+            raise SandException("Sample Rate cannot be zero")
 
         xC, yC = params.xCenter, params.yCenter
-        chain = Chains.spiral(xC,yC,params.r1,params.r2,params.turns,params.angleRate,params.angleStart,params.base,params.fill)
+        chain = Chains.spiral(xC, yC, params.r1, params.r2, params.turns, params.angleRate, params.angleStart, params.base, params.fill)
 
         if params.fitToTable:
-            chain = Chains.circleToTable( chain, self.width, self.length )
+            chain = Chains.circleToTable(chain, self.width, self.length)
         return [chain]

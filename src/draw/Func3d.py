@@ -1,9 +1,10 @@
-from sandable import Sandable
-from dialog import *
-from Chains import *
-from math import *
-    
-class Sander( Sandable ):
+import math
+from sandable import Sandable, SandException
+from dialog import DialogStr, DialogFloat, DialogInt, DialogYesNo, DialogBreak
+from Chains import Chains
+
+
+class Sander(Sandable):
     """
 ### Graph 3D functions of the form z = f(x,y)
 
@@ -53,60 +54,60 @@ class Sander( Sandable ):
   Exponential Bumps | -x*exp(-x**2-y**2) | X and Y (-2, 2, 45)
 """
 
-    def __init__( self, width, length, ballSize, units ):
+    def __init__(self, width, length, ballSize, units):
         self.editor = [
-            DialogStr(   "expression",      "Expression",           default = 'cos( 3.*radians( sqrt(x*x+y*y )))', length=45 ),
-            DialogFloat( "xStart",          "X Start",              default = -180.0 ),
-            DialogFloat( "xEnd",            "X End",                default = 180.0 ),
-            DialogInt(   "xPoints",         "X Points",             default = 45, min = 2, max = 180 ),
-            DialogFloat( "yStart",          "Y Start",              default = -180.0 ),
-            DialogFloat( "yEnd",            "Y End",                default = 180.0 ),
-            DialogInt(   "yPoints",         "Y Points",             default = 45, min = 2, max = 180 ),
-            DialogFloat( "zScale",          "Z Scale",              default = 1.0, min = 0.01, max = 10.0 ),
-            DialogFloat( "xyAngle",         "Horizontal Rotation",  units = "degrees", default = 45.0, min = -45.0, max = 45.0 ),
-            DialogFloat( "yzAngle",         "Vertical Tilt",        units = "degrees", default = 45.0, min = 0.0, max = 90.0 ),
-            DialogFloat( "zoom",            "Zoom",                 default = 1.0, min = 0.25, max = 10.0 ),
-            DialogYesNo( "topDown",         "Top Down",             default = True ),
+            DialogStr("expression",      "Expression",           default='cos( 3.*radians( sqrt(x*x+y*y )))', length=45),
+            DialogFloat("xStart",          "X Start",              default=-180.0),
+            DialogFloat("xEnd",            "X End",                default=180.0),
+            DialogInt("xPoints",         "X Points",             default=45, min=2, max=180),
+            DialogFloat("yStart",          "Y Start",              default=-180.0),
+            DialogFloat("yEnd",            "Y End",                default=180.0),
+            DialogInt("yPoints",         "Y Points",             default=45, min=2, max=180),
+            DialogFloat("zScale",          "Z Scale",              default=1.0, min=0.01, max=10.0),
+            DialogFloat("xyAngle",         "Horizontal Rotation",  units="degrees", default=45.0, min=-45.0, max=45.0),
+            DialogFloat("yzAngle",         "Vertical Tilt",        units="degrees", default=45.0, min=0.0, max=90.0),
+            DialogFloat("zoom",            "Zoom",                 default=1.0, min=0.25, max=10.0),
+            DialogYesNo("topDown",         "Top Down",             default=True),
             DialogBreak(),
-            DialogFloat( "xOffset",         "X Origin",             units = units, default = 0.0 ),
-            DialogFloat( "yOffset",         "Y Origin",             units = units, default = 0.0 ),
-            DialogFloat( "width",           "Width",                units = units, default = width, min = 1.0, max = width*4 ),
-            DialogFloat( "length",          "Length",               units = units, default = length, min = 1.0, max = length*4 ),
+            DialogFloat("xOffset",         "X Origin",             units=units, default=0.0),
+            DialogFloat("yOffset",         "Y Origin",             units=units, default=0.0),
+            DialogFloat("width",           "Width",                units=units, default=width, min=1.0, max=width*4),
+            DialogFloat("length",          "Length",               units=units, default=length, min=1.0, max=length*4),
         ]
 
-    def generate( self, params ):
+    def generate(self, params):
         xPoints = params.xPoints
         yPoints = params.yPoints
         xOffset = params.xOffset
         yOffset = params.yOffset
         xStart = params.xStart
         yStart = params.yStart
-        xyAngle = params.xyAngle
-        yzAngle = params.yzAngle
+        xyAngle = math.radians(params.xyAngle)
+        yzAngle = math.radians(params.yzAngle)
 
         xScale = params.width / (xPoints - 1)
         yScale = params.length / (yPoints - 1)
-        
+
         yAScale = (params.yEnd - yStart) / (yPoints - 1)
         xAScale = (params.xEnd - xStart) / (xPoints - 1)
 
         # Calculate the zValues
         try:
-            self._initCallFunc( params.expression )
+            self._initCallFunc(params.expression)
             zMin, zMax = 1E100, -1E100
-            zValues = [[ 0.0 ] * xPoints for y in range( yPoints )]
-            for y in range( yPoints ):
+            zValues = [[0.0] * xPoints for y in range(yPoints)]
+            for y in range(yPoints):
                 yr = y * yAScale + yStart
-                for x in range( xPoints ):
+                for x in range(xPoints):
                     xr = x * xAScale + xStart
-                    z = self._callFunc( xr, yr )
-                    zMin, zMax = min(z,zMin), max(z,zMax)
-                    zValues[ y ][ x ] = z
+                    z = self._callFunc(xr, yr)
+                    zMin, zMax = min(z, zMin), max(z, zMax)
+                    zValues[y][x] = z
         except Exception as e:
-            raise SandException( "Expression failed: %s" % e )
+            raise SandException("Expression failed: %s" % e)
 
-        if type(zMin) not in (int,float) or type(zMax) not in (int,float):
-            raise SandException( "The function didn't return proper numbers for the Z calculation" )
+        if type(zMin) not in (int, float) or type(zMax) not in (int, float):
+            raise SandException("The function didn't return proper numbers for the Z calculation")
 
         # Generate the chains
         xScale = 2.0 / xPoints
@@ -116,44 +117,47 @@ class Sander( Sandable ):
         zScale = 2.0 / (zMax - zMin) if zMax != zMin else 1.
         zOffset = zMin
         chain = []
-        for y in range( yPoints ):
+        for y in range(yPoints):
             points = []
             yp = yOffset + yScale * y
-            for x in range( xPoints ):
+            for x in range(xPoints):
                 xp = xOffset + xScale * x
                 zp = params.zScale * (zValues[y][x] - zOffset) * zScale
-                xpr, ypr, zpr = self._rotate((xp,yp,zp),xyAngle,yzAngle)
-                points.append( (xpr,ypr) )
+                xpr, ypr, zpr = self._rotate((xp, yp, zp), xyAngle, yzAngle)
+                points.append((xpr, ypr))
             if y % 2:
                 points.reverse()
             chain += points
 
         if params.topDown:
             chain.reverse()
-        chains = Chains.autoScaleCenter( [chain], [(params.xOffset,params.yOffset),(params.xOffset+params.width,params.yOffset+params.length)], params.zoom )
+        chains = Chains.autoScaleCenter([chain], [(params.xOffset, params.yOffset), (params.xOffset+params.width, params.yOffset+params.length)], params.zoom)
         return chains
 
-    def _initCallFunc( self, expression ):
-        safe_list = [
-            'acos', 'asin', 'atan', 'atan2', 'ceil', 'cos', 'cosh','degrees',
-            'e', 'exp', 'fabs', 'floor', 'fmod', 'frexp', 'hypot', 'ldexp', 'log', 
+    def _initCallFunc(self, expression):
+        math_safe_list = [
+            'acos', 'asin', 'atan', 'atan2', 'ceil', 'cos', 'cosh', 'degrees',
+            'e', 'exp', 'fabs', 'floor', 'fmod', 'frexp', 'hypot', 'ldexp', 'log',
             'log10', 'modf', 'pi', 'pow', 'radians', 'sin', 'sinh', 'sqrt', 'tan',
-            'tanh', 'min', 'max', 'abs', 'float', 'int',
-            ]
-        self.safe_dict = dict( [(k, eval(k)) for k in safe_list ])
-        self.expression = compile(expression, 'Expression', 'eval') 
-    
-    def _callFunc( self, x, y ):
+            'tanh',
+        ]
+        norm_safe_list = ['min', 'max', 'abs', 'float', 'int']
+        self.safe_dict = dict([(k, eval('math.'+k)) for k in math_safe_list])
+        for k in norm_safe_list:
+            self.safe_dict[k] = eval(k)
+        self.expression = compile(expression, 'Expression', 'eval')
+
+    def _callFunc(self, x, y):
         self.safe_dict['x'] = self.safe_dict['X'] = x
         self.safe_dict['y'] = self.safe_dict['Y'] = y
         # Only allow a small subset of builtin functions
-        z = eval( self.expression, {'__builtins__':{}}, self.safe_dict )
+        z = eval(self.expression, {'__builtins__': {}}, self.safe_dict)
         return z
 
-    def _rotate( self, p, xyAngle, yzAngle ):
+    def _rotate(self, p, xyR, yzR):
         x, y, z = p
-        x1 = x * cos( radians( xyAngle )) - y * sin( radians( xyAngle ))
-        y1 = x * sin( radians( xyAngle )) + y * cos( radians( xyAngle ))
-        y2 = y1 * cos( radians( yzAngle )) - z * sin( radians( yzAngle ))
-        z2 = y1 * sin( radians( yzAngle )) + z * sin( radians( yzAngle ))
-        return (x1,y2,z2)
+        x1 = x * math.cos(xyR) - y * math.sin(xyR)
+        y1 = x * math.sin(xyR) + y * math.cos(xyR)
+        y2 = y1 * math.cos(yzR) - z * math.sin(yzR)
+        z2 = y1 * math.sin(yzR) + z * math.sin(yzR)
+        return (x1, y2, z2)

@@ -1,11 +1,12 @@
 from Sand import CLIPART_PATH
 from sandable import Sandable, inchesToUnits
-from dialog import *
+from dialog import DialogFile, DialogFloat, DialogInt, DialogBreak
 
 import cam
-from Chains import *
+from Chains import Chains
 
-class Sander( Sandable ):
+
+class Sander(Sandable):
     """
 ### Draw clipart images (currently only DXF is supported)
 
@@ -31,51 +32,50 @@ sections of the drawing that aren't connected to one-another.
 * **Starting locations** - where on the table the drawing should be drawn. Also normally not worth changing.
 """
 
-    def __init__( self, width, length, ballSize, units ):
+    def __init__(self, width, length, ballSize, units):
         self.editor = [
-            DialogFile(  "filename",            "File Name",                default = CLIPART_PATH, filter = '.dxf' ),
-            DialogInt(   "iterations",          "Number of Fill Iterations",default = 0, min = 0, max = 60 ),
-            DialogFloat( "decrement",           "Fill Decrement",           units = units, default = 0.5, min = 0.0, max = inchesToUnits(2.0,units)),
-            DialogFloat( "ballSize",            "Ball Size",                units = units, default = ballSize, min = inchesToUnits(0.25,units)),
+            DialogFile("filename",            "File Name",                default=CLIPART_PATH, filter='.dxf'),
+            DialogInt("iterations",          "Number of Fill Iterations", default=0, min=0, max=60),
+            DialogFloat("decrement",           "Fill Decrement",           units=units, default=0.5, min=0.0, max=inchesToUnits(2.0, units)),
+            DialogFloat("ballSize",            "Ball Size",                units=units, default=ballSize, min=inchesToUnits(0.25, units)),
             DialogBreak(),
-            DialogFloat( "xOffset",             "X Origin",                 units = units, default = 0.0 ),
-            DialogFloat( "yOffset",             "Y Origin",                 units = units, default = 0.0 ),
-            DialogFloat( "width",               "Width (x)",                units = units, default = width, min = 1.0, max = width*2 ),
-            DialogFloat( "length",              "Length (y)",               units = units, default = length, min = 1.0, max = length*2 ),
+            DialogFloat("xOffset",             "X Origin",                 units=units, default=0.0),
+            DialogFloat("yOffset",             "Y Origin",                 units=units, default=0.0),
+            DialogFloat("width",               "Width (x)",                units=units, default=width, min=1.0, max=width*2),
+            DialogFloat("length",              "Length (y)",               units=units, default=length, min=1.0, max=length*2),
         ]
 
-    def generate( self, params ):
+    def generate(self, params):
         chains = []
         filename = params.filename
-        if filename.endswith( '.dxf' ):
-            cam.read_DXF( filename )
-        elif filename.endswith( '.svg' ):
-            cam.read_SVG( filename )
+        if filename.endswith('.dxf'):
+            cam.read_DXF(filename)
+        elif filename.endswith('.svg'):
+            cam.read_SVG(filename)
         else:
             return chains
 
-        for layer in range((len(cam.boundarys)-1),-1,-1):
+        for layer in range((len(cam.boundarys)-1), -1, -1):
             if cam.toolpaths[layer] == []:
                 path = cam.boundarys[layer]
             else:
                 path = cam.toolpaths[layer]
             for segment in range(len(path)):
                 chain = []
-                for vertex in range(0,len(path[segment])):
+                for vertex in range(0, len(path[segment])):
                     x = path[segment][vertex][cam.X]
                     y = path[segment][vertex][cam.Y]
-                    chain.append( (x,y) )
-                chains.append( chain )
-        
-        chains = Chains.autoScaleCenter( chains, [(0.0,0.0),(params.width,params.length)] )
+                    chain.append((x, y))
+                chains.append(chain)
+
+        chains = Chains.autoScaleCenter(chains, [(0.0, 0.0), (params.width, params.length)])
 
         if params.iterations:
             import shrinky
             newChains = chains
-            for chain in shrinky.shrinky( chains, params.iterations, -params.decrement ) :
+            for chain in shrinky.shrinky(chains, params.iterations, -params.decrement):
                 newChains += chain
         else:
             newChains = chains
 
-        return Chains.scanalize( newChains, params.xOffset, params.yOffset, params.width, params.length, 1.0 / params.ballSize )
-
+        return Chains.scanalize(newChains, params.xOffset, params.yOffset, params.width, params.length, 1.0 / params.ballSize)

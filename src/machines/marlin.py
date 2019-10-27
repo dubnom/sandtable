@@ -9,13 +9,13 @@ class machiner(Machine):
     """ Driver for Marlin compatible controllers."""
 
     def initialize(self, params, fullInit):
-        logging.info( 'Trying to connect to Marlin controller.' )
+        logging.info('Trying to connect to Marlin controller.')
 
         # Open the serial port to connect to Marlin
         try:
             self.ser = serial.Serial(params['port'], baudrate=params['baud'], rtscts=True, timeout=0.5)
         except Exception as e:
-            logging.error( e )
+            logging.error(e)
             exit(0)
 
         # Start the read thread
@@ -30,11 +30,11 @@ class machiner(Machine):
         initialize = []
         fullInit = True     # FIX: Board doesn't seem to remember anything
         if fullInit:
-            logging.info( 'Full machine initialization.' )
-            initialize += params['init'] + ['M500','G1 Z1','M114']
+            logging.info('Full machine initialization.')
+            initialize += params['init'] + ['M500', 'G1 Z1', 'M114']
 
         for i in initialize:
-            self.send( i ) 
+            self.send(i)
 
         # Home the machine
         self.home()
@@ -42,36 +42,34 @@ class machiner(Machine):
 
     def run(self, chains, units, feed):
         self.ready = False
-        self.send( 'M17' )
-        self.send( 'G1 F%g' % feed )
-        self.send( 'G1 Z0' )
+        self.send('M17')
+        self.send('G1 F%g' % feed)
+        self.send('G1 Z0')
         self.count = 0
         for chain in chains:
             for point in chain:
-                s =  'G1 X%g Y%g' % (round(point[0],1), round(point[1],1))
-                self.send( s )
+                s = 'G1 X%g Y%g' % (round(point[0], 1), round(point[1], 1))
+                self.send(s)
                 self.count += 1
                 if self.count % 10 == 0:
-                    self.send( "M114" )
-        self.send( 'G1 Z1' )
-        self.send( 'M18' )
-        self.send( "M114" )
+                    self.send("M114")
+        self.send('G1 Z1')
+        self.send('M18')
+        self.send("M114")
 
     def home(self):
-        pass
-        # FIX: NEED LIMIT SWITCHES
-        #self.send( 'G28.2X0Y0' )
+        self.send('G28.2X0Y0')
 
     def halt(self):
         self.flush()
-        self.send( 'G1 Z1' )
-        self.send( "M18" )
-        self.send( "M114" )
-        
+        self.send('G1 Z1')
+        self.send("M18")
+        self.send("M114")
+
     def stop(self):
-       self.writer.stop()
-       self.reader.stop()
-       self.ser.close()
+        self.writer.stop()
+        self.reader.stop()
+        self.ser.close()
 
 
 class ReadThread(Thread):
@@ -81,8 +79,8 @@ class ReadThread(Thread):
         super(ReadThread, self).__init__()
 
     def run(self):
-        logging.info( "Read thread active" )
-        reStatus = re.compile( '^X:([\d.-]+) Y:([\d.-]+) Z:([\d.-]+) E:([\d.-]+) Count X:([\d.-]+) Y:([\d.-]+) Z:([\d.-]+)$' )
+        logging.info("Read thread active")
+        reStatus = re.compile(r'^X:([\d.-]+) Y:([\d.-]+) Z:([\d.-]+) E:([\d.-]+) Count X:([\d.-]+) Y:([\d.-]+) Z:([\d.-]+)$')
         self.running = True
         while self.running:
             line = self.ser.readline().decode(encoding='utf-8').strip()
@@ -98,7 +96,7 @@ class ReadThread(Thread):
                         # Use the Z axis as a way of determining that a drawing has ended (0-busy, 1-ready)
                         self.machine.ready = float(match.groups()[2]) > .5
 
-        logging.info( "Read thread exiting" )
+        logging.info("Read thread exiting")
 
     def stop(self):
         self.running = False
@@ -111,16 +109,15 @@ class WriteThread(Thread):
         super(WriteThread, self).__init__()
 
     def run(self):
-        logging.info( "Write thread active" )
+        logging.info("Write thread active")
         self.running = True
         while self.running:
             # FIX: Add conditional for controller readiness
             data = self.queue.get()
             logging.debug('%d %s' % (self.queue.qsize(), data))
-            self.ser.write(bytes(data+'\r',encoding='UTF-8'))
+            self.ser.write(bytes(data+'\r', encoding='UTF-8'))
             self.queue.task_done()
-        logging.info( "Write thread exiting" )
+        logging.info("Write thread exiting")
 
     def stop(self):
         self.running = False
- 

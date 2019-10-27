@@ -9,16 +9,16 @@ from machine import Machine
 class machiner(Machine):
     """ Driver for Tinyg compatible controllers."""
 
-    state = 0 
+    state = 0
 
     def initialize(self, params, fullInit):
-        logging.info( 'Trying to connect to Tinyg controller.' )
+        logging.info('Trying to connect to Tinyg controller.')
 
         # Open the serial port to connect to Tinyg
         try:
             self.ser = serial.Serial(params['port'], baudrate=params['baud'], rtscts=True, timeout=0.5)
         except Exception as e:
-            logging.error( e )
+            logging.error(e)
             exit(0)
 
         # Start the read thread
@@ -31,21 +31,21 @@ class machiner(Machine):
 
         # Initialize the board
         initialize = [
-            {"rv":""},                      # Software version
-            {"rb":""},                      # Software build
-            {"ex":2},                       # Use CTS/RTS for flow control
-            {"jv":4},                       # Line numbers
-            {"qv":2},                       # Verbose queue reports
-            {"gun":0},                      # Inches 
-            {"sv":1},                       # Status reports (filtered)
+            {"rv": ""},                      # Software version
+            {"rb": ""},                      # Software build
+            {"ex": 2},                       # Use CTS/RTS for flow control
+            {"jv": 4},                       # Line numbers
+            {"qv": 2},                       # Verbose queue reports
+            {"gun": 0},                      # Inches
+            {"sv": 1},                       # Status reports (filtered)
         ]
         if fullInit:
             initialize += params['init']
         for i in initialize:
-            self.send( json.dumps(i)) 
+            self.send(json.dumps(i))
         # After making settings we either need to reset (and wait) or just wait a little bit
         if fullInit:
-            self.send( "\x18" )
+            self.send("\x18")
             time.sleep(6.)
         else:
             time.sleep(.5)
@@ -54,22 +54,22 @@ class machiner(Machine):
         self.home()
 
     def run(self, chains, units, feed):
-        self.send( 'G20' if units == 'inches' else 'G21')
-        self.send( 'F%g' % feed )
+        self.send('G20' if units == 'inches' else 'G21')
+        self.send('F%g' % feed)
         self.count = 0
         for chain in chains:
             for point in chain:
-                s =  'G1 X%g Y%g' % (round(point[0],2), round(point[1],2))
-                self.send( s )
+                s = 'G1 X%g Y%g' % (round(point[0], 2), round(point[1], 2))
+                self.send(s)
                 self.count += 1
-        self.send( 'M2' )
+        self.send('M2')
 
     def home(self):
-        self.send( 'G28.2X0Y0' )
+        self.send('G28.2X0Y0')
 
     def halt(self):
         self.flush()
-        
+
     def stop(self):
         self.writer.stop()
         self.reader.stop()
@@ -100,24 +100,24 @@ class ReadThread(Thread):
                             self.machine.pos[1] = status['posy']
                         if 'stat' in status:
                             self.machine.state = status['stat']
-                            self.machine.ready = self.machine.state in (1,3,4)
-                            logging.debug( "State: %d" % self.machine.state )
-                    
+                            self.machine.ready = self.machine.state in (1, 3, 4)
+                            logging.debug("State: %d" % self.machine.state)
+
                     # Parse queue reports
                     elif 'qr' in data:
                         self.machine.queueDepth = data['qr']
-                        logging.debug( "QueueDepth: %d" % self.machine.queueDepth )
+                        logging.debug("QueueDepth: %d" % self.machine.queueDepth)
 
                     # Parse responses
                     elif 'r' in data:
                         response = data['r']
-                        logging.debug( "Response: %s" % response )
+                        logging.debug("Response: %s" % response)
 
                     # Everything else
                     else:
-                        logging.debug( "Received:", data )
+                        logging.debug("Received:", data)
                 except ValueError:
-                    logging.warning( "Couldn't parse: %s" % line )
+                    logging.warning("Couldn't parse: %s" % line)
         logging.info("Read thread exiting")
 
     def stop(self):
@@ -132,16 +132,15 @@ class WriteThread(Thread):
         super(WriteThread, self).__init__()
 
     def run(self):
-        logging.info( "Write thread active" )
+        logging.info("Write thread active")
         self.running = True
         while self.running:
             data = self.queue.get()
             while self.machine.queueDepth > 0 and self.machine.state < 6:
                 time.sleep(.1)
-            self.ser.write(bytes(data+'\n',encoding='UTF-8'))
+            self.ser.write(bytes(data+'\n', encoding='UTF-8'))
             self.queue.task_done()
-        logging.info( "Write thread exiting" )
+        logging.info("Write thread exiting")
 
     def stop(self):
         self.running = False
-

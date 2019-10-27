@@ -1,8 +1,9 @@
 import queue
 
+
 class Machine:
     """ Base class for communicating with a CNC controller.
-    
+
         Subclasses must implement:
             initialize - connect and initialize the actual machine (through serial,
                          API, etc.) it expects:
@@ -51,5 +52,4 @@ class Machine:
     def getStatus(self):
         count = self.count
         percent = 100 if count == 0 else (count-self.queue.qsize()) / count
-        return {'pos':self.pos, 'ready':self.ready, 'percent':percent}
-
+        return {'pos': self.pos, 'ready': self.ready, 'percent': percent}

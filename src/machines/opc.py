@@ -36,6 +36,7 @@ Recommended use:
 import socket
 import struct
 
+
 class Client:
 
     def __init__(self, server_ip_port, long_connection=True, verbose=False):
@@ -123,7 +124,7 @@ class Client:
             0 is a special value which means "all channels".
 
         pixels: A list of 3-tuples representing rgb colors.
-            Each value in the tuple should be in the range 0-255 inclusive. 
+            Each value in the tuple should be in the range 0-255 inclusive.
             For example: [(255, 255, 255), (0, 0, 0), (127, 0, 0)]
             Floats will be rounded down to integers.
             Values outside the legal range will be clamped.
@@ -148,10 +149,10 @@ class Client:
         len_hi_byte = int(len(pixels)*3 / 256)
         len_lo_byte = (len(pixels)*3) % 256
         header = chr(channel) + chr(0) + chr(len_hi_byte) + chr(len_lo_byte)
-        pieces = [header] + [ struct.pack( "BBB",
-                     min(255, max(0, int(r))),
-                     min(255, max(0, int(g))),
-                     min(255, max(0, int(b)))) for r, g, b in pixels ]
+        pieces = [header] + [struct.pack("BBB",
+                                         min(255, max(0, int(r))),
+                                         min(255, max(0, int(g))),
+                                         min(255, max(0, int(b)))) for r, g, b in pixels]
 
         message = ''.join(pieces)
 
@@ -168,5 +169,3 @@ class Client:
             self.disconnect()
 
         return True
-
-

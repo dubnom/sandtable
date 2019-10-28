@@ -9,8 +9,8 @@ class Lighter(Ledable):
             DialogInt("delaySteps",   "Delay Steps",              default=10, min=0, max=1000),
         ]
 
-    def generator(self, leds, cols, rows, params):
-        end = (cols + rows) * 2
+    def generator(self, leds, params):
+        end = leds.count
         shift = 0
         angle = 360 / params.modulus
         colors = [None] * params.modulus

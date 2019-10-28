@@ -24,7 +24,7 @@ class Lighter(Ledable):
             DialogInt("whatever",     "Variable",         units="McValues"),
         ]
 
-    def generator(self, leds, cols, rows, params):
+    def generator(self, leds, params):
         # Sunrise starts with a black sky
         # The light slowly starts to brighten from the east
         # With the centerpoint slowly arching to the north or south (parameter)
@@ -36,7 +36,7 @@ class Lighter(Ledable):
         # Sunset is reverse of sunrise
 
         # FIX: To start, generate a simple static sunrise
-        count = 2 * (rows + cols)
+        count = leds.count
         pal = palettes['Sunset'](params).getColors()
         pal.reverse()
         g = Gauss(len(pal)-1, count / 2.0, count / 15.)

@@ -2,7 +2,7 @@ class Ledable():
     """ Base class for led lighting classes. """
     editor = []
 
-    def generator(self, leds, cols, rows, params):
+    def generator(self, leds, params):
         pass
 
 
@@ -12,6 +12,3 @@ def ledPatternFactory(pattern, columns, rows):
 
     lm = import_module('lights.%s' % pattern)
     return lm.Lighter(columns, rows)
-
-
-

@@ -8,12 +8,11 @@ class Lighter(Ledable):
             DialogColor("color",           "Color",                default=(128, 128, 128)),
         ]
 
-    def generator(self, leds, cols, rows, params):
-        end = (cols + rows) * 2
+    def generator(self, leds, params):
         on = params.color
         off = (0, 0, 0)
         while True:
-            for led in range(end):
+            for led in range(leds.count):
                 leds.set(led, on)
                 yield True
                 leds.set(led, off)

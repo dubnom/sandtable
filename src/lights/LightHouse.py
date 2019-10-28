@@ -6,6 +6,8 @@ from ledable import Ledable
 
 class Lighter(Ledable):
     def __init__(self, cols, rows):
+        self.cols = cols
+        self.rows = rows
         self.editor = [
             DialogFloat("xOffset",         "X Center",         units="inches", default=TABLE_WIDTH/2, min=0.0, max=TABLE_WIDTH),
             DialogFloat("yOffset",         "Y Center",         units="inches", default=TABLE_LENGTH/4, min=0.0, max=TABLE_LENGTH),
@@ -14,8 +16,9 @@ class Lighter(Ledable):
             DialogColor("color",           "Color",            default=(255, 255, 255)),
         ]
 
-    def generator(self, leds, cols, rows, params):
+    def generator(self, leds, params):
         width, length = TABLE_WIDTH, TABLE_LENGTH
+        cols, rows = self.cols, self.rows
         self.lights = [
             # Physical light location            Led range                            Reference
             (((0.0, 0.0), (width, 0.0)),         (cols*2+rows-1, cols+rows)),       # Bottom

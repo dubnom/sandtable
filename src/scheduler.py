@@ -24,7 +24,7 @@ import board
 import digitalio
 import mach
 import ledapi
-
+from ledable import ledPatternFactory
 
 # Parameters
 POLLING_DELAY = 0.100     # 1/10 second

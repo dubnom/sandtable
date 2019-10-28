@@ -1,17 +1,19 @@
-from Sand import Ledable
+from ledable import Ledable
 
 
 class Lighter(Ledable):
     steps = 15
 
     def __init__(self, cols, rows):
+        self.cols = cols
+        self.rows = rows
+        self.ucl, self.ucr, self.lcr, self.lcl = 0, cols-1, cols+rows-1, cols*2+rows-1
+        self.url, self.urr, self.lrr, self.lrl = cols*2+rows*2-1, cols, cols+rows-1, cols*2+rows
         self.editor = []
 
-    def generator(self, leds, cols, rows, params):
-        ucl, ucr, lcr, lcl = 0, cols-1, cols+rows-1, cols*2+rows-1
-        url, urr, lrr, lrl = cols*2+rows*2-1, cols, cols+rows-1, cols*2+rows
-        self.lights = [[ucl+col, ucr-col, lcr+col, lcl-col] for col in range(0, cols//2)] \
-            + [[urr+row, lrr-row, lrl+row, url-row] for row in range(0, rows//2)]
+    def generator(self, leds, params):
+        self.lights = [[self.ucl+col, self.ucr-col, self.lcr+col, self.lcl-col] for col in range(0, self.cols//2)] \
+            + [[self.urr+row, self.lrr-row, self.lrl+row, self.url-row] for row in range(0, self.rows//2)]
         count = len(self.lights)
         colors = [None] * count
         for c in range(count):

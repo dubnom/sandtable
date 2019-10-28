@@ -1,7 +1,6 @@
-from Sand import LED_HOST, LED_PORT, LED_COLUMNS, LED_ROWS
+from Sand import LED_HOST, LED_PORT
 import socket
 import json
-from importlib import import_module
 
 
 class ledapi():

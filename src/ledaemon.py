@@ -22,7 +22,7 @@ class startupPattern(Ledable):
     def __init__(self, cols, rows):
         self.editor = []
 
-    def generator(self, leds, cols, rows, params):
+    def generator(self, leds, params):
         revCount = 120
         for rev in range(revCount):
             leds.set(0, leds.HSB(720.0*rev/revCount, 100, 50 * rev/revCount), end=len(leds.leds)-1)
@@ -58,7 +58,7 @@ class LedThread(Thread):
     def setPattern(self, pattern, params):
         logging.info("Switching to pattern: %s" % pattern)
         self.pattern = type(pattern).__name__
-        self.generator = pattern.generator(self.leds, LED_COLUMNS, LED_ROWS, params)
+        self.generator = pattern.generator(self.leds, params)
 
     def stop(self):
         self.running = False

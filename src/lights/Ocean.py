@@ -15,14 +15,17 @@ class Lighter(Ledable):
     """
 
     def __init__(self, cols, rows):
+        self.cols = cols
+        self.rows = rows
         self.editor = [
             DialogFloat("wpm",         "Wave Frequency",       units="per minute", default=30.0, min=0.1, max=90.0),
             DialogFloat("roughness",   "Water Roughness",      units="percent", default=40.0, min=0.0, max=100.0),
         ]
 
-    def generator(self, leds, cols, rows, params):
+    def generator(self, leds, params):
         colors = palettes['Ocean'](params).getColors()
         width, length = TABLE_WIDTH, TABLE_LENGTH
+        cols, rows = self.cols, self.rows
         self.lights = [
             # Physical light location           Led range                             Reference
             (((0.0, 0.0), (width, 0.0)),         (cols*2+rows-1, cols+rows)),       # Bottom

@@ -61,7 +61,7 @@ def status():
         results.append(('Demo Mode', 'Unknown'))
 
     try:
-        with ledapi() as led:
+        with ledapi.ledapi() as led:
             results.append(('LED Status', '%s' % led.status()))
     except Exception:
         results.append(('LED Status', 'Unknown'))
@@ -136,8 +136,8 @@ def _serverLog():
 
 
 def _ledsReset():
-    with ledApi() as api:
-        api.restart()
+    with ledapi.ledapi() as led:
+        led.restart()
     return 'Restarting ledaemon', None
 
 

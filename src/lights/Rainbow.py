@@ -13,11 +13,10 @@ class Lighter(Ledable):
             DialogInt("brightness",      "Brightness",               units="percent", default=50, min=0, max=100),
         ]
 
-    def generator(self, leds, cols, rows, params):
-        end = (cols + rows) * 2
+    def generator(self, leds, params):
         degree = 0.0
         while True:
-            for led in range(0, end):
+            for led in range(0, leds.count):
                 leds.set(led, leds.HSB(led / params.degsSpan + degree, 100, params.brightness))
             yield True
             for delay in range(params.delaySteps):

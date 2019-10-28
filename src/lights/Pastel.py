@@ -6,9 +6,9 @@ class Lighter(Ledable):
     def __init__(self, cols, rows):
         self.editor = []
 
-    def generator(self, leds, cols, rows, params):
-        end = cols * 2 + rows * 2
-        ends = [0] * end
+    def generator(self, leds, params):
+        end = leds.count
+        ends = [0] * leds.count
         for led in range(0, end):
             leds.set(led, self._randomRGB())
             ends[led] = self._randomRGB()

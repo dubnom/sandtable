@@ -4,13 +4,13 @@ from ledable import Ledable
 
 class Lighter(Ledable):
     def __init__(self, cols, rows):
+        self.shift = cols / 2
         self.editor = []
 
-    def generator(self, leds, cols, rows, params):
+    def generator(self, leds, params):
         end = leds.count
         colors = [(255, 255, 0), (255, 0, 255), (0, 255, 255), (0, 0, 255)]
         mults = [end/12.0, end/60.0, end/60.0, end]
-        shift = cols / 2
 
         oldtm = None
         while True:
@@ -21,6 +21,6 @@ class Lighter(Ledable):
             else:
                 leds.clear()
                 for color, mult, v in zip(colors, mults, tm):
-                    leds.set(int(shift + mult * v) % end, color)
+                    leds.set(int(self.shift + mult * v) % end, color)
                 oldtm = tm
                 yield True

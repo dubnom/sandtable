@@ -1,5 +1,5 @@
-from Sand import Ledable
 from dialog import DialogInt
+from ledable import Ledable
 
 
 class Lighter(Ledable):
@@ -8,7 +8,7 @@ class Lighter(Ledable):
             DialogInt("steps",           "Transition Steps",         default=20, min=3, max=200),
         ]
 
-    def generator(self, leds, cols, rows, params):
+    def generator(self, leds, params):
         # Setup the groups
         self.groups = [
             leds.rectangle[0] + leds.rectangle[2],  # Top and bottom

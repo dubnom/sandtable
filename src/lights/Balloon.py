@@ -1,9 +1,10 @@
-from Sand import Ledable
-from dialog import DialogInt, DialogFloat
 import random
+from dialog import DialogInt, DialogFloat
+from ledable import Ledable
+from ledable import Ledable
 
 
-class BalloonData(object):
+class BalloonData:
     position = 0
     size = 0
     growthRate = 0
@@ -22,7 +23,7 @@ class Lighter(Ledable):
             DialogFloat("maxSpeed",     "Maximum Speed",            units="pixels/second", default=10., min=0.01, max=min(cols, rows)),
         ]
 
-    def generator(self, leds, cols, rows, params):
+    def generator(self, leds, params):
         self.leds = leds
         self.params = params
         end = leds.count

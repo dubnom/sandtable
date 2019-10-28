@@ -1,7 +1,7 @@
 import random
-from Sand import Ledable
 from dialog import DialogList, DialogInt
 from palettes import palettes
+from ledable import Ledable
 
 
 class Lighter(Ledable):
@@ -12,7 +12,7 @@ class Lighter(Ledable):
             DialogInt("dots",         "Number of Dots",               default=20, min=1, max=(cols + rows) * 2, ),
         ]
 
-    def generator(self, leds, cols, rows, params):
+    def generator(self, leds, params):
         end = leds.count
         colors = palettes[params.palette](params).getRandom(params.dots) if params.palette in palettes else [(0, 0, 0)]
         dots = [[random.randint(0, end), (random.random()-.5)*3.0, color] for color in colors]

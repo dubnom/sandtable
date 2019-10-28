@@ -1,10 +1,10 @@
 from math import pi, sin
 import random
-from Sand import Ledable, TABLE_WIDTH, TABLE_LENGTH, LED_COLUMNS, LED_ROWS, LED_PERIOD
+from Sand import TABLE_WIDTH, TABLE_LENGTH, LED_PERIOD
 from dialog import DialogFloat
 from palettes import palettes
 from LedsBase import LedsBase
-
+from ledable import Ledable
 
 class Lighter(Ledable):
     """
@@ -15,20 +15,23 @@ class Lighter(Ledable):
     """
 
     def __init__(self, cols, rows):
+        self.cols = cols
+        self.rows = rows
         self.editor = [
             DialogFloat("wpm",         "Wave Frequency",       units="per minute", default=30.0, min=0.1, max=90.0),
             DialogFloat("roughness",   "Water Roughness",      units="percent", default=40.0, min=0.0, max=100.0),
         ]
 
-    def generator(self, leds, cols, rows, params):
+    def generator(self, leds, params):
         colors = palettes['Ocean'](params).getColors()
         width, length = TABLE_WIDTH, TABLE_LENGTH
+        cols, rows = self.cols, self.rows
         self.lights = [
-            # Physical light location           Led range                                               Reference
-            (((0.0, 0.0), (width, 0.0)),         (LED_COLUMNS*2+LED_ROWS-1, LED_COLUMNS+LED_ROWS)),       # Bottom
-            (((width, 0.0), (width, length)),    (LED_COLUMNS+LED_ROWS-1, LED_COLUMNS)),                 # Right
-            (((0.0, length), (width, length)),   (0, LED_COLUMNS-1)),                                   # Top
-            (((0.0, 0.0), (0.0, length)),        (LED_COLUMNS*2+LED_ROWS, LED_COLUMNS*2+LED_ROWS*2-1)),   # Left
+            # Physical light location           Led range                             Reference
+            (((0.0, 0.0), (width, 0.0)),         (cols*2+rows-1, cols+rows)),       # Bottom
+            (((width, 0.0), (width, length)),    (cols+rows-1, cols)),              # Right
+            (((0.0, length), (width, length)),   (0, cols-1)),                      # Top
+            (((0.0, 0.0), (0.0, length)),        (cols*2+rows, cols*2+rows*2-1)),   # Left
         ]
 
         wavesPerPeriod = (params.wpm / 60.0) * LED_PERIOD
@@ -45,7 +48,7 @@ class Lighter(Ledable):
 
             for step in range(stepsPerWave):
                 leds.clear()
-                distance = int(sin(step * anglePerStep) * (LED_ROWS-1))
+                distance = int(sin(step * anglePerStep) * (rows-1))
                 for led in range(distance):
                     leds.set(lines[1][0][0] + lines[1][1] * led, lines[1][2][distance-led])
                     leds.set(lines[3][0][0] + lines[3][1] * led, lines[3][2][distance-led])
@@ -55,7 +58,7 @@ class Lighter(Ledable):
                     leds.set(lines[0][0][0] + lines[0][1] * led, lines[0][2][led])
 
                 # Top (Shore)
-                percent = float(distance) / LED_ROWS
+                percent = float(distance) / rows
                 threshold = 0.75
                 if percent > threshold:
                     for led, rgb in enumerate(self._dim(lines[0][2], (percent - threshold) / (1.0 - threshold))):

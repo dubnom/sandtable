@@ -78,10 +78,3 @@ exec("from %s.%s import *" % (CONFIG_PATH, hostmap[HOST_NAME]))
 
 IMAGE_HEIGHT = int(IMAGE_WIDTH * (TABLE_LENGTH / TABLE_WIDTH))
 MACH_FILE = '%smachines/%s.py' % (SOURCE_PATH, MACHINE)
-
-
-class Ledable():
-    editor = []
-
-    def generator(self, leds, cols, rows, params):
-        pass

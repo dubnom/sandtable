@@ -1,7 +1,7 @@
-from Sand import Ledable
 from dialog import DialogList, DialogInt
 from random import randint
 from palettes import palettes
+from ledable import Ledable
 
 
 class Lighter(Ledable):
@@ -14,7 +14,7 @@ class Lighter(Ledable):
             DialogInt("delaySteps",   "Delay Steps",                  default=20, min=0, max=1000),
         ]
 
-    def generator(self, leds, cols, rows, params):
+    def generator(self, leds, params):
         colors = palettes[params.palette](params).getColors() if params.palette in palettes else [(0, 0, 0)]
         end = leds.count
         shift = 0

@@ -5,13 +5,14 @@ import json
 import socket
 import socketserver
 from threading import Thread
-from tcpserver import StoppableTCPServer
 from importlib import import_module
 
+from ledable import Ledable, ledPatternFactory
+from tcpserver import StoppableTCPServer
 from dialog import Params
 from Sand import LED_DRIVER, LED_ROWS, LED_COLUMNS, LED_MAPPING, LED_PARAMS,\
-    LED_HOST, LED_PORT, LED_PERIOD, Ledable
-from ledstuff import ledPatternFactory
+    LED_HOST, LED_PORT, LED_PERIOD
+
 
 # The specific LED driver is specified in the machine configuration
 Leds = import_module('machines.%s' % LED_DRIVER)
@@ -21,7 +22,7 @@ class startupPattern(Ledable):
     def __init__(self, cols, rows):
         self.editor = []
 
-    def generator(self, leds, cols, rows, params):
+    def generator(self, leds, params):
         revCount = 120
         for rev in range(revCount):
             leds.set(0, leds.HSB(720.0*rev/revCount, 100, 50 * rev/revCount), end=len(leds.leds)-1)
@@ -57,7 +58,7 @@ class LedThread(Thread):
     def setPattern(self, pattern, params):
         logging.info("Switching to pattern: %s" % pattern)
         self.pattern = type(pattern).__name__
-        self.generator = pattern.generator(self.leds, LED_COLUMNS, LED_ROWS, params)
+        self.generator = pattern.generator(self.leds, params)
 
     def stop(self):
         self.running = False
@@ -78,7 +79,7 @@ class MyHandler(socketserver.StreamRequestHandler):
             params = Params()
             params.update(p)
             logging.info("Request: %s %s %s" % (cmd, pattern, params))
-            pat = ledPatternFactory(pattern)
+            pat = ledPatternFactory(pattern, LED_COLUMNS, LED_ROWS)
             self.ledThread.setPattern(pat, params)
         elif cmd == 'status':
             pass

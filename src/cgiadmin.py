@@ -6,7 +6,7 @@ import os
 from Sand import TABLE_WIDTH, TABLE_LENGTH, TABLE_UNITS, BALL_SIZE,\
     MACHINE, MACHINE_FEED, MACHINE_ACCEL, MACHINE_UNITS,\
     MACH_LOG, LED_LOG, SERVER_LOG, SCHEDULER_LOG, MOVIE_STATUS_LOG,\
-    GCODE_FILE, VER_FILE
+    VER_FILE
 import mach
 import schedapi
 import MovieStatus
@@ -77,9 +77,9 @@ def adminPage():
         "server_log":   (_serverLog,    "Server Log - View the web server log"),
         "led_log":      (_ledsLog,      "Led Log - View the ledaemon log (lighting system"),
         "led_res":      (_ledsReset,    "Led Reset - Reset the lighting system"),
+        "mach_halt":    (_machHalt,     "Mach Halt - Halt current drawing"),
         "mach_home":    (_home,         "Mach Home - Move ball to (0,0) and recalibrate"),
         "mach_log":     (_machLog,      "Mach Log - View the log of the motor control system"),
-        "mach_gcode":   (_machGcode,    "Mach GCode - View the last instruction file sent to the motor controller"),
         "mach_res":     (_machReset,    "Mach Reset - Reset the motor control system"),
         "mach_res_a":   (_machResetA,   "Mach Reset and Reinitialize - Reset everything motor control related"),
         "sched_log":    (_schedLog,     "Scheduler log - view the log of the demo scheduler"),
@@ -134,14 +134,18 @@ def _serverLog():
     return 'server.log', _escapeFile(SERVER_LOG)
 
 
-def _machGcode():
-    return 'G-Code', _escapeFile(GCODE_FILE)
-
-
 def _ledsReset():
     with ledApi() as api:
         api.restart()
     return 'Restarting ledaemon', None
+
+
+def _machHalt():
+    with schedapi.schedapi() as sched:
+        sched.demoHalt()
+    with mach.mach() as e:
+        e.stop()
+    return 'Halted drawing', None
 
 
 def _machReset():

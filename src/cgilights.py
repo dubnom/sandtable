@@ -18,7 +18,7 @@ def lightsPage():
     d = Dialog(pattern.editor, form, None, autoSubmit=True)
     params = d.getParams()
     if form.method:
-        setLedPattern(pattern, params)
+        setLedPattern(ledPattern, params)
 
     return [
         cstuff.standardTopStr(),

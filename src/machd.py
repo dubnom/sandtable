@@ -8,16 +8,20 @@ from importlib import import_module
 from tcpserver import StoppableTCPServer
 from Sand import MACH_HOST, MACH_PORT, MACHINE, VER_FILE, MACHINE_PARAMS
 
-REQ_BUF_SIZE = 10 * 1024 * 1024
 
-
-class MyHandler(socketserver.BaseRequestHandler):
+class MyHandler(socketserver.StreamRequestHandler):
     def setup(self):
+        super(MyHandler, self).setup()
         self.machine = self.server.machine
 
     def handle(self):
-        req = self.request.recv(REQ_BUF_SIZE).decode('utf-8')
-        command, data = json.loads(req)
+        req = self.rfile.readline().strip()
+        try:
+            command, data = json.loads(req)
+        except json.decoder.JSONDecodeError as e:
+            logging.info(e)
+            return
+
         if command != 'status':
             logging.info("Command: %s" % command)
         if command == 'send':
@@ -30,10 +34,9 @@ class MyHandler(socketserver.BaseRequestHandler):
             self.restart()
 
         status = self.machine.getStatus()
-        self.request.send(bytes(json.dumps(status), encoding='utf-8'))
+        self.wfile.write(bytes(json.dumps(status)+'\n', 'utf-8'))
 
     def run(self, data):
-        logging.info(data)
         chains = data['chains']
         units = data['units']
         feed = data['feed']

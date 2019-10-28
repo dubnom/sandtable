@@ -1,7 +1,6 @@
 from Sand import LED_HOST, LED_PORT, LED_COLUMNS, LED_ROWS
 import socket
 import json
-import pickle
 from importlib import import_module
 
 
@@ -19,22 +18,19 @@ class ledApi:
     def __init__(self, hostName=LED_HOST, hostPort=LED_PORT):
         self.hostName = hostName
         self.hostPort = hostPort
-        self.BUFFER_SIZE = 512
         self._status = None
 
     def __enter__(self):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect((self.hostName, self.hostPort))
         return self
 
     def __exit__(self, e, t, tb):
-        self.sock.close()
-        del self.sock
         return False
 
     def command(self, cmd, pattern=None, params=None):
-        self.sock.sendall(pickle.dumps((cmd, pattern, params)))
-        self._status = json.loads(self.sock.recv(512).decode('utf-8'))
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.connect((self.hostName, self.hostPort))
+            sock.sendall(bytes(json.dumps((cmd, pattern, params))+'\n', encoding='utf-8'))
+            self._status = json.loads(sock.recv(512).decode('utf-8'))
         return self._status
 
     def setPattern(self, pattern, params):

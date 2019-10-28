@@ -104,7 +104,7 @@ def drawPage():
         errors = '"%s" is not a valid drawing method!' % sandable
 
     # The hash is used to ensure that cached images are correct
-    imagefile = "%s?%d" % (IMAGE_FILE, hash((sandable, params)))
+    imagefile = "%s?%s" % (IMAGE_FILE, params.hash())
 
     return [
         cstuff.standardTopStr(),

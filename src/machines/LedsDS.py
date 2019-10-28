@@ -17,7 +17,7 @@ class Leds(LedsBase):
         for led, color in enumerate(self.leds):
             if self.mapping:
                 color = self.leds[self.mapping[led]]
-            self.strip[led] = color
+            self.strip[led] = (int(color[0]), int(color[1]), int(color[2]))
         self.strip.show()
 
     def disconnect(self):

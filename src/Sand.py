@@ -45,7 +45,6 @@ TMP_PATH = "/tmp/"
 MACH_HOST = 'localhost'
 MACH_PORT = 5007
 MACH_LOG = "/var/log/machd.log"
-GCODE_FILE = "%sgcode.ngc" % DATA_PATH
 
 VER_FILE = "%smachine.py" % DATA_PATH
 

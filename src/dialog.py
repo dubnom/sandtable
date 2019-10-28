@@ -2,13 +2,15 @@ import os
 import random
 import copy
 from html import escape
+from hashlib import md5
 
 
-class Params():
+class Params(dict):
     def __init__(self, editor=None):
+        super(Params, self).__init__()
         if editor:
             for field in editor:
-                setattr(self, field.name, field.default)
+                self[field.name] = field.default
 
     def randomize(self, editor):
         for field in editor:
@@ -16,13 +18,17 @@ class Params():
             if field.name not in ['width', 'length']:
                 value = field._random()
                 if value is not None:
-                    setattr(self, field.name, value)
+                    self[field.name] = value
 
-    def __str__(self):
-        s = "Params("
-        for a in [a for a in dir(self) if not a.startswith('_')]:
-            s += "%s:%s, " % (a, getattr(self, a))
-        return s+")"
+    def hash(self):
+        h = md5()
+        h.update(bytes(str(self.items), 'utf-8'))
+        return h.hexdigest()
+
+    def __getattribute__(self, attr):
+        if attr in self:
+            return self[attr]
+        return super(Params, self).__getattribute__(attr)
 
 
 class Dialog:
@@ -46,7 +52,7 @@ class Dialog:
             if hasattr(self.params, field.name):
                 continue
             if hasattr(field, 'fromFormRaw'):
-                setattr(self.params, field.name, field.fromFormRaw(self.form))
+                self.params[field.name] = field.fromFormRaw(self.form)
             elif field.name in self.form:
                 try:
                     value = field.fromForm(self.form.get(field.name))
@@ -57,9 +63,9 @@ class Dialog:
                 if err:
                     value = err[0]
                     self.errors[field.name] = err[1]
-                setattr(self.params, field.name, value)
+                self.params[field.name] = value
             else:
-                setattr(self.params, field.name, field.default)
+                self.params[field.name] = field.default
         return self.params
 
     def html(self):

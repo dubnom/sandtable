@@ -18,13 +18,12 @@ class mach:
         return False
 
     def command(self, string, data={}):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((self.hostName, self.portNumber))
-        sock.sendall(bytes(json.dumps((string, data)), encoding='utf-8'))
-        v = sock.recv(self.BUFFER_SIZE)
-        self.status = json.loads(v)
-        sock.close()
-        del sock
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.connect((self.hostName, self.portNumber))
+            cmd = bytes(json.dumps((string, data))+'\n', encoding='utf-8')
+            sock.sendall(cmd)
+            v = str(sock.recv(self.BUFFER_SIZE), 'utf-8')
+            self.status = json.loads(v)
 
     def close(self):
         pass

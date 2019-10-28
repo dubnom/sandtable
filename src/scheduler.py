@@ -132,13 +132,13 @@ class Demo(Thread):
     def _lightsRandom(self):
         pattern = ledPatternFactory('RandomLights')
         params = Params(pattern.editor)
-        params.minutes = 2.0
-        setLedPattern(pattern, params)
+        params['minutes'] = 2.0
+        setLedPattern('RandomLights', params)
 
     def _lightsOff(self):
         pattern = ledPatternFactory('Off')
         params = Params(pattern.editor)
-        setLedPattern(pattern, params)
+        setLedPattern('Off', params)
 
     def _drawRandom(self):
         boundingBox = [(0.0, 0.0), (TABLE_WIDTH, TABLE_LENGTH)]
@@ -159,9 +159,9 @@ class Demo(Thread):
                 logging.warning("Tried %s but failed with %s" % (sand, e))
 
         logging.info("Drawing %s, estimated time %d:%02d" % (sand, int(t/60), int(t) % 60))
+        History.save(params, drawer, chains, "lastdemo")
         with mach.mach() as e:
             e.run(chains, boundingBox, MACHINE_FEED, TABLE_UNITS, MACHINE_UNITS)
-        History.save(params, drawer, chains, "lastdemo")
 
     def _drawWait(self):
         with mach.mach() as e:
@@ -205,12 +205,14 @@ class ProxSwitchThread(Thread):
         self.running = False
 
 
-class MyHandler(socketserver.BaseRequestHandler):
+class MyHandler(socketserver.StreamRequestHandler):
     def setup(self):
+        super(MyHandler, self).setup()
         self.demo = self.server.demo
 
     def handle(self):
-        command, data = json.loads(self.request.recv(1024*10).decode('utf-8'))
+        req = self.rfile.readline().strip()
+        command, data = json.loads(req)
         logging.debug("Command: %s, %s" % (command, data))
         if command == 'status':
             pass
@@ -230,7 +232,7 @@ class MyHandler(socketserver.BaseRequestHandler):
             pass    # FIX: Finish code
         else:
             logging.warning("Unknown command: %s" % command)
-        self.request.send(bytes(json.dumps({'state': self.demo._state}), encoding='utf-8'))
+        self.wfile.write(bytes(json.dumps({'state': self.demo._state})+'\n', encoding='utf-8'))
 
     def _restart(self):
         self.server.stop()

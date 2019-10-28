@@ -2,15 +2,16 @@
 import time
 import logging
 import json
-import pickle
 import socket
 import socketserver
 from threading import Thread
 from tcpserver import StoppableTCPServer
 from importlib import import_module
 
+from dialog import Params
 from Sand import LED_DRIVER, LED_ROWS, LED_COLUMNS, LED_MAPPING, LED_PARAMS,\
     LED_HOST, LED_PORT, LED_PERIOD, Ledable
+from ledstuff import ledPatternFactory
 
 # The specific LED driver is specified in the machine configuration
 Leds = import_module('machines.%s' % LED_DRIVER)
@@ -65,21 +66,25 @@ class LedThread(Thread):
         return {'running': self.generator is not None, 'pattern': self.pattern}
 
 
-class MyHandler(socketserver.BaseRequestHandler):
+class MyHandler(socketserver.StreamRequestHandler):
     def setup(self):
+        super(MyHandler, self).setup()
         self.ledThread = self.server.ledThread
 
     def handle(self):
-        req = self.request.recv(10*1024)
-        cmd, pattern, params = pickle.loads(req)
+        req = self.rfile.readline().strip()
+        cmd, pattern, p = json.loads(req)
         if cmd == 'pattern':
+            params = Params()
+            params.update(p)
             logging.info("Request: %s %s %s" % (cmd, pattern, params))
-            self.ledThread.setPattern(pattern, params)
+            pat = ledPatternFactory(pattern)
+            self.ledThread.setPattern(pat, params)
         elif cmd == 'status':
             pass
         elif cmd == 'restart':
             self.server.stop()
-        self.request.send(bytes(json.dumps(self.ledThread.status()), encoding='utf-8'))
+        self.wfile.write(bytes(json.dumps(self.ledThread.status())+'\n', encoding='utf-8'))
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 from math import fmod
-from Sand import Ledable
 from dialog import DialogFloat, DialogInt, DialogBreak
+from ledable import Ledable
 
 
 class Lighter(Ledable):

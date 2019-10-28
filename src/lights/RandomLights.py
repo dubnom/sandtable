@@ -1,8 +1,8 @@
 from random import randint
-from Sand import Ledable, ledPatterns
 from dialog import DialogFloat, Params
 from time import time
-from ledstuff import ledPatternFactory
+from ledable import Ledable, ledPatternFactory
+from Sand import ledPatterns
 
 
 class Lighter(Ledable):
@@ -15,7 +15,7 @@ class Lighter(Ledable):
     def generator(self, leds, cols, rows, params):
         while True:
             pattern = self.patterns[randint(0, len(self.patterns)-1)]
-            pat = ledPatternFactory(pattern)
+            pat = ledPatternFactory(pattern, cols, rows)
 
             iParams = Params(pat.editor)
             iParams.randomize(pat.editor)

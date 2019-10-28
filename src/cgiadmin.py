@@ -8,10 +8,11 @@ from Sand import TABLE_WIDTH, TABLE_LENGTH, TABLE_UNITS, BALL_SIZE,\
     MACH_LOG, LED_LOG, SERVER_LOG, SCHEDULER_LOG, MOVIE_STATUS_LOG,\
     VER_FILE
 import mach
+import ledapi
 import schedapi
 import MovieStatus
 from cgistuff import cgistuff
-from ledstuff import ledApi
+
 
 # FIX: This should be placed in a library
 _conversion = {'inches': 1, 'mm': 25.4, 'cm': 2.54}
@@ -60,8 +61,8 @@ def status():
         results.append(('Demo Mode', 'Unknown'))
 
     try:
-        with ledApi() as api:
-            results.append(('LED Status', '%s' % api.status()))
+        with ledapi() as led:
+            results.append(('LED Status', '%s' % led.status()))
     except Exception:
         results.append(('LED Status', 'Unknown'))
 

@@ -5,13 +5,14 @@ import json
 import socket
 import socketserver
 from threading import Thread
-from tcpserver import StoppableTCPServer
 from importlib import import_module
 
+from ledable import Ledable, ledPatternFactory
+from tcpserver import StoppableTCPServer
 from dialog import Params
 from Sand import LED_DRIVER, LED_ROWS, LED_COLUMNS, LED_MAPPING, LED_PARAMS,\
-    LED_HOST, LED_PORT, LED_PERIOD, Ledable
-from ledstuff import ledPatternFactory
+    LED_HOST, LED_PORT, LED_PERIOD
+
 
 # The specific LED driver is specified in the machine configuration
 Leds = import_module('machines.%s' % LED_DRIVER)
@@ -78,7 +79,7 @@ class MyHandler(socketserver.StreamRequestHandler):
             params = Params()
             params.update(p)
             logging.info("Request: %s %s %s" % (cmd, pattern, params))
-            pat = ledPatternFactory(pattern)
+            pat = ledPatternFactory(pattern, LED_COLUMNS, LED_ROWS)
             self.ledThread.setPattern(pat, params)
         elif cmd == 'status':
             pass

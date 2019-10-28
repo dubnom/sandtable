@@ -1,5 +1,5 @@
-from Sand import Ledable
 from dialog import DialogColor
+from ledable import Ledable
 
 
 class Lighter(Ledable):

@@ -1,9 +1,10 @@
 from Sand import Ledable
 from dialog import DialogInt, DialogFloat
+from ledable import Ledable
 import random
 
 
-class BalloonData(object):
+class BalloonData:
     position = 0
     size = 0
     growthRate = 0

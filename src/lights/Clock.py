@@ -1,5 +1,5 @@
-from Sand import Ledable
 from time import localtime, time
+from ledable import Ledable
 
 
 class Lighter(Ledable):

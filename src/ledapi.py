@@ -4,17 +4,7 @@ import json
 from importlib import import_module
 
 
-def ledPatternFactory(pattern):
-    lm = import_module('lights.%s' % pattern)
-    return lm.Lighter(LED_COLUMNS, LED_ROWS)
-
-
-def setLedPattern(pattern, params):
-    with ledApi() as api:
-        return api.setPattern(pattern, params)
-
-
-class ledApi:
+class ledapi():
     def __init__(self, hostName=LED_HOST, hostPort=LED_PORT):
         self.hostName = hostName
         self.hostPort = hostPort

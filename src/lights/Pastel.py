@@ -1,5 +1,5 @@
 from random import randint
-from Sand import Ledable
+from ledable import Ledable
 
 
 class Lighter(Ledable):

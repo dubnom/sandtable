@@ -1,7 +1,7 @@
 import random
-from Sand import Ledable
 from dialog import DialogList, DialogInt
 from palettes import palettes
+from ledable import Ledable
 
 
 class Lighter(Ledable):

@@ -1,5 +1,6 @@
 import colorsys
-from Sand import Ledable, LED_PERIOD
+from Sand import LED_PERIOD
+from ledable import Ledable
 
 
 class Lighter(Ledable):

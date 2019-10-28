@@ -1,6 +1,7 @@
 from math import radians, sin, cos, fmod
-from Sand import Ledable, LED_COLUMNS, LED_ROWS, TABLE_WIDTH, TABLE_LENGTH
+from Sand import TABLE_WIDTH, TABLE_LENGTH
 from dialog import DialogFloat, DialogColor
+from ledable import Ledable
 
 
 class Lighter(Ledable):
@@ -16,17 +17,17 @@ class Lighter(Ledable):
     def generator(self, leds, cols, rows, params):
         width, length = TABLE_WIDTH, TABLE_LENGTH
         self.lights = [
-            # Physical light location           Led range                                               Reference
-            (((0.0, 0.0), (width, 0.0)),         (LED_COLUMNS*2+LED_ROWS-1, LED_COLUMNS+LED_ROWS)),       # Bottom
-            (((width, 0.0), (width, length)),    (LED_COLUMNS+LED_ROWS-1, LED_COLUMNS)),                 # Right
-            (((0.0, length), (width, length)),   (0, LED_COLUMNS-1)),                                   # Top
-            (((0.0, 0.0), (0.0, length)),        (LED_COLUMNS*2+LED_ROWS, LED_COLUMNS*2+LED_ROWS*2-1)),   # Left
+            # Physical light location            Led range                            Reference
+            (((0.0, 0.0), (width, 0.0)),         (cols*2+rows-1, cols+rows)),       # Bottom
+            (((width, 0.0), (width, length)),    (cols+rows-1, cols)),              # Right
+            (((0.0, length), (width, length)),   (0, cols-1)),                      # Top
+            (((0.0, 0.0), (0.0, length)),        (cols*2+rows, cols*2+rows*2-1)),   # Left
         ]
 
         angle = 0.0
         dist = 1000.0
         beamWidth = params.beamWidth / 2.0
-        end = (LED_ROWS+LED_COLUMNS)*2
+        end = (rows+cols)*2
         color = params.color
         def ray(a): return ((params.xOffset, params.yOffset), (params.xOffset+dist*cos(radians(a)), params.yOffset+dist*sin(radians(a))))
 

@@ -1,7 +1,7 @@
 from math import e
-from Sand import Ledable
 from dialog import DialogInt
 from palettes import palettes
+from ledable import Ledable
 
 
 class Gauss:

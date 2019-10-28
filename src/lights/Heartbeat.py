@@ -1,5 +1,6 @@
-from Sand import Ledable, LED_PERIOD
+from Sand import LED_PERIOD
 from dialog import DialogInt
+from ledable import Ledable
 
 
 class Lighter(Ledable):

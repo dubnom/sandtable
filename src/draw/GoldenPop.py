@@ -6,8 +6,20 @@ from Chains import Chains
 
 class Sander(Sandable):
     """
-### GoldenDrop
+### GoldenPop
 
+#### Special Thanks
+Special thanks to John Edmark who's amazing work inspired this drawing method.  In fact, John was sitting
+with me giving me equations, pointers, and ideas while I wrote this code.
+
+#### Parameters
+
+* **Starting Radius** - Radius to start growing the spiral from.
+* **Phyllotaxic Angle** - Amount to rotate for each new "leaf".
+* **Reduction Rate** - Amount to reduce the length of each stalk and circle for each iteration.
+* **Circle Diameter** - Size of the circle ("Leaf")at the end of the stalk. The size of the circle decreases based on the **Reduction Rate**.
+* **Interations** - Number of stalks and circles.
+* **X Center** and **Y Center** - where the center of the spiral will be relative to the table.
 """
 
     def __init__(self, width, length, ballSize, units):

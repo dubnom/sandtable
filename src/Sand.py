@@ -13,7 +13,7 @@ drawers = [
     "Sisyphus", "Func3d", "SpiralArms",
     "Bulbs", "Engine", "ESpiral",
     "Man", "RandomDraw", "Move",
-    "GoldenDrop", "GoldenPop",
+    "GoldenDrop", "GoldenPop", "Shape",
 ]
 
 todo = ["Tree", "Celtic", "LOGO", "GreekKey", "CropCircle", "Propogation", ]

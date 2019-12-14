@@ -10,6 +10,7 @@ class machiner(Machine):
     """ Driver for Tinyg compatible controllers."""
 
     state = 0
+    queueDepth = 32
 
     def initialize(self, params, fullInit):
         logging.info('Trying to connect to Tinyg controller.')
@@ -136,7 +137,7 @@ class WriteThread(Thread):
         self.running = True
         while self.running:
             data = self.queue.get()
-            while self.machine.queueDepth > 0 and self.machine.state < 6:
+            while self.machine.queueDepth < 3:
                 time.sleep(.1)
             self.ser.write(bytes(data+'\n', encoding='UTF-8'))
             self.queue.task_done()

@@ -4,6 +4,7 @@ drawers = [
     "Spiral", "Rose", "Star",
     "Fermat", "Spirograph", "Sines",
     "Lissajous", "Harmonograph", "Nautilus",
+    "GoldenDrop", "GoldenPop", "Shape",
     "Text", "Maze", "Sun",
     "Snowflake", "Dragon", "Hilbert",
     "Waves", "Grid", "Checkers",
@@ -13,7 +14,6 @@ drawers = [
     "Sisyphus", "Func3d", "SpiralArms",
     "Bulbs", "Engine", "ESpiral",
     "Man", "RandomDraw", "Move",
-    "GoldenDrop", "GoldenPop", "Shape",
 ]
 
 todo = ["Tree", "Celtic", "LOGO", "GreekKey", "CropCircle", "Propogation", ]

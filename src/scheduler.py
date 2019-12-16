@@ -139,9 +139,9 @@ class Demo(Thread):
             led.setPattern('RandomLights', params)
 
     def _lightsOff(self):
-        pattern = ledPatternFactory('Off')
+        pattern = ledPatternFactory('Off', LED_COLUMNS, LED_ROWS)
         params = Params(pattern.editor)
-        with ledapi.ledapi as led:
+        with ledapi.ledapi() as led:
             led.setPattern('Off', params)
 
     def _drawRandom(self):

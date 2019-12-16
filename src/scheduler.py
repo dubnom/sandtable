@@ -15,7 +15,8 @@ import random
 
 from Sand import DATA_PATH, TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS,\
    MACHINE_UNITS, MACHINE_ACCEL, MACHINE_FEED,\
-   SCHEDULER_ENABLE, SCHEDULER_HOST, SCHEDULER_PORT, drawers
+   SCHEDULER_ENABLE, SCHEDULER_HOST, SCHEDULER_PORT, drawers,\
+   LED_COLUMNS, LED_ROWS
 from sandable import sandableFactory
 from dialog import Params
 from Chains import Chains
@@ -23,8 +24,8 @@ from history import History
 import board
 import digitalio
 import mach
-import ledapi
 from ledable import ledPatternFactory
+import ledapi
 
 # Parameters
 POLLING_DELAY = 0.100     # 1/10 second
@@ -131,10 +132,10 @@ class Demo(Thread):
         self._state = self.DIE
 
     def _lightsRandom(self):
-        pattern = ledPatternFactory('RandomLights')
+        pattern = ledPatternFactory('RandomLights', LED_COLUMNS, LED_ROWS)
         params = Params(pattern.editor)
         params['minutes'] = 2.0
-        with ledapi.ledapi as led:
+        with ledapi.ledapi() as led:
             led.setPattern('RandomLights', params)
 
     def _lightsOff(self):

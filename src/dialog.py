@@ -8,11 +8,13 @@ from hashlib import md5
 class Params(dict):
     def __init__(self, editor=None):
         super(Params, self).__init__()
+        self.editor = editor
         if editor:
             for field in editor:
                 self[field.name] = field.default
 
     def randomize(self, editor):
+        self.editor = editor
         for field in editor:
             # FIX: This is very specific to sandtable drawing methods
             if field.name not in ['width', 'length']:
@@ -29,6 +31,13 @@ class Params(dict):
         if attr in self:
             return self[attr]
         return super(Params, self).__getattribute__(attr)
+
+    def __equal__(self, params):
+        if self.editor:
+            for field in editor:
+                if self.getattr(field.name, None) != params.getattr(field.name, None):
+                    return False
+        return True
 
 
 class Dialog:

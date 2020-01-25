@@ -1,9 +1,10 @@
+from os import listdir, rename, remove, scandir
+import pickle as pickle
+
 from Sand import STORE_PATH, TABLE_WIDTH, TABLE_LENGTH,\
     IMAGE_TYPE, IMAGE_WIDTH, IMAGE_HEIGHT, CACHE_FILE,\
     HISTORY_COUNT
-from os import listdir, rename, remove
 from Chains import Chains
-import pickle as pickle
 
 
 class History():
@@ -67,6 +68,15 @@ class History():
                     save.append(name[:-5])
         return (save, history)
 
+    @staticmethod
+    def getFolders():
+        folders = []
+        with scandir(STORE_PATH) as directory:
+            for entry in directory:
+                if entry.is_dir():
+                    folders.append(entry.name)
+        return folders
+
 
 class Memoize():
     """Memoize is used to cache drawings"""
@@ -82,7 +92,7 @@ class Memoize():
             self.params = None
 
     def match(self, sandable, params):
-        return self.sandable == sandable and all(a.startswith('__') or getattr(self.params, a, None) == getattr(params, a, None) for a in dir(params))
+        return self.sandable == sandable and self.params == params
 
     def chains(self):
         with open(CACHE_FILE, 'rb') as f:

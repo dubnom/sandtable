@@ -1,5 +1,6 @@
 from bottle import request, route, post, get, template
 from datetime import timedelta
+import logging
 
 from Sand import TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS,\
     MACHINE_UNITS, MACHINE_FEED, MACHINE_ACCEL,\
@@ -10,6 +11,7 @@ from Chains import Chains
 from cgistuff import cgistuff
 from dialog import Dialog
 from history import History, Memoize
+from thr import dumpThr
 
 import mach
 import schedapi
@@ -19,7 +21,7 @@ import schedapi
 @post('/draw')
 @get('/draw')
 def drawPage():
-    cstuff = cgistuff('Draw')
+    cstuff = cgistuff('Draw', jQuery=True, jQueryUI=True)
     form = request.forms
 
     # Check to see if params are being loaded from a file
@@ -31,6 +33,9 @@ def drawPage():
         sandable = params.sandable
     else:
         sandable = form.method or request.query.method or drawers[0]
+
+    # Load the list of playlists (folders)
+    playlists = '\n'.join(['<option value="{0}">{0}</option>'.format(playlist) for playlist in History.getFolders()])
 
     # Take action
     editor, errors = '', None
@@ -73,9 +78,10 @@ def drawPage():
             with mach.mach() as e:
                 e.stop()
 
-        # If 'Save' has been requested save the drawing's parameters
-        if action == 'save' or action == 'Save':
+        # If 'Add' has been requested, add the drawing to a playlist
+        if action == 'add' or action == 'Add':
             name = form._name.strip()
+            playlist = form._playlist.strip()
             if any(k in name for k in './\\~'):
                 errors = '"%s" cannot contain path characters ("./\\~")' % name
             elif not len(name):
@@ -83,7 +89,7 @@ def drawPage():
             else:
                 History.save(params, sandable, chains, name)
 
-        # If 'Export' has been requested, export to an SVG file
+        # If 'Export' has been requested, export based on the requested format
         if action == 'export' or action == 'Export':
             name = form._name.strip()
             if any(k in name for k in './\\~'):
@@ -91,7 +97,15 @@ def drawPage():
             elif not len(name):
                 errors = 'No name was specified'
             else:
-                Chains.makeSVG(chains, "%s%s.svg" % (DATA_PATH, name))
+                format = form._format.strip()
+                if format == 'svg':
+                    Chains.makeSVG(chains, "%s%s.svg" % (DATA_PATH, name))
+                elif format == 'gcode':
+                    Chains.makeGCode(chains, boundingBox, MACHINE_FEED, "%s%s.gcode" % (DATA_PATH, name), MACHINE_UNITS, TABLE_UNITS)
+                elif format == 'thr':
+                    dumpThr("%s%s.thr" % (DATA_PATH, name), chains)
+                elif format == 'xy':
+                    pass  # FIX: Implement x,y files
 
         # Estimate the amount of time it will take to draw
         seconds, distance, pointCount = Chains.estimateMachiningTime(chains, boundingBox, MACHINE_FEED, MACHINE_ACCEL)
@@ -99,7 +113,7 @@ def drawPage():
         drawinfo = 'Draw time %s &nbsp;&nbsp;&nbsp; %.1f feet &nbsp;&nbsp;&nbsp; Points %d' % (timedelta(0, int(seconds)), distance / 12.0, pointCount)
 
         # Make the form
-        editor = template('draw-form', sandable=sandable, dialog=d.html(), drawinfo=drawinfo, help=help)
+        editor = template('draw-form', sandable=sandable, dialog=d.html(), drawinfo=drawinfo, help=help, playlists=playlists)
     else:
         errors = '"%s" is not a valid drawing method!' % sandable
 

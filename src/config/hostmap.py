@@ -6,4 +6,5 @@ hostmap = {
     'sandtable4': 'version3',
     'rehorst': 'rehorst',
     'pi4': 'version4',
+    'pi5': 'version5',
 }

@@ -1,7 +1,7 @@
 from bottle import request, route, get, post, template, SimpleTemplate
 import os
 import logging
-from Sand import PICTURE_PATH, CLIPART_PATH, MOVIE_SCRIPT_PATH, STORE_PATH, MOVIE_OUTPUT_PATH
+from Sand import PICTURE_PATH, CLIPART_PATH, THETARHO_PATH, MOVIE_SCRIPT_PATH, STORE_PATH, MOVIE_OUTPUT_PATH
 from cgistuff import cgistuff
 
 
@@ -48,6 +48,18 @@ class ftClipart(ftBase):
         os.rename(os.path.join(path, f + '.' + exts[-1]), os.path.join(path, newName + '.' + exts[-1]))
         return (True, 'Renamed')
 
+
+class ftThetaRho(ftBase):
+    def __init__(self):
+        self.path = THETARHO_PATH
+        self.columns = 6
+        self.filter = ['thr']
+        self.allowUpload = True
+
+    def imgFunc(self, f, fn, p):
+        return """<button type="button" class="filer" onclick='mySubmit("draw", "method","Sisyphus", "filename","%s")'>
+               <img src="images/thr.png" width="80">
+               </button>""" % fn
 
 class ftScripts(ftBase):
     def __init__(self):
@@ -101,6 +113,7 @@ class ftDrawings(ftBase):
 filetypes = {
     'Pictures':         ftPictures(),
     'Clipart':          ftClipart(),
+    'Sisyphus':         ftThetaRho(),
     'Movie Scripts':    ftScripts(),
     'Movies':           ftMovies(),
     'Saved Drawings':   ftDrawings(),
@@ -142,8 +155,9 @@ def filerPage():
         logging.info('name: %s, extension: %s' % (name, ext))
         logging.info('path: ' + path)
         if ext[1:] in filetype.filter and filetype.allowUpload:
-            logging.info('saving picture to: %s%s%s ' % (path, name, ext))
-            fUpload.save('%s%s%s' % (path, name, ext))
+            fullName = os.path.join(path, name + ext)
+            logging.info('saving picture to: %s' % fullName)
+            fUpload.save(fullName, overwrite=True)
 
     # Query and display the contents of the directory
     dirlist = os.listdir(path)

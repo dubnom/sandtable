@@ -8,7 +8,6 @@ from machine import Machine
 
 
 POSITION_POLL_FREQ = 30     # Poll for status every 30 instructions
-POSITION_POLL_SECS = 2.     # Or every 2. seconds
 
 
 class machiner(Machine):
@@ -40,6 +39,11 @@ class machiner(Machine):
         if fullInit:
             initialize += params['init']
 
+        logging.info('Waiting for Grbl to be ready')
+        while not self.reader.ready:
+            time.sleep(.2)
+        logging.info('Grbl ready')
+            
         for i in initialize:
             self.send(i)
 
@@ -51,20 +55,25 @@ class machiner(Machine):
             rounding = 0
             self.send('G21')
         self.send('F%g' % feed)
-        self.count = 0
         for chain in chains:
             for point in chain:
-                s = 'G1X%gY%g' % (round(point[0], 1), round(point[1], 1))
+                s = 'G1X%gY%g' % (round(point[0], rounding), round(point[1], rounding))
                 self.send(s)
-                self.count += 1
         self.send('M2')
 
     def home(self):
-        self.send('G28.2X0Y0')
+        self.send('$X')
+        self.send('G54')
+        self.send('G92.1')
+        self.send('G91')
+        self.send('G0X%gY%g' % (-10*60, -10*60))    # FIX: Remove hardcoded values
+        self.send('G0X5Y5')                         # FIX: hardcoded, backoff
+        self.send('G90')
+        self.send('G92 X0 Y0 Z0')
 
     def halt(self):
         self.flush()
-        self.send("abort")
+        #self.send("abort")
 
     def stop(self):
         self.writer.stop()
@@ -76,10 +85,11 @@ class ReadThread(Thread):
     def __init__(self, machine, ser):
         self.machine = machine
         self.ser = ser
+        self.ready = False
         super(ReadThread, self).__init__()
 
     def run(self):
-        reStatus = re.compile(r'^<(Idle|Run),MPos:([\d.-]+),([\d.-]+),([\d.-]+),(.*)>$')
+        reStatus = re.compile(r'^<(Idle|Run),WPos:([\d.-]+),([\d.-]+),([\d.-]+)(.*)>$')
 
         logging.info("Read thread active")
         self.running = True
@@ -87,30 +97,33 @@ class ReadThread(Thread):
             line = self.ser.readline().decode(encoding='utf-8').strip()
             if len(line):
                 # Parse the lines for status here
-                try:
-                    # Parse status reports
-                    match = reStatus.match(line)
-                    if match:
-                        logging.warning('Matched %s' % str(match.groups()))
-                        status = match.groups()[0]
-                        self.machine.pos[0] = float(match.groups()[1])
-                        self.machine.pos[1] = float(match.groups()[2])
-                        self.machine.ready = status == 'Idle'
+                if line.startswith('Grbl'):
+                    self.ready = True
+                else:
+                    try:
+                        # Parse status reports
+                        match = reStatus.match(line)
+                        if match:
+                            logging.warning('Matched %s' % str(match.groups()))
+                            status = match.groups()[0]
+                            self.machine.pos[0] = float(match.groups()[1])
+                            self.machine.pos[1] = float(match.groups()[2])
+                            self.machine.ready = status == 'Idle'
 
-                    # Parse responses
-                    elif line == 'ok':
-                        self.machine.queueDepth -= 1
-                        logging.warning( "ok: %4d" % self.machine.queueDepth )
+                        # Parse responses
+                        elif line == 'ok':
+                            self.machine.queueDepth -= 1
+                            logging.warning( "ok: %4d" % self.machine.queueDepth )
 
-                    elif line.startswith('error'):
-                        self.machine.queueDepth -= 1
-                        logging.error( "error: %04d %s" % line )
+                        elif line.startswith('error'):
+                            self.machine.queueDepth -= 1
+                            logging.error( "error: %04d %s" % line )
 
-                    # Everything else
-                    else:
-                        logging.warning("Received: %4d %s" % (self.machine.queueDepth, line))
-                except (ValueError, TypeError):
-                    logging.warning("Couldn't parse: %s" % line)
+                        # Everything else
+                        else:
+                            logging.warning("Received: %4d %s" % (self.machine.queueDepth, line))
+                    except (ValueError, TypeError):
+                        logging.warning("Couldn't parse: %s" % line)
         logging.info("Read thread exiting")
 
     def stop(self):
@@ -138,11 +151,14 @@ class WriteThread(Thread):
                 self.queue.task_done()
                 logging.warning(" Writing %4d:%s" % (self.machine.queueDepth, data))
 
+                # Pause a bit if writing to the eeprom or resetting
+                if data.startswith('$'):
+                    time.sleep(2.)
+
                 # Ask for the machine's status periodically
                 self.num += 1
                 if self.num % POSITION_POLL_FREQ == 0:
-                    #self._getStatus()
-                    pass
+                    self._getStatus()
             except Empty:
                 self._getStatus()
 
@@ -150,7 +166,7 @@ class WriteThread(Thread):
 
     def _getStatus(self):
         self.num = 0
-        self.ser.write(bytes('?\r', encoding='utf-8'))
+        self.ser.write(bytes('?', encoding='utf-8'))
 
     def stop(self):
         self.running = False

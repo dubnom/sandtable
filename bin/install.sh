@@ -15,6 +15,7 @@
 # Set st_led to one of the following:
 #  DotStar
 #  FadeCandy
+#  NeoPixel
 #  OPC
 #  None
 st_led=DotStar
@@ -139,6 +140,12 @@ elif [ "$st_led" = "OPC" ];
 then
     # FIX: OPC not yet done
     echo ERROR: OPC Install not yet supported
+
+# Neopixels
+elif [ "$st_led" = "NeoPixel" ];
+then
+    pip3 install rpi_ws281x
+    pip3 install adafruit-circuitpython-neopixel
 
 # None
 elif [ "$st_led" != "None" ];

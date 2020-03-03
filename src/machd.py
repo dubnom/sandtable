@@ -30,6 +30,8 @@ class MyHandler(socketserver.StreamRequestHandler):
             self.run(data)
         elif command == 'halt':
             self.machine.halt()
+        elif command == 'home':
+            self.machine.home()
         elif command == 'restart':
             self.restart()
 

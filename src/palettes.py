@@ -74,7 +74,7 @@ class PaletteHue(Palette):
     def __init__(self, params):
         try:
             self.hue, b, s = LedsBase.RGBtoHSB(params.color)
-        except TypeError:
+        except (TypeError, AttributeError):
             self.hue = randint(0, 359)
 
     def getColors(self, limit=7):

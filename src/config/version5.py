@@ -13,7 +13,7 @@ TABLE_WIDTH         = 60.0
 TABLE_LENGTH        = 60.0
 
 LED_DRIVER          = "LedsDS"
-LED_PARAMS          = None
+LED_PARAMS          = { 'brightness': .5 }
 LED_COLUMNS         = 72 
 LED_ROWS            = 72
 LED_PERIOD          = 1.0 / 45.0

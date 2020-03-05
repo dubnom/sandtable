@@ -41,8 +41,8 @@ ln -s $PWD /home/sandtable/
 
 cd /var/www/sandtable
 mkdir store
-mkdir thetarho
-chown -R www-data pictures clipart scripts movies store data thetarho
+mkdir thr
+chown -R www-data pictures clipart scripts movies store data thr
 
 # Update /etc/rc.local to run SandTable services
 if grep -q /var/www/sandtable/bin/rc.sandtable "/etc/rc.local";

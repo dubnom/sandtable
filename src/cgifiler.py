@@ -1,7 +1,7 @@
 from bottle import request, route, get, post, template, SimpleTemplate
 import os
 import logging
-from Sand import PICTURE_PATH, CLIPART_PATH, THETARHO_PATH, MOVIE_SCRIPT_PATH, STORE_PATH, MOVIE_OUTPUT_PATH
+from Sand import PICTURE_PATH, CLIPART_PATH, THR_PATH, MOVIE_SCRIPT_PATH, STORE_PATH, MOVIE_OUTPUT_PATH
 from cgistuff import cgistuff
 
 
@@ -49,9 +49,9 @@ class ftClipart(ftBase):
         return (True, 'Renamed')
 
 
-class ftThetaRho(ftBase):
+class ftSisyphus(ftBase):
     def __init__(self):
-        self.path = THETARHO_PATH
+        self.path = THR_PATH
         self.columns = 6
         self.filter = ['thr']
         self.allowUpload = True
@@ -113,7 +113,7 @@ class ftDrawings(ftBase):
 filetypes = {
     'Pictures':         ftPictures(),
     'Clipart':          ftClipart(),
-    'Sisyphus':         ftThetaRho(),
+    'Sisyphus':         ftSisyphus(),
     'Movie Scripts':    ftScripts(),
     'Movies':           ftMovies(),
     'Saved Drawings':   ftDrawings(),

@@ -8,9 +8,11 @@ class Leds(LedsBase):
 
     def __init__(self, rows, cols, mapping, params):
         self.mapping = mapping
+        self.params = params
         LedsBase.__init__(self, rows, cols)
 
     def connect(self):
+        brightness = self.params.get( 'brightness', 1. ) if self.params else 1. 
         self.strip = dotstar.DotStar(board.SCK, board.MOSI, self.count, auto_write=False)
 
     def refresh(self):

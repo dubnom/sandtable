@@ -3,6 +3,8 @@ import socketserver
 
 
 class StoppableTCPServer(socketserver.TCPServer):
+    allow_reuse_address = True
+
     def server_bind(self):
         socketserver.TCPServer.server_bind(self)
         self.socket.settimeout(1)

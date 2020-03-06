@@ -70,6 +70,9 @@ class machiner(Machine):
         self.send('G0X5Y5')                         # FIX: hardcoded, backoff
         self.send('G90')
         self.send('G92 X0 Y0 Z0')
+        #time.sleep(10.)     # FIX: This sucks
+        #self.send(chr(24))
+        #self.send('$X')
 
     def halt(self):
         self.flush()
@@ -152,7 +155,7 @@ class WriteThread(Thread):
                 logging.warning(" Writing %4d:%s" % (self.machine.queueDepth, data))
 
                 # Pause a bit if writing to the eeprom or resetting
-                if data.startswith('$'):
+                if data.startswith(('$', chr(24))):
                     time.sleep(2.)
 
                 # Ask for the machine's status periodically

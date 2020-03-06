@@ -22,16 +22,18 @@ LED_MAPPING         = None
 
 MACHINE             = "grbl"
 MACHINE_UNITS       = "mm"
-MACHINE_FEED        = 200.0 * 60    # mm/minute
-MACHINE_ACCEL       = 8000.0        # 
+MACHINE_FEED        = 8000          # mm/minute
+MACHINE_ACCEL       = 1500          # mm/sec^2
 
 MACHINE_PARAMS = {
     'port': "/dev/ttyUSB0",
     'baud': 115200,
     'init': [
         "$10=2",                        # Only report the work position
-        "$120=%g" % MACHINE_FEED,       # X axis mm/minute
-        "$121=%g" % MACHINE_FEED,       # Y axis mm/minute
+        "$110=%g" % MACHINE_FEED,       # X axis mm/minute
+        "$111=%g" % MACHINE_FEED,       # Y axis mm/minute
+        "$120=%g" % MACHINE_ACCEL,      # X axis mm/sec^2
+        "$121=%g" % MACHINE_ACCEL,      # Y axis mm/sec^2
         "$130=%g" % (TABLE_WIDTH*10),   # X axis max travel mm
         "$131=%g" % (TABLE_LENGTH*10),  # Y axis max travel mm
         "$132=10",                      # Z axis max travel mm (bogus timeout number)

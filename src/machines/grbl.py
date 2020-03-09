@@ -8,7 +8,7 @@ from machine import Machine
 
 
 POSITION_POLL_FREQ = 30     # Poll for status every 30 instructions
-
+POSITION_POLL_TIME = 5      # Or every 5 seconds
 
 class machiner(Machine):
     """Driver for GRBL compatible controllers."""
@@ -146,7 +146,7 @@ class WriteThread(Thread):
         self.running = True
         while self.running:
             try:
-                data = self.queue.get()
+                data = self.queue.get(timeout=POSITION_POLL_TIME)
                 while self.machine.queueDepth > 5:
                     time.sleep(.1)
                 self.machine.queueDepth += 1

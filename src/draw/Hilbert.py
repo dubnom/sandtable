@@ -23,13 +23,14 @@ Read the Wikipedia article on [Hilbert curvers](http://en.wikipedia.org/wiki/Hil
 
     def __init__(self, width, length, ballSize, units):
         self.editor = [
-            DialogInt("depth",               "Depth of fractility",      default=2, min=1, max=7),
-            DialogYesNo("fit",                 "Auto-fit to table",        default=False),
+            DialogInt("depth",                  "Depth of fractility",      default=2, min=1, max=7),
+            DialogYesNo("fit",                  "Auto-fit to table",        default=False),
+            DialogYesNo("round",                "Rounded edges",            default=False),
             DialogBreak(),
-            DialogFloat("xOffset",             "X Origin",                 units=units, default=0.0),
-            DialogFloat("yOffset",             "Y Origin",                 units=units, default=0.0),
-            DialogFloat("width",               "Width (x)",                units=units, default=width),
-            DialogFloat("length",              "Length (y)",               units=units, default=length),
+            DialogFloat("xOffset",              "X Origin",                 units=units, default=0.0),
+            DialogFloat("yOffset",              "Y Origin",                 units=units, default=0.0),
+            DialogFloat("width",                "Width (x)",                units=units, default=width),
+            DialogFloat("length",               "Length (y)",               units=units, default=length),
         ]
 
     def generate(self, params):
@@ -42,7 +43,10 @@ Read the Wikipedia article on [Hilbert curvers](http://en.wikipedia.org/wiki/Hil
         bounds = [(params.xOffset, params.yOffset), (params.xOffset+params.width, params.yOffset+params.length)]
         if params.fit:
             return Chains.fit([self.chain], bounds)
-        return Chains.autoScaleCenter([self.chain], bounds)
+        chains = [self.chain]
+        if params.round:
+            chains = Chains.splines(chains)
+        return Chains.autoScaleCenter(chains, bounds)
 
     def _hilbert(self, x0, y0, xi, xj, yi, yj, n):
         if n <= 0:

@@ -155,7 +155,9 @@ class Demo(Thread):
             params.randomize(sand.editor)
             try:
                 chains = sand.generate(params)
-                t, d, p = Chains.estimateMachiningTime(chains, boundingBox, MACHINE_FEED, MACHINE_ACCEL)
+                pchains = chains.convertUnits(chains, TABLE_UNITS, MACHINE_UNITS)
+                pchains = chains.bound(chains, boundingBox)
+                t, d, p = Chains.estimateMachiningTime(pchains, MACHINE_FEED, MACHINE_ACCEL)
                 if DRAW_TIME_MIN <= t <= DRAW_TIME_MAX:
                     break
                 logging.info("Tried %s but time was %d:%02d" % (sand, int(t/60), int(t) % 60))

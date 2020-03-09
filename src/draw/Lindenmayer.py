@@ -1,5 +1,5 @@
 from sandable import Sandable
-from dialog import DialogInt, DialogFloat, DialogBreak, DialogStr
+from dialog import DialogInt, DialogFloat, DialogBreak, DialogStr, DialogYesNo
 from PolyLine import PolyLine
 from Chains import Chains
 
@@ -32,8 +32,6 @@ Special characters used in **Axiom** and **Rules**:
 * **[** - Push the current location onto a stack.
 * **]** - Draw an efficient, non-destructive path, back to a previously pushed location.
 
-#### Examples
-
 A simple **Axiom** that would draw a square is "F-F-F-F" with **Angle**=90 degrees.
 
 Another simple **Axiom** that draws a triangle is "A-A-A" with **Angle**=120 degrees.
@@ -56,32 +54,48 @@ Visually, this will start looking like a filled-in
 stepped pyramid.  Try higher values for **Repetitions** but realize that the drawing gets exponentially larger
 for ever increment. The final length of **Axiom**, and the number of points in the drawing, are limited
 to keep from running out of memory.
+
+#### Examples
+
+Name | Axiom | Angle | Rules
+--- | --- | --- | ---
+Koch Curve | F | 90 | F=F+F-F-F+F
+Koch Island | F+F+F+F | -90 | F=F+F-F-FF+F+F-F
+Koch Snowflake | F++F++F | 60 | F=F-F++F-F
+Sierpinski Triangle | F-G-G | 120 | F=F-G+F+G-F, G=GG
+Dragon Curve | FX | 90 | X=X+YF+, Y=-FX-Y
+Fractal Plant | X | 25 | X=F+[[X]-X]-F[-FX]+X, F=FF
+Rings | F-F-F-F | 90 | F=FF-F-F-F-F-F+F
+Hilbert Curve | X | -90 | X=-YF+XFX+FY-, Y=+XF-YFY-FX+
+Pentaplexity | F++F++F++F++F | 36 | F=F++F++F|F-F++F
 """
 
     def __init__(self, width, length, ballSize, units):
         self.editor = [
-            DialogInt("repetitions",     "Repetitions",          default=3, min=1, max=20),
-            DialogFloat("angle",           "Angle",                units="degrees", default=90.0),
+            DialogInt("repetitions",        "Repetitions",          default=3, min=1, max=20),
+            DialogFloat("heading",          "Initial heading",      units="degrees", default=0.0),
+            DialogFloat("angle",            "Angle",                units="degrees", default=90.0),
+            DialogYesNo("round",            "Rounded edges",        default=False),
             DialogBreak(),
-            DialogStr("axiom",           "Axiom",                length=30),
-            DialogStr("rule1",           "Rule 1",               length=30),
-            DialogStr("rule2",           "Rule 2",               length=30),
-            DialogStr("rule3",           "Rule 3",               length=30),
-            DialogStr("rule4",           "Rule 4",               length=30),
-            DialogStr("rule5",           "Rule 5",               length=30),
-            DialogStr("rule6",           "Rule 6",               length=30),
+            DialogStr("axiom",              "Axiom",                length=30),
+            DialogStr("rule1",              "Rule 1",               length=30),
+            DialogStr("rule2",              "Rule 2",               length=30),
+            DialogStr("rule3",              "Rule 3",               length=30),
+            DialogStr("rule4",              "Rule 4",               length=30),
+            DialogStr("rule5",              "Rule 5",               length=30),
+            DialogStr("rule6",              "Rule 6",               length=30),
             DialogBreak(),
-            DialogFloat("xOrigin",         "X Origin",             units=units, default=0.0),
-            DialogFloat("yOrigin",         "Y Origin",             units=units, default=0.0),
-            DialogFloat("width",           "Width",                units=units, default=width),
-            DialogFloat("length",          "Length",               units=units, default=length),
+            DialogFloat("xOrigin",          "X Origin",             units=units, default=0.0),
+            DialogFloat("yOrigin",          "Y Origin",             units=units, default=0.0),
+            DialogFloat("width",            "Width",                units=units, default=width),
+            DialogFloat("length",           "Length",               units=units, default=length),
         ]
-        self.MAX_LEN = 5000
+        self.MAX_LEN = 50000
 
     def generate(self, params):
         # Compile the rules
         rules = {}
-        for key in dir(params):
+        for key in params.keys():
             if key.startswith('rule'):
                 values = getattr(params, key).split('=')
                 if len(values) == 2:
@@ -92,6 +106,7 @@ to keep from running out of memory.
 
         # Convert the axiom into a polyline
         polyline = PolyLine()
+        polyline.turn(params.heading)
         methods = {'F': lambda: polyline.forward(1.0),
                    'A': lambda: polyline.forward(1.0),
                    'B': lambda: polyline.forward(1.0),
@@ -106,7 +121,11 @@ to keep from running out of memory.
             if char in methods:
                 methods[char]()
 
-        return Chains.autoScaleCenter([polyline.points], [(params.xOrigin, params.yOrigin), (params.width, params.length)])
+        chains = [polyline.points]
+        if params.round:
+            chains = Chains.splines(chains)
+        bounds = [(params.xOrigin, params.yOrigin), (params.width, params.length)]
+        return Chains.autoScaleCenter(chains, bounds)
 
     def _iterateAxiom(self, axiom=None, rules=None, repetitions=1):
         for repeat in range(0, repetitions):

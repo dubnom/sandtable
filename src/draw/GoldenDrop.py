@@ -1,6 +1,6 @@
 from math import radians, sin, cos, exp, pi, sqrt
 from sandable import Sandable
-from dialog import DialogFloat, DialogInt, DialogBreak
+from dialog import DialogFloat, DialogInt, DialogBreak, DialogYesNo
 from Chains import Chains
 
 
@@ -26,14 +26,15 @@ with me giving me equations, pointers, and ideas while I wrote this code.
         self.width = width
         self.length = length
         self.editor = [
-            DialogFloat("radius",          "Starting Radius",      units=units, default=min(width,length)/2., min=3., max=max(width,length)),
-            DialogFloat("angle",           "Phyllotaxic Angle",    units="degrees", default=137.51, min=1, max=180.0),
-            DialogFloat("reductionRate",   "Reduction Rate",       default=0.976, min=.85, max=.99),
-            DialogFloat("petalWidth",      "Petal Width",          units="degrees", default=15., min=5., max=90.),
-            DialogInt("iterations",        "Iterations",           default=100, min=1, max=500),
+            DialogFloat("radius",          "Starting Radius",       units=units, default=min(width,length)/2., min=3., max=max(width,length)),
+            DialogFloat("angle",           "Phyllotaxic Angle",     units="degrees", default=137.51, min=1, max=180.0),
+            DialogFloat("reductionRate",   "Reduction Rate",        default=0.976, min=.85, max=.99),
+            DialogFloat("petalWidth",      "Petal Width",           units="degrees", default=15., min=5., max=90.),
+            DialogInt("iterations",        "Iterations",            default=100, min=1, max=500),
+            DialogYesNo("round",           "Rounded edges",         default=False),
             DialogBreak(),
-            DialogFloat("xCenter",         "X Center",             units=units, default=width / 2.0),
-            DialogFloat("yCenter",         "Y Center",             units=units, default=length / 2.0),
+            DialogFloat("xCenter",         "X Center",              units=units, default=width / 2.0),
+            DialogFloat("yCenter",         "Y Center",              units=units, default=length / 2.0),
         ]
 
     def generate(self, params):
@@ -60,5 +61,8 @@ with me giving me equations, pointers, and ideas while I wrote this code.
             angle += params.angle
             radius *= reduction
 
-        return [chain]
+        chains = [chain]
+        if params.round:
+            chains = Chains.splines(chains)
+        return chains
 

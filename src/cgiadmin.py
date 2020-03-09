@@ -8,21 +8,11 @@ from Sand import TABLE_WIDTH, TABLE_LENGTH, TABLE_UNITS, BALL_SIZE,\
     MACH_LOG, LED_LOG, SERVER_LOG, SCHEDULER_LOG, MOVIE_STATUS_LOG,\
     VER_FILE
 import mach
+import convert
 import ledapi
 import schedapi
 import MovieStatus
 from cgistuff import cgistuff
-
-
-# FIX: This should be placed in a library
-_conversion = {'inches': 1, 'mm': 25.4, 'cm': 2.54}
-
-
-def convert(val, fromUnits, toUnits):
-    if fromUnits == toUnits:
-        return val
-    unitConv = _conversion[toUnits] / _conversion[fromUnits]
-    return val*unitConv
 
 
 @route('/admin/status')     # FIX: Remove this
@@ -46,8 +36,8 @@ def status():
                 status['pos'][1],
                 MACHINE_UNITS)])
             results.append(['Table Position', '%.2f, %.2f %s' % (
-                convert(status['pos'][0], MACHINE_UNITS, TABLE_UNITS),
-                convert(status['pos'][1], MACHINE_UNITS, TABLE_UNITS),
+                convert.convert(status['pos'][0], MACHINE_UNITS, TABLE_UNITS),
+                convert.convert(status['pos'][1], MACHINE_UNITS, TABLE_UNITS),
                 TABLE_UNITS)])
             results.append(['Drawing Percent', '%5.1f' % (100*status['percent'])])
     except Exception:

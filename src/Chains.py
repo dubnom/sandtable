@@ -417,28 +417,29 @@ class Chains():
             print('M2', file=f)
 
     @staticmethod
-    def estimateMachiningTime(chains, box, feed, accel):
+    def estimateMachiningTime(chains, feed, accel):
         """Estimate the amount time, distance, and points to draw the chains in sand"""
-        feed /= 60.0               # Feed is in inches/minute convert to inches/second
-        accelTime = feed / accel   # Time to accelerate to full speed v=at  (feed is in in/min, accel is in/sec)
+        feed /= 60.0               # Feed is in units/minute convert to units/second
+        accelTime = feed / accel   # Time to accelerate to full speed v=at
 
         # Distance to accelerate to full speed s=1/2at^2
-        accelDist = (accel * accelTime ** 2) / 2.0
+        accelDist = (accel * accelTime ** 2.) / 2.0
         twoDist = accelDist * 2.0
 
         time = 0.0
         distance = 0.0
         pointCount = 0
-        p0 = (0.0, 0.0)
-        for chain in Chains.bound(chains, box):
+        p0 = None
+        for chain in chains:
             for p1 in chain:
+                if p0:
+                    dist = math.sqrt((p1[0] - p0[0]) ** 2 + (p1[1] - p0[1]) ** 2)
+                    distance += dist
+                    if dist >= twoDist:
+                        time += accelTime + ((dist - twoDist) / feed) + accelTime
+                    else:
+                        time += 2.0 * math.sqrt(dist / accel)
                 pointCount += 1
-                dist = math.sqrt((p1[0] - p0[0]) ** 2 + (p1[1] - p0[1]) ** 2)
-                if dist >= twoDist:
-                    time += accelTime + ((dist - twoDist) / feed)
-                else:
-                    time += 2.0 * math.sqrt(dist / accel)
-                distance += dist
                 p0 = p1
         return time, distance, pointCount
 

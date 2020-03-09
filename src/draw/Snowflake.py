@@ -31,14 +31,14 @@ Depth | Probability | Size Decrease | Seed
 
     def __init__(self, width, length, ballSize, units):
         self.editor = [
-            DialogInt("depth",               "Depth of fractility",      default=2, max=10),
-            DialogFloat("branchProbability",   "Probability of branching", default=0.7, min=0.0, max=1.0),
-            DialogFloat("percent",             "Fractility size decrease", default=0.3),
-            DialogYesNo("round",               "Rounded crystals",         default=False),
-            DialogInt("seed",                "Random seed",              default=1, min=0, max=10000, rbutton=True),
+            DialogInt("depth",                  "Depth of fractility",      default=2, max=10),
+            DialogFloat("branchProbability",    "Probability of branching", default=0.7, min=0.0, max=1.0),
+            DialogFloat("percent",              "Fractility size decrease", default=0.3),
+            DialogYesNo("round",                "Rounded crystals",         default=False),
+            DialogInt("seed",                   "Random seed",              default=1, min=0, max=10000, rbutton=True),
             DialogBreak(),
-            DialogFloat("xCenter",             "X Center",                 units=units, default=width / 2.0),
-            DialogFloat("yCenter",             "Y Center",                 units=units, default=length / 2.0),
+            DialogFloat("xCenter",              "X Center",                 units=units, default=width / 2.0),
+            DialogFloat("yCenter",              "Y Center",                 units=units, default=length / 2.0),
         ]
         self.table = [(0.0, 0.0), (width, length)]
 

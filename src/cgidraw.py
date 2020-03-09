@@ -11,6 +11,7 @@ from cgistuff import cgistuff
 from dialog import Dialog
 from history import History, Memoize
 
+import convert
 import mach
 import schedapi
 
@@ -94,9 +95,14 @@ def drawPage():
                 Chains.makeSVG(chains, "%s%s.svg" % (DATA_PATH, name))
 
         # Estimate the amount of time it will take to draw
-        seconds, distance, pointCount = Chains.estimateMachiningTime(chains, boundingBox, MACHINE_FEED, MACHINE_ACCEL)
+        chains = Chains.bound(chains, boundingBox)
+        chains = Chains.convertUnits(chains, TABLE_UNITS, MACHINE_UNITS)
+        seconds, distance, pointCount = Chains.estimateMachiningTime(chains, MACHINE_FEED, MACHINE_ACCEL)
         help = '' if not sand.__doc__ else '&nbsp;&nbsp;&nbsp;&nbsp;<span class="navigation"><a href="dhelp/%s" target="_blank">Help!</a></span>' % sandable
-        drawinfo = 'Draw time %s &nbsp;&nbsp;&nbsp; %.1f feet &nbsp;&nbsp;&nbsp; Points %d' % (timedelta(0, int(seconds)), distance / 12.0, pointCount)
+        drawinfo = 'Draw time %s &nbsp;&nbsp;&nbsp; %.1f %s &nbsp;&nbsp;&nbsp; Points %d' % (
+                timedelta(0, int(seconds)),
+                convert.convert(distance, MACHINE_UNITS, TABLE_UNITS), TABLE_UNITS,
+                pointCount)
 
         # Make the form
         editor = template('draw-form', sandable=sandable, dialog=d.html(), drawinfo=drawinfo, help=help)

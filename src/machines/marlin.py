@@ -13,10 +13,13 @@ class machiner(Machine):
 
         # Open the serial port to connect to Marlin
         try:
-            self.ser = serial.Serial(params['port'], baudrate=params['baud'], rtscts=True, timeout=0.5)
+            self.ser = serial.Serial(params['port'], baudrate=params['baud'], rtscts=False, timeout=0.5)
         except Exception as e:
             logging.error(e)
             exit(0)
+
+        # Initialize the queue depth tracker
+        self.queueDepth = 0
 
         # Start the read thread
         self.reader = ReadThread(self, self.ser)
@@ -45,14 +48,10 @@ class machiner(Machine):
         self.send('M17')
         self.send('G1 F%g' % feed)
         self.send('G1 Z0')
-        self.count = 0
         for chain in chains:
             for point in chain:
                 s = 'G1 X%g Y%g' % (round(point[0], 1), round(point[1], 1))
                 self.send(s)
-                self.count += 1
-                if self.count % 10 == 0:
-                    self.send("M114")
         self.send('G1 Z1')
         self.send('M18')
         self.send("M114")
@@ -76,6 +75,7 @@ class ReadThread(Thread):
     def __init__(self, machine, ser):
         self.machine = machine
         self.ser = ser
+        self.ready = False
         super(ReadThread, self).__init__()
 
     def run(self):
@@ -87,15 +87,27 @@ class ReadThread(Thread):
             if len(line):
                 logging.debug("<"+line)
                 if line.startswith('ok'):
-                    pass
-                else:
-                    match = reStatus.match(line)
-                    if match:
-                        self.machine.pos[0] = float(match.groups()[0])
-                        self.machine.pos[1] = float(match.groups()[1])
-                        # Use the Z axis as a way of determining that a drawing has ended (0-busy, 1-ready)
-                        self.machine.ready = float(match.groups()[2]) > .5
+                    self.machine.queueDepth -=1
+                    logging.warning( "ok: %4d" % self.machine.queueDepth )
 
+                elif line.startswith('error'):
+                    self.machine.queueDepth -= 1
+                    logging.error( "error: %04d %s" % line )
+
+                else:
+                    try:
+                        match = reStatus.match(line)
+                        if match:
+                            self.machine.pos[0] = float(match.groups()[0])
+                            self.machine.pos[1] = float(match.groups()[1])
+                            # Use the Z axis as a way of determining that a drawing has ended (0-busy, 1-ready)
+                            self.machine.ready = float(match.groups()[2]) > .5
+
+                        # Everything else
+                        else:
+                            logging.warning("Received: %4d %s" % (self.machine.queueDepth, line))
+                    except (ValueError, TypeError):
+                        logging.warning("Couldn't parse: %s" % line)
         logging.info("Read thread exiting")
 
     def stop(self):
@@ -104,20 +116,40 @@ class ReadThread(Thread):
 
 class WriteThread(Thread):
     def __init__(self, machine, ser):
+        self.machine = machine
         self.ser = ser
         self.queue = machine.queue
+        self.num = 0
         super(WriteThread, self).__init__()
 
     def run(self):
         logging.info("Write thread active")
         self.running = True
         while self.running:
-            # FIX: Add conditional for controller readiness
-            data = self.queue.get()
-            logging.debug('%d %s' % (self.queue.qsize(), data))
-            self.ser.write(bytes(data+'\r', encoding='UTF-8'))
-            self.queue.task_done()
+            try:
+                data = self.queue.get(timeout=POSITION_POLL_TIME)
+                while self.machine.queueDepth > 10:
+                    time.sleep(.1)
+                self.machine.queueDepth += 1
+                self.ser.write(bytes(data+'\r', encoding='UTF-8'))
+                self.queue.task_done()
+                logging.warning(" Writing %4d:%s" % (self.machine.queueDepth, data))
+
+                # Pause a bit if writing to the eeprom or resetting
+                if data.startswith(('$', chr(24))):
+                    time.sleep(2.)
+
+                # Ask for the machine's status periodically
+                self.num += 1
+                if self.num % POSITION_POLL_FREQ == 0:
+                    self._getStatus()
+            except Empty:
+                self._getStatus()
         logging.info("Write thread exiting")
+
+    def _getStatus(self):
+        self.num = 0
+        self.ser.write(bytes('M114', encoding='utf-8'))
 
     def stop(self):
         self.running = False

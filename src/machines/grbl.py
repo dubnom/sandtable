@@ -107,7 +107,6 @@ class ReadThread(Thread):
                         # Parse status reports
                         match = reStatus.match(line)
                         if match:
-                            logging.warning('Matched %s' % str(match.groups()))
                             status = match.groups()[0]
                             self.machine.pos[0] = float(match.groups()[1])
                             self.machine.pos[1] = float(match.groups()[2])

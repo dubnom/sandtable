@@ -1,5 +1,5 @@
 import random
-from Sand import MACHINE_FEED, MACHINE_ACCEL, drawers
+from Sand import TABLE_UNITS, MACHINE_UNITS, MACHINE_FEED, MACHINE_ACCEL, drawers
 from sandable import Sandable, sandableFactory
 from Chains import Chains
 from dialog import DialogInt, DialogBreak, DialogFloat, Params
@@ -34,6 +34,8 @@ class Sander(Sandable):
             p = Params(sand.editor)
             p.randomize(sand.editor)
             chains = sand.generate(p)
-            t, d, p = Chains.estimateMachiningTime(chains, boundingBox, MACHINE_FEED, MACHINE_ACCEL)
+            pchains = Chains.bound(chains, boundingBox)
+            pchains = Chains.convertUnits(chains, TABLE_UNITS, MACHINE_UNITS)
+            t, d, p = Chains.estimateMachiningTime(pchains, MACHINE_FEED, MACHINE_ACCEL)
             if params.drawTimeMin <= t/60.0 <= params.drawTimeMax:
                 return chains

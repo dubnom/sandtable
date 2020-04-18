@@ -155,8 +155,8 @@ class Demo(Thread):
             params.randomize(sand.editor)
             try:
                 chains = sand.generate(params)
-                pchains = chains.convertUnits(chains, TABLE_UNITS, MACHINE_UNITS)
-                pchains = chains.bound(chains, boundingBox)
+                pchains = Chains.convertUnits(chains, TABLE_UNITS, MACHINE_UNITS)
+                pchains = Chains.bound(chains, boundingBox)
                 t, d, p = Chains.estimateMachiningTime(pchains, MACHINE_FEED, MACHINE_ACCEL)
                 if DRAW_TIME_MIN <= t <= DRAW_TIME_MAX:
                     break

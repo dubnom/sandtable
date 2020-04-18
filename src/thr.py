@@ -54,7 +54,7 @@ def loadThr(filename, xc=0, yc=0, aplus=0, multiplier=1):
             line = f.readline().strip()
             if len(line) == 0:
                 break
-            if line.startswith('#'):
+            if line.startswith('#') or line.startswith('/'):
                 continue
             parts = line.split(' ')
             angle, radius = float(parts[0])+aplus, float(parts[1])

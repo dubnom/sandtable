@@ -7,4 +7,5 @@ hostmap = {
     'rehorst': 'rehorst',
     'pi4': 'version4',
     'pi5': 'version5',
+    'kgst': 'versionKG',
 }

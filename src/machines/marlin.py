@@ -1,12 +1,19 @@
 import serial
 import logging
 from threading import Thread
+from queue import Empty
+import time
 import re
 from machine import Machine
 
 
+POSITION_POLL_FREQ = 30     # Poll for status every 30 instructions
+POSITION_POLL_TIME = 5      # Or every 5 seconds
+
 class machiner(Machine):
     """ Driver for Marlin compatible controllers."""
+
+    started = False
 
     def initialize(self, params, fullInit):
         logging.info('Trying to connect to Marlin controller.')
@@ -48,10 +55,14 @@ class machiner(Machine):
         self.send('M17')
         self.send('G1 F%g' % feed)
         self.send('G1 Z0')
+        count = 0
         for chain in chains:
             for point in chain:
                 s = 'G1 X%g Y%g' % (round(point[0], 1), round(point[1], 1))
                 self.send(s)
+                count += 1
+                if count % POSITION_POLL_FREQ == 0:
+                    self.send('M114')
         self.send('G1 Z1')
         self.send('M18')
         self.send("M114")
@@ -80,13 +91,15 @@ class ReadThread(Thread):
 
     def run(self):
         logging.info("Read thread active")
-        reStatus = re.compile(r'^X:([\d.-]+) Y:([\d.-]+) Z:([\d.-]+) E:([\d.-]+) Count X:([\d.-]+) Y:([\d.-]+) Z:([\d.-]+)$')
+        reStatus = re.compile(r'^X:([\d.-]+) Y:([\d.-]+) Z:([\d.-]+) E:([\d.-]+) .+$')
         self.running = True
         while self.running:
             line = self.ser.readline().decode(encoding='utf-8').strip()
             if len(line):
                 logging.debug("<"+line)
-                if line.startswith('ok'):
+                if line.startswith('Marlin'):
+                    self.machine.started = True
+                elif line.startswith('ok'):
                     self.machine.queueDepth -=1
                     logging.warning( "ok: %4d" % self.machine.queueDepth )
 
@@ -125,10 +138,12 @@ class WriteThread(Thread):
     def run(self):
         logging.info("Write thread active")
         self.running = True
+        while not self.machine.started:
+            time.sleep(.1)
         while self.running:
             try:
                 data = self.queue.get(timeout=POSITION_POLL_TIME)
-                while self.machine.queueDepth > 10:
+                while self.machine.queueDepth > 7:
                     time.sleep(.1)
                 self.machine.queueDepth += 1
                 self.ser.write(bytes(data+'\r', encoding='UTF-8'))
@@ -140,16 +155,17 @@ class WriteThread(Thread):
                     time.sleep(2.)
 
                 # Ask for the machine's status periodically
-                self.num += 1
-                if self.num % POSITION_POLL_FREQ == 0:
-                    self._getStatus()
+                #self.num += 1
+                #if self.num % POSITION_POLL_FREQ == 0:
+                #    self._getStatus()
             except Empty:
-                self._getStatus()
+                #self._getStatus()
+                pass
         logging.info("Write thread exiting")
 
     def _getStatus(self):
         self.num = 0
-        self.ser.write(bytes('M114', encoding='utf-8'))
+        self.ser.write(bytes('M114\r', encoding='utf-8'))
 
     def stop(self):
         self.running = False

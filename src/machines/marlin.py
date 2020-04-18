@@ -91,7 +91,7 @@ class ReadThread(Thread):
 
     def run(self):
         logging.info("Read thread active")
-        reStatus = re.compile(r'^X:([\d.-]+) Y:([\d.-]+) Z:([\d.-]+) E:([\d.-]+) .+$')
+        reStatus = re.compile(r'^X:([\d.-]+) Y:([\d.-]+) Z:([\d.-]+) .+$')
         self.running = True
         while self.running:
             line = self.ser.readline().decode(encoding='utf-8').strip()
@@ -114,7 +114,7 @@ class ReadThread(Thread):
                             self.machine.pos[0] = float(match.groups()[0])
                             self.machine.pos[1] = float(match.groups()[1])
                             # Use the Z axis as a way of determining that a drawing has ended (0-busy, 1-ready)
-                            self.machine.ready = float(match.groups()[2]) > .5
+                            self.machine.ready = 'Busy' if float(match.groups()[2]) > .5 else 'Idle'
 
                         # Everything else
                         else:

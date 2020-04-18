@@ -88,7 +88,7 @@ class TrueTypeTracer():
             if lastC:
                 try:
                     xoffset += kerns[(cmap[ord(lastC)], cmap[ord(c)])]
-                except (IndexError, KeyError):
+                except (IndexError, KeyError, TypeError):
                     pass
             lastC = c
 

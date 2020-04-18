@@ -72,7 +72,7 @@ Use the "Pictures" tab in the main navigation to more easily select photos.
 
         # Some images can't be loaded or operated on correctly
         # Loop through until we find one that works
-        for attempt, (url, ty) in enumerate(imageInfo):
+        for attempt, url in enumerate(imageInfo):
             try:
                 f = BytesIO(urllib.request.urlopen(url).read())
                 image = Image.open(f)

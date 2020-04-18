@@ -23,34 +23,31 @@ def googleImages(query, size=None, color=None, ty=None):
     tbs = '&tbs=' + ','.join(t) if len(t) else ''
 
     query = '+'.join(query.split())
-    url = "https://www.google.com/search?q="+query+"&source=lnms&tbm=isch"+tbs+"&sa=1&biw=1200&bih=357"
+    url = "https://www.google.com/search?q="+query+"&source=lnms&tbm=isch"+tbs+"&sa=X&biw=1200&bih=357"
 
     content = requests.get(url, headers=header).content
-    fileNames = re.findall('"ity":"(.*?)","oh":[0-9]*,"ou":"(.*?)"', content.decode())
+    fileNames = re.findall('\\["(http.?://.*?)",(\d+),(\d+)]', content.decode())
 
     imageInfo = []
     pat = re.compile('(\\\\u[0-9a-fA-F]{4})')
-    for ty, fn in fileNames:
-        fn = pat.sub(lambda x: chr(int(x.group(1)[3:], 16)), fn)
-        imageInfo.append((fn, ty.lower()))
+    for fn in fileNames:
+        imageInfo.append(fn[0])
     return imageInfo
 
 
-def fetchImage(url, fileType, directory, fileName):
+def fetchImage(url, directory, fileName):
     req = urllib.request.Request(url, headers=header)
     raw_img = urllib.request.urlopen(req).read()
 
-    if fileType not in ["jpg", "jpeg", "gif", "png"]:
-        fileType = 'jpg'
-    with open(os.path.join(directory, fileName+"."+fileType), 'wb') as f:
+    with open(os.path.join(directory, fileName), 'wb') as f:
         f.truncate()
         f.write(raw_img)
 
 
 def fetchImages(imageInfo, directory, fileName, counter=0):
-    for url, fileType in imageInfo:
+    for url in imageInfo:
         try:
-            fetchImage(url, fileType, directory, "%s%04d" % (fileName, counter))
+            fetchImage(url, directory, "%s%04d" % (fileName, counter))
             counter += 1
         except Exception:
             pass

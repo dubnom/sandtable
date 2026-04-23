@@ -1,0 +1,13 @@
+[Unit]
+Description=SandTable Scheduler
+
+[Service]
+WorkingDirectory=/home/dubnom/sandtable
+ExecStart=/home/dubnom/.venv/bin/python src/scheduler.py
+Restart=always
+RestartSec=10
+SyslogIdentifier=sandtable-scheduler
+User=sandtable
+
+[Install]
+WantedBy=multi-user.target

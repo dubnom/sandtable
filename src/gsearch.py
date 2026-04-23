@@ -11,6 +11,31 @@ header = {'User-Agent': "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 
 # Color:    Any (None), color, gray, trans
 # Type:     Any (None), face, photo, clipart, lineart
 
+CLIENT_ID = "463291698813-feu7uujf39986hmbq37m9k1fv9js6b2e.apps.googleusercontent.com"
+API_KEY = "AIzaSyCQV7ZgJYmqs50OpjFPeSHwfy3U8K3czJI"
+PROJECT_ID = "project=white-rune-147815"
+CX = "012131163717407201601:uikkqitby9c"
+CLIENT_ID = "463291698813-nbpkrfdunojp2g1g0u578r24m1u9vnsf.apps.googleusercontent.com"
+CLIENT_ID = "361169336202-fkc96ihd7063h8j0a2bhhci0lrqb8opq.apps.googleusercontent.com"
+API_KEY = "AIzaSyB8X3xEwwNwA7OWx88571tsvfjrSd-bAlU"
+PROJECT_NUMBER = "361169336202"
+PROJECT_ID = "sandtable-493918"
+API_KEY = "AIzaSyBDkoJhyp_pwewYWr5YsshfSun_fxKB6Ag"
+API_KEY = "AIzaSyB7cskNuztzp9GZrUvZBYYkY9ZH8U3ibqE"
+
+def gis(query):
+    from google_images_search import GoogleImagesSearch
+    giss = GoogleImagesSearch(API_KEY, CX)
+
+    params = {
+            'q': query,
+            'num': 10,
+    }
+    giss.search(search_params=params)
+    for image in gis.results():
+        print(image.url)
+
+print(gis("puppies"))
 
 def googleImages(query, size=None, color=None, ty=None):
     t = []

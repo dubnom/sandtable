@@ -1,0 +1,13 @@
+[Unit]
+Description=SandTable Machine Handler
+
+[Service]
+WorkingDirectory=/home/dubnom/sandtable
+ExecStart=/home/dubnom/.venv/bin/python src/machd.py
+Restart=always
+RestartSec=10
+SyslogIdentifier=sandtable-machine
+User=sandtable
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,14 @@
+[Unit]
+Description=SandTable Web Service
+
+[Service]
+WorkingDirectory=/home/dubnom/sandtable
+ExecStart=/home/dubnom/.venv/bin/python src/sandtable.py
+Restart=always
+RestartSec=10
+SyslogIdentifier=sandtable-server
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+User=sandtable
+
+[Install]
+WantedBy=multi-user.target

@@ -21,8 +21,6 @@ from sandable import sandableFactory
 from dialog import Params
 from Chains import Chains
 from history import History
-import board
-import digitalio
 import mach
 from ledable import ledPatternFactory
 import ledapi
@@ -33,8 +31,6 @@ DRAW_TIME_MIN = 18        # 18 Seconds
 DRAW_TIME_MAX = 25*60     # 25 minutes
 PROX_SWITCH_SECS = 8         # Number of seconds to wait for taps
 
-PROX_PIN = board.D18
-PROX_PIN.direction = digitalio.Direction.INPUT
 
 # Advanced job scheduler setup
 
@@ -116,18 +112,6 @@ class Demo(Thread):
         if self._state == self.RUNNING:
             self._state = self.HALT
 
-    def proxCallback(self, taps):
-        if taps == 2:
-            self._lightsRandom()
-        elif taps == 3:
-            self.demoOnce()
-        elif taps == 4:
-            self.demoContinuous()
-        elif taps == 5:
-            self.demoHalt()
-        else:
-            logging.info("Number of taps: %d" % taps)
-
     def stop(self):
         self._state = self.DIE
 
@@ -178,39 +162,6 @@ class Demo(Thread):
         with mach.mach() as e:
             e.stop()
 
-
-class ProxSwitchThread(Thread):
-    """
-        GPIO listener thread for proximity switch
-        callback - gets passed the number of taps
-        window - the timeframe in seconds
-    """
-
-    def __init__(self, callback, window=PROX_SWITCH_SECS):
-        super(ProxSwitchThread, self).__init__()
-        self.pin = PROX_PIN
-        self.window = window
-        self.callback = callback
-        self.q = deque(maxlen=window)
-
-    def run(self):
-        logging.info("ProxSwitchThread active")
-        self.running = True
-        while self.running:
-            t = time.time()
-            if self.pin.value:
-                self.q.append(t)
-            if len(self.q) and t - self.q[0] >= self.window:
-                self.callback(len(self.q))
-                self.q.clear()
-            time.sleep(POLLING_DELAY)
-
-        logging.info("ProxSwitchThread exiting")
-
-    def stop(self):
-        self.running = False
-
-
 class MyHandler(socketserver.StreamRequestHandler):
     def setup(self):
         super(MyHandler, self).setup()
@@ -254,10 +205,6 @@ if __name__ == "__main__":
     demo = Demo()
     demo.start()
 
-    # Start listening for taps from the proximity switch
-    proxSwitch = ProxSwitchThread(demo.proxCallback)
-    proxSwitch.start()
-
     # Start the background job scheduler (which potentially means start servicing jobs)
     scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults, timezone=utc)
     scheduler.start()
@@ -296,7 +243,6 @@ if __name__ == "__main__":
     logging.info("Out of server loop!")
 
     scheduler.shutdown()
-    proxSwitch.stop()
     demo.stop()
 
     exit(1)

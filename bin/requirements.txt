@@ -1,0 +1,12 @@
+future
+pillow
+evdev
+bottle
+cython
+pypotrace
+shapely
+apscheduler
+sqlalchemy
+fontTools
+markdown
+gphoto2

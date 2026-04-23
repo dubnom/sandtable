@@ -1,33 +1,27 @@
 from shapely.geometry import Polygon, MultiPolygon
-
+from shapely.ops import unary_union
 
 def shrinky(chains, iterations, amount):
     for i in range(iterations):
-        allPolys = None
+        allPolys = Polygon()
         for chain in chains:
             if len(chain) < 3:
                 continue
             p = Polygon(chain)
             try:
-                allPolys = p if not allPolys else allPolys.union(p)
+                allPolys = allPolys.union(p)
             except Exception:
                 pass
 
-        if not allPolys:
-            return
-
-        if allPolys.type == 'Polygon':
-            allPolys = MultiPolygon([allPolys])
-
         newChains = []
-        for poly in allPolys:
+        def recursiveShrink(poly):
             buf = poly.buffer(amount)
-            if buf.type == 'MultiPolygon':
-                for poly2 in buf:
-                    if poly2.exterior:
-                        newChains.append([p for p in poly2.exterior.simplify(0.1, True).coords])
+            if buf.geom_type == 'MultiPolygon':
+                for poly2 in buf.geoms:
+                    recursiveShrink(poly2)
             else:
                 if buf.exterior:
                     newChains.append([p for p in buf.exterior.simplify(0.1, True).coords])
+        recursiveShrink(allPolys)
         chains = newChains
         yield newChains

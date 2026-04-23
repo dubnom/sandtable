@@ -34,7 +34,7 @@ class ftClipart(ftBase):
     def __init__(self):
         self.path = CLIPART_PATH
         self.columns = 6
-        self.filter = ['dxf']
+        self.filter = ['svg']
         self.allowUpload = True
 
     def imgFunc(self, f, fn, p):

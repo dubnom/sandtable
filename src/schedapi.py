@@ -17,6 +17,7 @@ class schedapi():
         return False
 
     def command(self, command, data=None):
+        return  # TODO: THIS IS WEIRD
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.connect((self.hostName, self.portNumber))
             sock.sendall(bytes(json.dumps((command, data))+'\n', encoding='utf-8'))

@@ -1,6 +1,6 @@
 from bottle import request, route, post, get, template
 import signal
-from cgi import escape
+from html import escape
 import os
 
 from Sand import TABLE_WIDTH, TABLE_LENGTH, TABLE_UNITS, BALL_SIZE,\

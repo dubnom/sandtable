@@ -34,7 +34,7 @@ sections of the drawing that aren't connected to one-another.
 
     def __init__(self, width, length, ballSize, units):
         self.editor = [
-            DialogFile("filename",            "File Name",                default=CLIPART_PATH, filter='.dxf'),
+            DialogFile("filename",            "File Name",                default=CLIPART_PATH, filter='.svg'),
             DialogInt("iterations",          "Number of Fill Iterations", default=0, min=0, max=60),
             DialogFloat("decrement",           "Fill Decrement",           units=units, default=0.5, min=0.0, max=inchesToUnits(2.0, units)),
             DialogFloat("ballSize",            "Ball Size",                units=units, default=ballSize, min=inchesToUnits(0.25, units)),
@@ -46,28 +46,15 @@ sections of the drawing that aren't connected to one-another.
         ]
 
     def generate(self, params):
-        chains = []
         filename = params.filename
         if filename.endswith('.dxf'):
-            cam.read_DXF(filename)
+            chains = cam.read_DXF(filename)
         elif filename.endswith('.svg'):
-            cam.read_SVG(filename)
+            chains = cam.read_SVG(filename)
         else:
-            return chains
+           return []
 
-        for layer in range((len(cam.boundarys)-1), -1, -1):
-            if cam.toolpaths[layer] == []:
-                path = cam.boundarys[layer]
-            else:
-                path = cam.toolpaths[layer]
-            for segment in range(len(path)):
-                chain = []
-                for vertex in range(0, len(path[segment])):
-                    x = path[segment][vertex][cam.X]
-                    y = path[segment][vertex][cam.Y]
-                    chain.append((x, y))
-                chains.append(chain)
-
+        chains = Chains.scale(chains, [1, -1])
         chains = Chains.autoScaleCenter(chains, [(0.0, 0.0), (params.width, params.length)])
 
         if params.iterations:

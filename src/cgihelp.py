@@ -1,5 +1,5 @@
 from bottle import route, get, template
-from cgi import escape
+from html import escape
 from Sand import drawers
 from sandable import sandableFactory
 

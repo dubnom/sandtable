@@ -72,13 +72,13 @@ Pentaplexity | F++F++F++F++F | 36 | F=F++F++F|F-F++F
 
     def __init__(self, width, length, ballSize, units):
         self.editor = [
-            DialogInt("repetitions",        "Repetitions",          default=3, min=1, max=20),
+            DialogInt("repetitions",        "Repetitions",          default=3, min=1, max=10),
             DialogFloat("heading",          "Initial heading",      units="degrees", default=0.0),
             DialogFloat("angle",            "Angle",                units="degrees", default=90.0),
             DialogYesNo("round",            "Rounded edges",        default=False),
             DialogBreak(),
-            DialogStr("axiom",              "Axiom",                length=30),
-            DialogStr("rule1",              "Rule 1",               length=30),
+            DialogStr("axiom",              "Axiom",                default='F', length=30),
+            DialogStr("rule1",              "Rule 1",               default='F=F+F-F-F+F', length=30),
             DialogStr("rule2",              "Rule 2",               length=30),
             DialogStr("rule3",              "Rule 3",               length=30),
             DialogStr("rule4",              "Rule 4",               length=30),

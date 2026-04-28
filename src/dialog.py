@@ -107,6 +107,9 @@ class DialogField:
             return (self.max, "Too high, set to maximum")
         return None
 
+    def isRandomizable(self):
+        return False
+
 
 class DialogFloat(DialogField):
     def __init__(self, name, prompt, units='', default=0.0, min=None, max=None, randRange=None, format='%g', rbutton=False, slider=True, step=None, rRound=4):
@@ -139,6 +142,9 @@ class DialogFloat(DialogField):
         if self.randRange:
             return round(random.triangular(self.randRange[0], self.randRange[1], self.default), self.rRound)
         return None if self.min is None or self.max is None else round(random.triangular(self.min, self.max, self.default), self.rRound)
+
+    def isRandomizable(self):
+        return self.randRange is not None or (self.min is not None and self.max is not None)
 
 
 class DialogFloats(DialogField):
@@ -179,6 +185,9 @@ class DialogFloats(DialogField):
             return [round(random.triangular(self.min, self.max), self.rRound) for i in range(count)]
         return None
 
+    def isRandomizable(self):
+        return self.randRange is not None or (self.minNums is not None and self.maxNums is not None and self.min is not None and self.max is not None)
+
 
 class DialogInt(DialogField):
     def __init__(self, name, prompt, units='', default=0, min=None, max=None, randRange=None, format='%d', rbutton=False, slider=True):
@@ -209,6 +218,9 @@ class DialogInt(DialogField):
         if self.randRange:
             return int(random.triangular(self.randRange[0], self.randRange[1], self.default))
         return None if self.min is None or self.max is None else int(random.triangular(self.min, self.max, self.default))
+
+    def isRandomizable(self):
+        return self.randRange is not None or (self.min is not None and self.max is not None)
 
 
 class DialogInts(DialogField):
@@ -246,6 +258,9 @@ class DialogInts(DialogField):
             return [random.randint(self.min, self.max) for i in range(random.randint(self.minNums, self.maxNums))]
         return None
 
+    def isRandomizable(self):
+        return self.randRange is not None or (self.minNums is not None and self.maxNums is not None and self.min is not None and self.max is not None)
+
 
 class DialogStr(DialogField):
     def __init__(self, name, prompt, units='', default='', length=20):
@@ -281,6 +296,9 @@ class DialogList(DialogField):
     def _random(self):
         return self.list[random.randint(0, len(self.list) - 1)]
 
+    def isRandomizable(self):
+        return bool(self.list)
+
 
 class Dialog2Choices(DialogList):
     def __init__(self, name, prompt, units='', default=False, list=['True', 'False']):
@@ -296,7 +314,7 @@ class Dialog2Choices(DialogList):
         return value == self.list[1]
 
     def _random(self):
-        return random.randint(0, 1)
+        return bool(random.randint(0, 1))
 
 
 class DialogYesNo(Dialog2Choices):
@@ -381,6 +399,9 @@ class DialogFile(DialogField):
                 return os.path.join(path, f)
             path = os.path.join(path, f)
 
+    def isRandomizable(self):
+        return True
+
 
 class DialogFont(DialogField):
     def __init__(self, name, prompt, default='', filter='', extensions=False):
@@ -419,6 +440,9 @@ class DialogFont(DialogField):
     def _random(self):
         fonts = self._getFonts()
         return fonts[random.randint(0, len(fonts) - 1)][1]
+
+    def isRandomizable(self):
+        return True
 
 
 class DialogFileList(DialogField):
@@ -462,6 +486,9 @@ class DialogFileList(DialogField):
         files = self._getFiles()
         return files[random.randint(0, len(files) - 1)][1] if files else self.default
 
+    def isRandomizable(self):
+        return bool(self._getFiles())
+
 
 class DialogMulti(DialogField):
     def __init__(self, name, prompt, default='', rows=5, cols=20):
@@ -498,6 +525,9 @@ class DialogColor(DialogField):
 
     def _random(self):
         return (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+
+    def isRandomizable(self):
+        return True
 
 
 class DialogBreak(DialogField):

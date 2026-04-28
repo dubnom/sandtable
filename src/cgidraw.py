@@ -1,4 +1,5 @@
 import base64
+from threading import Lock
 
 from flask import request, render_template, jsonify
 from datetime import timedelta
@@ -18,6 +19,28 @@ from history import History, Memoize
 import convert
 import mach
 import schedapi
+
+
+_previewRequestLock = Lock()
+_latestPreviewRequestBySid = {}
+
+
+def _set_latest_preview_request_id(sid, requestId):
+    with _previewRequestLock:
+        _latestPreviewRequestBySid[sid] = requestId
+
+
+def _is_latest_preview_request_id(sid, requestId):
+    # Requests without requestId are treated as non-cancelable legacy requests.
+    if requestId is None:
+        return True
+    with _previewRequestLock:
+        return _latestPreviewRequestBySid.get(sid) == requestId
+
+
+def _clear_latest_preview_request_id(sid):
+    with _previewRequestLock:
+        _latestPreviewRequestBySid.pop(sid, None)
 
 
 def _load_requested_sandable(form):
@@ -57,6 +80,7 @@ def _field_to_schema(field):
         'prompt': getattr(field, 'prompt', ''),
         'units': getattr(field, 'units', ''),
         'default': _json_safe(getattr(field, 'default', None)),
+        'randomizable': bool(field.isRandomizable()) if hasattr(field, 'isRandomizable') else False,
     }
 
     for key in ['min', 'max', 'slider', 'step', 'format', 'length', 'rows', 'cols', 'rbutton']:
@@ -95,8 +119,9 @@ def _params_payload(editor, params):
     return payload
 
 
-def _generate_chains_and_image(sandable, sand, params, boundingBox):
+def _generate_chains_and_image(sandable, sand, params, boundingBox, shouldSave=None):
     errors = None
+    cancelled = False
     memoize = Memoize()
     if CACHE_ENABLE and memoize.match(sandable, params):
         chains = memoize.chains()
@@ -106,9 +131,14 @@ def _generate_chains_and_image(sandable, sand, params, boundingBox):
         except SandException as e:
             errors = str(e)
             chains = []
+
+        if shouldSave is not None and not shouldSave():
+            cancelled = True
+            return chains, errors, cancelled
+
         Chains.saveImage(chains, boundingBox, IMAGE_FILE, IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_TYPE, clipToTable=True)
         memoize.save(sandable, params, chains)
-    return chains, errors
+    return chains, errors, cancelled
 
 
 def _draw_summary(chains, sandable):
@@ -130,7 +160,7 @@ def _draw_summary(chains, sandable):
     }
 
 
-def _api_prepare_draw(payload):
+def _api_prepare_draw(payload, shouldSave=None):
     method = payload.get('method', request.args.get('method', drawers[0]))
     sandable = _normalize_sandable(method)
     if not sandable:
@@ -152,9 +182,25 @@ def _api_prepare_draw(payload):
     action = payload.get('action', 'refresh')
     if action == 'random' or action == 'Random!':
         params.randomize(sand.editor)
+    elif action == 'random-field':
+        fieldName = payload.get('fieldName', '')
+        for field in sand.editor:
+            if getattr(field, 'name', '') != fieldName:
+                continue
+            value = field._random()
+            if value is not None:
+                params[fieldName] = value
+            break
 
     boundingBox = [(0.0, 0.0), (TABLE_WIDTH, TABLE_LENGTH)]
-    chains, errors = _generate_chains_and_image(sandable, sand, params, boundingBox)
+    chains, errors, cancelled = _generate_chains_and_image(sandable, sand, params, boundingBox, shouldSave=shouldSave)
+    if cancelled:
+        return {
+            'cancelled': True,
+            'method': sandable,
+            'action': action,
+        }, None, None
+
     summary = _draw_summary(chains, sandable)
     imageHash = params.hash()
 
@@ -298,6 +344,8 @@ def drawPreviewApi():
     state, errorResponse, status = _api_prepare_draw(payload)
     if errorResponse:
         return errorResponse, status
+    if state.get('cancelled'):
+        return jsonify({'status': 'cancelled'}), 409
 
     return jsonify(_api_response_from_state(state))
 
@@ -333,7 +381,7 @@ def drawLoadApi():
     params = d.getParams()
 
     boundingBox = [(0.0, 0.0), (TABLE_WIDTH, TABLE_LENGTH)]
-    chains, errors = _generate_chains_and_image(sandable, sand, params, boundingBox)
+    chains, errors, _ = _generate_chains_and_image(sandable, sand, params, boundingBox)
     summary = _draw_summary(chains, sandable)
     imageHash = params.hash()
 
@@ -485,7 +533,7 @@ def drawPage():
         boundingBox = [(0.0, 0.0), (TABLE_WIDTH, TABLE_LENGTH)]
 
         # Generate the chains
-        chains, genErrors = _generate_chains_and_image(sandable, sand, params, boundingBox)
+        chains, genErrors, _ = _generate_chains_and_image(sandable, sand, params, boundingBox)
         if genErrors:
             errors = genErrors
 
@@ -551,15 +599,38 @@ def drawPage():
 @socketio.on('draw:preview')
 def handle_preview(payload):
     """WebSocket handler for preview request (equivalent to POST /api/draw/preview)"""
-    state, errorResponse, status = _api_prepare_draw(payload)
+    payload = payload if isinstance(payload, dict) else {}
+    requestId = payload.get('requestId')
+    sid = request.sid
+    _set_latest_preview_request_id(sid, requestId)
+
+    state, errorResponse, status = _api_prepare_draw(
+        payload,
+        shouldSave=lambda: _is_latest_preview_request_id(sid, requestId)
+    )
+
+    if not _is_latest_preview_request_id(sid, requestId):
+        return
+
     if errorResponse:
         socketio.emit('draw:preview:response', {
             'error': errorResponse.get_json().get('error') if hasattr(errorResponse, 'get_json') else str(errorResponse),
             'status': status,
+            'requestId': requestId,
         })
         return
 
-    socketio.emit('draw:preview:response', _api_response_from_state(state, includeImageData=True))
+    if state.get('cancelled'):
+        return
+
+    response = _api_response_from_state(state, includeImageData=True)
+    response['requestId'] = requestId
+    socketio.emit('draw:preview:response', response)
+
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    _clear_latest_preview_request_id(request.sid)
 
 
 @socketio.on('draw:execute')

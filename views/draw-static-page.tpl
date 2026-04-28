@@ -65,6 +65,7 @@
     fields: [],
     params: {},
     realtime: true,
+    latestPreviewRequestId: 0,
   };
 
   const methodGrid = document.getElementById('methodGrid');
@@ -118,6 +119,33 @@
     }
   }
 
+  function renderDrawInfo(summary) {
+    const info = (summary && summary.drawinfo) ? String(summary.drawinfo) : '';
+    const helpPath = (summary && summary.helpUrl) ? String(summary.helpUrl) : '';
+
+    drawInfo.innerHTML = '';
+    if (!info && !helpPath) {
+      return;
+    }
+
+    if (info) {
+      drawInfo.appendChild(document.createTextNode(info));
+    }
+
+    if (helpPath) {
+      if (info) {
+        drawInfo.appendChild(document.createTextNode('    '));
+      }
+      const link = document.createElement('a');
+      link.href = buildUrl('/' + helpPath.replace(/^\/+/, ''));
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.className = 'navigation';
+      link.textContent = 'Help!';
+      drawInfo.appendChild(link);
+    }
+  }
+
   async function fetchJson(url, options) {
     const response = await fetch(url, options || {});
     const payload = await response.json();
@@ -127,6 +155,20 @@
       throw err;
     }
     return payload;
+  }
+
+  function valueForChoiceField(field, rawValue) {
+    const kind = field.kind;
+    const choices = field.choices || [];
+    if ((kind === 'DialogYesNo' || kind === 'DialogTrueFalse' || kind === 'DialogOnOff' || kind === 'Dialog2Choices') && choices.length >= 2) {
+      if (rawValue === true || rawValue === 1 || rawValue === '1' || rawValue === 'true' || rawValue === 'True') {
+        return choices[1];
+      }
+      if (rawValue === false || rawValue === 0 || rawValue === '0' || rawValue === 'false' || rawValue === 'False') {
+        return choices[0];
+      }
+    }
+    return rawValue;
   }
 
   function controlForField(field, value) {
@@ -141,11 +183,19 @@
       const select = document.createElement('select');
       select.dataset.fieldName = field.name;
       const choices = field.choices || [];
+      let selectedValue = value;
+      if ((kind === 'DialogYesNo' || kind === 'DialogTrueFalse' || kind === 'DialogOnOff' || kind === 'Dialog2Choices') && choices.length >= 2) {
+        if (value === true || value === 1 || value === '1' || value === 'true' || value === 'True') {
+          selectedValue = choices[1];
+        } else if (value === false || value === 0 || value === '0' || value === 'false' || value === 'False') {
+          selectedValue = choices[0];
+        }
+      }
       choices.forEach(function(choice) {
         const opt = document.createElement('option');
         opt.value = String(choice);
         opt.textContent = String(choice);
-        if (String(choice) === String(value)) {
+        if (String(choice) === String(selectedValue)) {
           opt.selected = true;
         }
         select.appendChild(opt);
@@ -212,10 +262,50 @@
       } else {
         input.step = 'any';
       }
-    } else {
-      input.type = 'text';
+
+      input.value = value == null ? '' : String(value);
+
+      const useSlider = field.slider === true && field.min !== undefined && field.min !== null && field.max !== undefined && field.max !== null;
+      if (!useSlider) {
+        return input;
+      }
+
+      const wrapper = document.createElement('span');
+      wrapper.appendChild(input);
+
+      const slider = document.createElement('input');
+      slider.type = 'range';
+      slider.dataset.fieldName = field.name;
+      slider.dataset.fieldSliderName = field.name;
+      slider.min = String(field.min);
+      slider.max = String(field.max);
+      if (kind === 'DialogInt') {
+        slider.step = '1';
+      } else if (field.step !== undefined && field.step !== null) {
+        slider.step = String(field.step);
+      }
+      slider.value = input.value;
+      slider.style.marginLeft = '6px';
+      slider.style.verticalAlign = 'middle';
+
+      input.addEventListener('input', function() {
+        slider.value = input.value;
+      });
+      input.addEventListener('change', function() {
+        slider.value = input.value;
+      });
+      slider.addEventListener('input', function() {
+        input.value = slider.value;
+      });
+      slider.addEventListener('change', function() {
+        input.value = slider.value;
+      });
+
+      wrapper.appendChild(slider);
+      return wrapper;
     }
 
+    input.type = 'text';
     input.value = value == null ? '' : String(value);
     if (kind === 'DialogStr' && field.length) {
       input.size = field.length;
@@ -245,6 +335,28 @@
       const value = Object.prototype.hasOwnProperty.call(state.params, field.name) ? state.params[field.name] : field.default;
       const control = controlForField(field, value);
       valueSpan.appendChild(control);
+      if (field.randomizable) {
+        const randomButton = document.createElement('button');
+        randomButton.type = 'button';
+        randomButton.textContent = 'Rnd';
+        randomButton.title = 'Randomize this field';
+        randomButton.dataset.randomFieldName = field.name;
+        randomButton.style.marginLeft = '6px';
+        randomButton.style.fontSize = '11px';
+        randomButton.style.padding = '1px 5px';
+        valueSpan.appendChild(randomButton);
+      }
+      if (field.name && field.kind !== 'DialogBreak') {
+        const defaultButton = document.createElement('button');
+        defaultButton.type = 'button';
+        defaultButton.textContent = 'Def';
+        defaultButton.title = 'Restore default value';
+        defaultButton.dataset.defaultFieldName = field.name;
+        defaultButton.style.marginLeft = '6px';
+        defaultButton.style.fontSize = '11px';
+        defaultButton.style.padding = '1px 5px';
+        valueSpan.appendChild(defaultButton);
+      }
       if (field.units) {
         valueSpan.appendChild(document.createTextNode(' ' + field.units));
       }
@@ -287,7 +399,7 @@
       planImage.src = data.image.url;
     }
     const summary = data.summary || {};
-    drawInfo.textContent = summary.drawinfo || '';
+    renderDrawInfo(summary);
     showError(data.errors || '');
     populateMethods(state.methods);
     renderDialog();
@@ -355,16 +467,56 @@
   }
 
   // WebSocket-based interactive requests
-  function preview(action) {
+  function preview(action, extraPayload) {
     setStatus('Working...');
-    socket.emit('draw:preview', {
+    state.latestPreviewRequestId += 1;
+    socket.emit('draw:preview', Object.assign({
       method: state.method,
       action: action || 'refresh',
       params: collectParams(),
-    });
+      requestId: state.latestPreviewRequestId,
+    }, extraPayload || {}));
+  }
+
+  function randomizeField(fieldName) {
+    preview('random-field', {fieldName: fieldName});
+  }
+
+  function restoreFieldDefault(fieldName) {
+    const field = (state.fields || []).find(function(f) { return f.name === fieldName; });
+    if (!field) {
+      return;
+    }
+    const node = dialogHost.querySelector('[data-field-name="' + fieldName.replace(/"/g, '\\"') + '"]');
+    if (!node) {
+      return;
+    }
+
+    let defaultValue = field.default;
+    if (node.tagName === 'SELECT') {
+      defaultValue = valueForChoiceField(field, defaultValue);
+      node.value = defaultValue == null ? '' : String(defaultValue);
+    } else if (field.kind === 'DialogColor' && Array.isArray(defaultValue) && defaultValue.length === 3) {
+      const r = Number(defaultValue[0]).toString(16).padStart(2, '0');
+      const g = Number(defaultValue[1]).toString(16).padStart(2, '0');
+      const b = Number(defaultValue[2]).toString(16).padStart(2, '0');
+      node.value = '#' + r + g + b;
+    } else {
+      node.value = defaultValue == null ? '' : String(defaultValue);
+    }
+
+    const sliderNode = dialogHost.querySelector('[data-field-slider-name="' + fieldName.replace(/"/g, '\\"') + '"]');
+    if (sliderNode) {
+      sliderNode.value = node.value;
+    }
+
+    preview('refresh');
   }
 
   socket.on('draw:preview:response', function(data) {
+    if (data && data.requestId && data.requestId !== state.latestPreviewRequestId) {
+      return;
+    }
     if (data.error) {
       showError(data.error);
       setStatus('');
@@ -479,9 +631,53 @@
     }
   });
 
+  function isDeferredTypingField(target) {
+    if (!target || !target.dataset || !target.dataset.fieldName) {
+      return false;
+    }
+    if (target.tagName === 'TEXTAREA') {
+      return true;
+    }
+    if (target.tagName !== 'INPUT') {
+      return false;
+    }
+    const inputType = (target.type || '').toLowerCase();
+    return inputType === 'text' || inputType === 'number';
+  }
+
   dialogHost.addEventListener('input', function(event) {
     if (event.target && event.target.dataset && event.target.dataset.fieldName) {
+      if (isDeferredTypingField(event.target)) {
+        return;
+      }
       realtimePreview();
+    }
+  });
+
+  dialogHost.addEventListener('keydown', function(event) {
+    if (event.key !== 'Enter') {
+      return;
+    }
+    if (!isDeferredTypingField(event.target)) {
+      return;
+    }
+    if (event.target.tagName === 'INPUT') {
+      event.preventDefault();
+    }
+    realtimePreview();
+  });
+
+  dialogHost.addEventListener('mousedown', function(event) {
+    if (event.button !== 0) {
+      return;
+    }
+    if (event.target && event.target.dataset && event.target.dataset.randomFieldName) {
+      event.preventDefault();
+      randomizeField(event.target.dataset.randomFieldName);
+    }
+    if (event.target && event.target.dataset && event.target.dataset.defaultFieldName) {
+      event.preventDefault();
+      restoreFieldDefault(event.target.dataset.defaultFieldName);
     }
   });
 

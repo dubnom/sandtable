@@ -31,7 +31,7 @@ Depth | Probability | Size Decrease | Seed
 
     def __init__(self, width, length, ballSize, units):
         self.editor = [
-            DialogInt("depth",                  "Depth of fractility",      default=2, max=10),
+            DialogInt("depth",                  "Depth of fractility",      default=2, min=0, max=6),
             DialogFloat("branchProbability",    "Probability of branching", default=0.7, min=0.0, max=1.0),
             DialogFloat("percent",              "Fractility size decrease", default=0.3),
             DialogYesNo("round",                "Rounded crystals",         default=False),

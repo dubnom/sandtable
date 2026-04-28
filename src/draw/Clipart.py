@@ -37,13 +37,13 @@ sections of the drawing that aren't connected to one-another.
             DialogFileList("filename",        "File Name",                path=CLIPART_PATH, filter='.svg', default=''),
             DialogInt("iterations",          "Number of Fill Iterations", default=0, min=0, max=60),
             DialogFloat("decrement",           "Fill Decrement",           units=units, default=0.5, min=0.0, max=inchesToUnits(2.0, units)),
-            DialogFloat("ballSize",            "Ball Size",                units=units, default=ballSize, min=inchesToUnits(0.25, units)),
             DialogBreak(),
             DialogFloat("xOffset",             "X Origin",                 units=units, default=0.0),
             DialogFloat("yOffset",             "Y Origin",                 units=units, default=0.0),
             DialogFloat("width",               "Width (x)",                units=units, default=width, min=1.0, max=width*2),
             DialogFloat("length",              "Length (y)",               units=units, default=length, min=1.0, max=length*2),
         ]
+        self.ballSize = ballSize
 
     def generate(self, params):
         filename = params.filename
@@ -65,4 +65,4 @@ sections of the drawing that aren't connected to one-another.
         else:
             newChains = chains
 
-        return Chains.scanalize(newChains, params.xOffset, params.yOffset, params.width, params.length, 1.0 / params.ballSize)
+        return Chains.scanalize(newChains, params.xOffset, params.yOffset, params.width, params.length, 1.0 / self.ballSize)

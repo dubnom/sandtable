@@ -2,6 +2,10 @@ class Sandable():
     """ Base class for sandtable drawable classes. """
     editor = []
 
+    def isRealtime(self):
+        """Whether this drawing method is fast enough for live form-change refresh."""
+        return True
+
     def generate(self, params):
         return []
 

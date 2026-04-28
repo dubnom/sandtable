@@ -253,6 +253,7 @@ def drawSchemaApi():
     sand = sandableFactory(sandable, TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS)
     return jsonify({
         'method': sandable,
+        'realtime': bool(sand.isRealtime()),
         'fields': [_field_to_schema(field) for field in sand.editor],
         'image': {
             'width': IMAGE_WIDTH,
@@ -279,6 +280,7 @@ def handle_schema(payload):
     sand = sandableFactory(sandable, TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS)
     socketio.emit('draw:schema:response', {
         'method': sandable,
+        'realtime': bool(sand.isRealtime()),
         'fields': [_field_to_schema(field) for field in sand.editor],
         'image': {
             'path': IMAGE_FILE,

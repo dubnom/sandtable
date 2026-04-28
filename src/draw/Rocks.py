@@ -37,7 +37,6 @@ Press the *Random* button to automatically make new drawings.
             DialogInt("rakeSize",        "Rake teeth",               units="tines", min=2, max=5, default=3),
             DialogInt("seed",            "Random Seed",              default=1, min=0, max=10000, rbutton=True),
             DialogBreak(),
-            DialogFloat("ballSize",        "Ball size",                units=units, min=.25, default=ballSize),
             DialogFloat("xOffset",         "X Origin",                 units=units, default=0.0),
             DialogFloat("yOffset",         "Y Origin",                 units=units, default=0.0),
             DialogFloat("width",           "Width (x)",                units=units, default=width),
@@ -61,4 +60,4 @@ Press the *Random* button to automatically make new drawings.
             chain += Chains.spiral(rock[0], rock[1], rockSize, rockSize+rakeSize, params.rakeSize)
             chains.append(chain)
 
-        return Chains.scanalize(chains, params.xOffset, params.yOffset, params.width, params.length, 1.0 / params.ballSize)
+        return Chains.scanalize(chains, params.xOffset, params.yOffset, params.width, params.length, 1.0 / self.ballSize)

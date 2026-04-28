@@ -102,6 +102,9 @@ Try **Preset** first, then adjust **Feed** and **Kill** to explore variations wi
         ]
         self.ballSize = ballSize
 
+    def isRealtime(self):
+        return False
+
     def _apply_preset(self, params):
         preset = self.PRESETS.get(getattr(params, "preset", "Custom"), {})
         for name, value in preset.items():

@@ -39,13 +39,13 @@ Use the "Pictures" tab in the main navigation to more easily select photos.
             DialogInt("iterations",          "Number of Fill Iterations", default=0, min=0, max=100),
             DialogFloat("decrement",           "Fill Decrement",           units=units, default=0.5, min=0.0, max=10.0),
             DialogBreak(),
-            DialogFloat("ballSize",            "Ball Size",                units=units, default=ballSize, min=0.25),
             DialogFloat("size",                "Height (Picture)",         units=units, default=length),
             DialogFloat("xOffset",             "X Origin",                 units=units, default=0.0),
             DialogFloat("yOffset",             "Y Origin",                 units=units, default=0.0),
             DialogFloat("width",               "Width (x)",                units=units, default=width, min=1.0, max=1000.0),
             DialogFloat("length",              "Length (y)",               units=units, default=length, min=1.0, max=1000.0),
         ]
+        self.ballSize = ballSize
 
     def generate(self, params):
         chains = []
@@ -93,7 +93,7 @@ Use the "Pictures" tab in the main navigation to more easily select photos.
             for chain in shrinky.shrinky(oldChains, params.iterations, -params.decrement):
                 chains += chain
 
-        return Chains.scanalize(chains, params.xOffset, params.yOffset, params.width, params.length, 1.0 / params.ballSize)
+        return Chains.scanalize(chains, params.xOffset, params.yOffset, params.width, params.length, 1.0 / self.ballSize)
 
     def _alphaToColor(self, image, color=(255, 255, 255)):
         if len(image.getbands()) == 4:

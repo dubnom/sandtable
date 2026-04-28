@@ -83,6 +83,9 @@ Try changing **Field Scale** and **Rotation** first.
         ]
         self.ballSize = ballSize
 
+    def isRealtime(self):
+        return False
+
     def _field(self, x, y, params):
         phase = radians(params.phase)
         # A smooth, deterministic vector field made from mixed trig waves.

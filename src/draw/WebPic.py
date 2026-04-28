@@ -48,13 +48,13 @@ Use the "Pictures" tab in the main navigation to more easily select photos.
             DialogFloat("decrement",           "Fill Decrement",           units=units,
                         default=inchesToUnits(0.5, units), min=0.0, max=inchesToUnits(10.0, units)),
             DialogBreak(),
-            DialogFloat("ballSize",            "Ball Size",                units=units, default=ballSize, min=0.25),
             DialogFloat("xOffset",             "X Origin",                 units=units, default=0.0),
             DialogFloat("yOffset",             "Y Origin",                 units=units, default=0.0),
             DialogFloat("width",               "Width (x)",                units=units, default=width, min=1.0, max=1000.0),
             DialogFloat("length",              "Length (y)",               units=units, default=length, min=1.0, max=1000.0),
             DialogList("draw",                "Draw Method",              default='smartdraw', list=['scanalize', 'smartdraw']),
         ]
+        self.ballSize = ballSize
 
     def generate(self, params):
         chains = []
@@ -124,10 +124,10 @@ Use the "Pictures" tab in the main navigation to more easily select photos.
                 chains += chain
 
         if params.draw == 'scanalize':
-            return Chains.scanalize(chains, params.xOffset, params.yOffset, params.width, params.length, 1.0 / params.ballSize)
+            return Chains.scanalize(chains, params.xOffset, params.yOffset, params.width, params.length, 1.0 / self.ballSize)
         else:
             import SmartDraw
-            return SmartDraw.SmartDraw(chains, params.width, params.length, params.ballSize)
+            return SmartDraw.SmartDraw(chains, params.width, params.length, self.ballSize)
 
     def _alphaToColor(self, image, color=(255, 255, 255)):
         if len(image.getbands()) == 4:

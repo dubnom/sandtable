@@ -64,6 +64,7 @@
     methods: fallbackMethods || [],
     fields: [],
     params: {},
+    realtime: true,
   };
 
   const methodGrid = document.getElementById('methodGrid');
@@ -307,6 +308,7 @@
         }
 
         state.method = data.method;
+        state.realtime = data.realtime !== false;
         state.fields = data.fields || [];
         state.params = {};
         state.fields.forEach(function(field) {
@@ -322,6 +324,23 @@
       socket.emit('draw:schema', {method: method});
     });
   }
+
+  const realtimePreview = (function() {
+    let timer = null;
+    const DELAY_MS = 250;
+    return function() {
+      if (!state.realtime) {
+        return;
+      }
+      if (timer) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        timer = null;
+        preview('refresh');
+      }, DELAY_MS);
+    };
+  })();
 
   async function selectMethod(method) {
     setStatus('Loading method...');
@@ -453,6 +472,18 @@
   document.getElementById('abortBtn').addEventListener('click', abortDraw);
   document.getElementById('saveBtn').addEventListener('click', saveDrawing);
   document.getElementById('exportBtn').addEventListener('click', exportDrawing);
+
+  dialogHost.addEventListener('change', function(event) {
+    if (event.target && event.target.dataset && event.target.dataset.fieldName) {
+      realtimePreview();
+    }
+  });
+
+  dialogHost.addEventListener('input', function(event) {
+    if (event.target && event.target.dataset && event.target.dataset.fieldName) {
+      realtimePreview();
+    }
+  });
 
   (async function init() {
     try {

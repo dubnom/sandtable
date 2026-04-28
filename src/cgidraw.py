@@ -4,6 +4,7 @@ from threading import Lock
 from flask import request, render_template, jsonify
 from datetime import timedelta
 from os import stat
+from os.path import basename
 
 from Sand import TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS,\
     MACHINE_UNITS, MACHINE_FEED, MACHINE_ACCEL,\
@@ -15,6 +16,7 @@ from webapp import app, socketio
 from cgistuff import cgistuff
 from dialog import Dialog
 from history import History, Memoize
+from playlist import Playlist
 
 import convert
 import mach
@@ -500,7 +502,6 @@ def drawExportApi():
     })
 
 
-@app.route('/', methods=['GET'])
 @app.route('/draw', methods=['GET', 'POST'])
 def drawPage():
     if request.method == 'GET':
@@ -738,4 +739,64 @@ def handle_export(payload):
         'file': fileName,
         'image': state['image'],
         'summary': state['summary'],
+    })
+
+
+@socketio.on('draw:playlist:add')
+def handle_playlist_add(payload):
+    """WebSocket handler to add the current drawing configuration to the playlist."""
+    payload = payload if isinstance(payload, dict) else {}
+
+    method = _normalize_sandable(payload.get('method', drawers[0]))
+    if not method:
+        socketio.emit('draw:playlist:add:response', {
+            'status': 'error',
+            'error': 'Invalid drawing method',
+        })
+        return
+
+    params = payload.get('params')
+    if not isinstance(params, dict):
+        params = {}
+
+    # Rebuild state via the same parse/validation path used by preview.
+    state, errorResponse, status = _api_prepare_draw({
+        'method': method,
+        'params': params,
+        'action': 'refresh',
+    })
+    if errorResponse:
+        socketio.emit('draw:playlist:add:response', {
+            'status': 'error',
+            'error': errorResponse.get_json().get('error') if hasattr(errorResponse, 'get_json') else str(errorResponse),
+        })
+        return
+    if state.get('errors'):
+        socketio.emit('draw:playlist:add:response', {
+            'status': 'error',
+            'error': state['errors'],
+            'fieldErrors': state.get('fieldErrors', {}),
+        })
+        return
+
+    item = Playlist.add(state['method'], state['params'])
+
+    imageFile = '_playlist_%s.png' % item['id']
+    imagePath = '%s%s' % (STORE_PATH, imageFile)
+    Chains.saveImage(
+        state['chains'],
+        state['boundingBox'],
+        imagePath,
+        int(IMAGE_WIDTH / 2),
+        int(IMAGE_HEIGHT / 2),
+        IMAGE_TYPE,
+        clipToTable=True,
+    )
+    Playlist.setImage(item['id'], imageFile)
+    item['imageFile'] = basename(imageFile)
+
+    socketio.emit('draw:playlist:add:response', {
+        'status': 'ok',
+        'item': item,
+        'count': len(Playlist.list()),
     })

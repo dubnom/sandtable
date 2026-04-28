@@ -15,22 +15,29 @@
      <button id="redrawBtn" class="redraw" type="button">Redraw Screen</button>
      <button id="randomBtn" class="random" type="button">Random!</button>
      <button id="drawBtn" class="doit" type="button">Draw in Sand!</button>
-     <button id="abortBtn" class="abort" type="button">Abort!</button>
     </div>
     <div class="savebox" style="margin-top: 10px;">
      <span class="save">Name</span>
      <input id="nameInput" class="save" type="text" size="24">
      <button id="saveBtn" class="save" type="button">Save</button>
      <button id="exportBtn" class="export" type="button">Export</button>
+      <button id="playlistBtn" class="load" type="button">Add to Playlist</button>
     </div>
    </center>
   </td>
  </tr>
 </table>
 
-<script src="//cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script>
 (function() {
+  if (typeof window.__sandtablePageCleanup === 'function') {
+    try {
+      window.__sandtablePageCleanup();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   const initialMethod = {{ method|tojson }};
   const fallbackMethods = {{ sandables|tojson }};
   const pagePath = window.location.pathname || '/draw';
@@ -67,6 +74,7 @@
     realtime: true,
     latestPreviewRequestId: 0,
   };
+  let destroyed = false;
 
   const methodGrid = document.getElementById('methodGrid');
   const planImage = document.getElementById('planImage');
@@ -75,6 +83,30 @@
   const dialogHost = document.getElementById('dialogHost');
   const statusMsg = document.getElementById('statusMsg');
   const nameInput = document.getElementById('nameInput');
+
+  function twoDigit(value) {
+    return String(value).padStart(2, '0');
+  }
+
+  function makeDefaultFileName(method) {
+    const now = new Date();
+    const stamp = String(now.getFullYear()) +
+      twoDigit(now.getMonth() + 1) +
+      twoDigit(now.getDate()) + '_' +
+      twoDigit(now.getHours()) +
+      twoDigit(now.getMinutes()) +
+      twoDigit(now.getSeconds());
+    const safeMethod = String(method || 'drawing').replace(/[^A-Za-z0-9_-]+/g, '_');
+    return safeMethod + '_' + stamp;
+  }
+
+  function refreshDefaultFileName() {
+    const previousAutoName = state.autoFileName || '';
+    state.autoFileName = makeDefaultFileName(state.method);
+    if (!nameInput.value || nameInput.value === previousAutoName) {
+      nameInput.value = state.autoFileName;
+    }
+  }
 
   function methodImageUrl(method) {
     return buildUrl('/images/' + encodeURIComponent(method) + '.png');
@@ -106,10 +138,16 @@
   }
 
   function setStatus(msg) {
+    if (destroyed) {
+      return;
+    }
     statusMsg.textContent = msg || '';
   }
 
   function showError(msg) {
+    if (destroyed) {
+      return;
+    }
     if (msg) {
       errorBox.style.display = 'block';
       errorBox.textContent = 'Error: ' + msg;
@@ -314,6 +352,9 @@
   }
 
   function renderDialog() {
+    if (destroyed) {
+      return;
+    }
     const table = document.createElement('table');
     table.className = 'form';
 
@@ -429,6 +470,7 @@
           }
         });
         window.history.replaceState(null, '', drawUrlForMethod(state.method));
+        refreshDefaultFileName();
         renderDialog();
         resolve(data);
       });
@@ -514,6 +556,9 @@
   }
 
   socket.on('draw:preview:response', function(data) {
+    if (destroyed) {
+      return;
+    }
     if (data && data.requestId && data.requestId !== state.latestPreviewRequestId) {
       return;
     }
@@ -535,6 +580,9 @@
   }
 
   socket.on('draw:execute:response', function(data) {
+    if (destroyed) {
+      return;
+    }
     if (data.error) {
       showError(data.error);
       setStatus('');
@@ -549,30 +597,19 @@
     }
   });
 
-  function abortDraw() {
-    setStatus('Stopping...');
-    socket.emit('draw:abort', {});
-  }
-
-  socket.on('draw:abort:response', function(data) {
-    if (data.error) {
-      showError(data.error);
-    } else {
-      setStatus('Stopped');
-      showError('');
-    }
-  });
-
   function saveDrawing() {
     setStatus('Saving...');
     socket.emit('draw:save', {
       method: state.method,
-      name: nameInput.value || '',
+      name: nameInput.value || state.autoFileName || '',
       params: collectParams(),
     });
   }
 
   socket.on('draw:save:response', function(data) {
+    if (destroyed) {
+      return;
+    }
     if (data.error) {
       showError(data.error);
       setStatus('');
@@ -586,12 +623,23 @@
     setStatus('Exporting...');
     socket.emit('draw:export', {
       method: state.method,
-      name: nameInput.value || '',
+      name: nameInput.value || state.autoFileName || '',
+      params: collectParams(),
+    });
+  }
+
+  function addToPlaylist() {
+    setStatus('Adding to playlist...');
+    socket.emit('draw:playlist:add', {
+      method: state.method,
       params: collectParams(),
     });
   }
 
   socket.on('draw:export:response', function(data) {
+    if (destroyed) {
+      return;
+    }
     if (data.error) {
       showError(data.error);
       setStatus('');
@@ -601,18 +649,50 @@
     }
   });
 
+  socket.on('draw:playlist:add:response', function(data) {
+    if (destroyed) {
+      return;
+    }
+    if (data.error || data.status !== 'ok') {
+      showError((data && data.error) ? data.error : 'Unable to add to playlist');
+      setStatus('');
+    } else {
+      const title = data.item && data.item.title ? String(data.item.title) : 'playlist';
+      setStatus('Added: ' + title);
+      showError('');
+    }
+  });
+
   // WebSocket connection handlers
   socket.on('connect', function() {
+    if (destroyed) {
+      return;
+    }
     setStatus('Connected');
   });
 
   socket.on('disconnect', function() {
+    if (destroyed) {
+      return;
+    }
     setStatus('Disconnected - attempting to reconnect');
   });
 
   socket.on('connect_error', function(error) {
+    if (destroyed) {
+      return;
+    }
     showError('Connection error: ' + error.message);
   });
+
+  window.__sandtablePageCleanup = function() {
+    destroyed = true;
+    try {
+      socket.disconnect();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   document.getElementById('redrawBtn').addEventListener('click', function() {
     preview('refresh');
@@ -621,9 +701,9 @@
     preview('random');
   });
   document.getElementById('drawBtn').addEventListener('click', executeDraw);
-  document.getElementById('abortBtn').addEventListener('click', abortDraw);
   document.getElementById('saveBtn').addEventListener('click', saveDrawing);
   document.getElementById('exportBtn').addEventListener('click', exportDrawing);
+  document.getElementById('playlistBtn').addEventListener('click', addToPlaylist);
 
   dialogHost.addEventListener('change', function(event) {
     if (event.target && event.target.dataset && event.target.dataset.fieldName) {

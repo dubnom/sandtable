@@ -15,6 +15,12 @@
  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
 {% endif %}
  <script>
+  if (window.top !== window.self) {
+   document.documentElement.classList.add('embedded-frame');
+  }
+ </script>
+ <script src="//cdn.socket.io/4.5.4/socket.io.min.js"></script>
+ <script>
   function randomInt( field, min, max ) {
    number = min + Math.floor( Math.random()*(max - min));
    field.value = number; }
@@ -26,6 +32,18 @@
 <meta name="viewport" content="width=device-width, user-scalable=yes" />
 {{ meta|safe }}
 <style>
+html.embedded-frame .pageTitle,
+html.embedded-frame .navigation,
+html.embedded-frame #globalStatusBar,
+html.embedded-frame footer {
+ display: none !important;
+}
+
+html.embedded-frame body {
+ margin: 0;
+ padding-bottom: 0 !important;
+}
+
 {{ inline_css|safe }}
 </style>
 <title>Sand Table - {{title}}</title>

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "56d5bd19e9524c279c6a1f3a518237f3",
+    "method": "Star",
+    "title": "Star 2026-04-28 12:10:21",
+    "created": 1777392621,
+    "params": {
+      "points": 5,
+      "innerRadius1": 3.0,
+      "outerRadius1": 8.5,
+      "innerRadius2": 0.0,
+      "outerRadius2": 5.0,
+      "angleStart": 0.0,
+      "angleShift": 0.0,
+      "steps": 5,
+      "fitToTable": false,
+      "xCenter": 19.0,
+      "yCenter": 8.5
+    },
+    "imageFile": "_playlist_56d5bd19e9524c279c6a1f3a518237f3.png"
+  }
+]

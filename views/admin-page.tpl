@@ -1,5 +1,12 @@
 <div class="admingood" id="stats">STATS</div>
 <script>
+if (typeof window.__sandtablePageCleanup === 'function') {
+ try {
+  window.__sandtablePageCleanup();
+ } catch (err) {
+  console.error(err);
+ }
+}
 function updateStats(data,status) {
  stuff = data.stuff
  document.getElementById('stats').innerHTML = formatStuff(stuff);
@@ -16,7 +23,10 @@ function updater() {
  $.post("admin/status", {}, updateStats);
 } 
 updater();
-setInterval(updater, 2500);
+var adminStatsInterval = setInterval(updater, 2500);
+window.__sandtablePageCleanup = function() {
+ clearInterval(adminStatsInterval);
+};
 </script>
 
 {% if message %}

@@ -16,6 +16,9 @@ import cgihelp
 import cgiadmin
 import cgifiler
 import cgidhelp
+import cgiplaylist
+import cgistatus
+import cgishell
 
 
 def _env_flag(name, default=False):

@@ -1,4 +1,4 @@
-from flask import request, render_template
+from flask import request, render_template, redirect, url_for
 import signal
 from html import escape
 import os
@@ -62,6 +62,9 @@ def status():
 
 @app.route('/admin', methods=['GET', 'POST'])
 def adminPage():
+    if request.method == 'GET' and request.args.get('embed') != '1':
+        return redirect(url_for('shellPage', view='admin'))
+
     actions = {
         "server_log":   (_serverLog,    "Server Log - View the web server log"),
         "led_log":      (_ledsLog,      "Led Log - View the ledaemon log (lighting system"),

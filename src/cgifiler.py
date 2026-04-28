@@ -1,10 +1,12 @@
-from flask import request, render_template
+from flask import request, render_template, redirect, url_for
 import os
 import logging
 from html import escape
+from urllib.parse import quote
 from Sand import PICTURE_PATH, CLIPART_PATH, THR_PATH, MOVIE_SCRIPT_PATH, STORE_PATH, MOVIE_OUTPUT_PATH
 from webapp import app
 from cgistuff import cgistuff
+from history import History
 
 
 class ftBase():
@@ -27,9 +29,9 @@ class ftPictures(ftBase):
         self.allowUpload = True
 
     def imgFunc(self, f, fn, p):
-        return """<button type="button" class="filer" onclick='mySubmit("draw", "method","Picture", "filename","%s")'>
-               <img src="%s" width="80" align="center">
-               </button>""" % (fn, fn)
+        return """<a class="filer" href="/?view=draw&method=Picture&filename=%s">
+             <img src="%s" width="80" align="center">
+             </a>""" % (quote(fn, safe=''), fn)
 
 
 class ftClipart(ftBase):
@@ -40,9 +42,9 @@ class ftClipart(ftBase):
         self.allowUpload = True
 
     def imgFunc(self, f, fn, p):
-        return """<button type="button" class="filer" onclick='mySubmit("draw", "method","Clipart", "filename","%s")'>
-               <img src="images/DXF.png" width="80">
-               </button>""" % fn
+        return """<a class="filer" href="/?view=draw&method=Clipart&filename=%s">
+             <img src="images/DXF.png" width="80">
+             </a>""" % quote(fn, safe='')
 
     def rename(self, f, oldName, newName):
         path = os.path.dirname(oldName)
@@ -59,9 +61,9 @@ class ftSisyphus(ftBase):
         self.allowUpload = True
 
     def imgFunc(self, f, fn, p):
-        return """<button type="button" class="filer" onclick='mySubmit("draw", "method","Sisyphus", "filename","%s")'>
-               <img src="images/thr.png" width="80">
-               </button>""" % fn
+        return """<a class="filer" href="/?view=draw&method=Sisyphus&filename=%s">
+             <img src="images/thr.png" width="80">
+             </a>""" % quote(fn, safe='')
 
 class ftScripts(ftBase):
     def __init__(self):
@@ -71,9 +73,9 @@ class ftScripts(ftBase):
         self.allowUpload = True
 
     def imgFunc(self, f, fn, p):
-        return """<button type="button" class="filer" onclick='mySubmit("movie", "action","load", "_loadname","%s")'>
-               <img src="images/script.png" width="80">
-               </button>""" % p[0]
+        return """<a class="filer" href="/?view=movie&loadname=%s">
+             <img src="images/script.png" width="80">
+             </a>""" % quote(p[0], safe='')
 
 
 class ftMovies(ftBase):
@@ -84,9 +86,9 @@ class ftMovies(ftBase):
         self.allowUpload = False
 
     def imgFunc(self, f, fn, p):
-        return """<button type="button" class="filer" onclick='mySubmit("watch", "action","load", "_loadname","%s")'>
-               <img src="images/MPEG4.png" width="80">
-               </button>""" % f
+        return """<a class="filer" href="/?view=watch&_loadname=%s">
+             <img src="images/MPEG4.png" width="80">
+             </a>""" % quote(f, safe='')
 
 
 class ftDrawings(ftBase):
@@ -97,18 +99,24 @@ class ftDrawings(ftBase):
         self.allowUpload = False
 
     def imgFunc(self, f, fn, p):
-        return """<button type="button" class="filer" onclick='mySubmit("draw", "action","load", "_loadname","%s")'>
-               <img src="%s%s.png">
-               </button>""" % (p[0], self.path, p[0])
+        pngPath = os.path.splitext(fn)[0] + '.png'
+        pngUrl = '/' + pngPath.replace(os.sep, '/').lstrip('/')
+        return """<a class="filer" href="/?view=draw&loadname=%s">
+               <img src="%s">
+               </a>""" % (p[0], pngUrl)
 
     def delete(self, f, filename):
-        os.remove(os.path.join(self.path, f + '.sand'))
-        os.remove(os.path.join(self.path, f + '.png'))
+        base, _ = os.path.splitext(filename)
+        os.remove(base + '.sand')
+        os.remove(base + '.png')
         return (True, 'Deleted')
 
     def rename(self, f, oldName, newName):
-        os.rename(os.path.join(self.path, f + '.sand'), os.path.join(self.path, newName + '.sand'))
-        os.rename(os.path.join(self.path, f + '.png'),  os.path.join(self.path, newName + '.png'))
+        oldBase, _ = os.path.splitext(oldName)
+        path = os.path.dirname(oldName)
+        newBase = os.path.join(path, newName)
+        os.rename(oldBase + '.sand', newBase + '.sand')
+        os.rename(oldBase + '.png', newBase + '.png')
         return (True, 'Renamed')
 
 
@@ -136,6 +144,9 @@ def render_actions(nm, fn, ft):
 
 @app.route('/filer', methods=['GET', 'POST'])
 def filerPage():
+    if request.method == 'GET' and request.args.get('embed') != '1':
+        return redirect(url_for('shellPage', view='filer'))
+
     cstuff = cgistuff('Filer', jQuery=True)
 
     form = request.values
@@ -181,6 +192,7 @@ def filerPage():
     for f in dirlist:
         filename = os.path.join(path, f)
         pieces = f.split('.')
+        isFile = False
         if f == '..':
             dirs = path.split('/')
             s = fmt % ('/'.join(dirs[:-1]), 'Up')
@@ -191,10 +203,11 @@ def filerPage():
         elif len(pieces) != 2 or not pieces[1] in filetype.filter:
             continue
         else:
+            isFile = True
             s = '%s<p class="filername">%s</p>' % (filetype.imgFunc(f, filename, pieces), pieces[0])
 
         res += '<tr>' if not (imgNum % columns) else ''
-        button = render_actions(pieces[0], filename, ft)
+        button = render_actions(pieces[0], filename, ft) if isFile else ''
         res += '<td class="filer" valign="bottom" width="%d%%"><div class="filer" id="%s">%s%s</div></td>' % (int(100/columns), filename, s, button)
         imgNum += 1
         res += '</tr>' if not (imgNum % columns) else ''
@@ -207,7 +220,8 @@ def filerPage():
         cstuff.headerStr(),
         cstuff.startBodyStr(),
         cstuff.navigationStr(),
-        render_template('filer-page.tpl', options=options, ft=ft, path=path, table=res, upload=upload, ftfilter=ftfilter),
+        render_template('filer-page.tpl', options=options, ft=ft, path=path, table=res, upload=upload, ftfilter=ftfilter,
+                        store_root=STORE_PATH, saved_directory=os.path.join(STORE_PATH, 'saved')),
         cstuff.endBodyStr()])
 
 

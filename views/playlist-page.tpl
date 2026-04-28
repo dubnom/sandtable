@@ -30,7 +30,7 @@
        {% endif %}
       </td>
     <td class="help">{{ item.title }}</td>
-        <td class="help"><a href="draw?method={{ item.method }}">{{ item.method }}</a></td>
+      <td class="help"><a href="/draw?method={{ item.method }}">{{ item.method }}</a></td>
         <td class="help">{{ item.createdText }}</td>
     <td class="help">
     <form method="post" action="playlist" style="display:inline;">

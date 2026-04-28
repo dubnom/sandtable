@@ -1,4 +1,4 @@
-from flask import request, render_template
+from flask import request, render_template, redirect, url_for
 import os
 from Sand import PICTURE_PATH
 from webapp import app
@@ -7,6 +7,9 @@ from cgistuff import cgistuff
 
 @app.route('/pictures', methods=['GET', 'POST'])
 def picturesPage():
+    if request.method == 'GET' and request.args.get('embed') != '1':
+        return redirect(url_for('shellPage', view='pictures'))
+
     form = request.form
     action = form.get('action', '').lower()
     if action == 'upload':

@@ -1,7 +1,7 @@
 import base64
 from threading import Lock
 
-from flask import request, render_template, jsonify
+from flask import request, render_template, jsonify, redirect, url_for
 from datetime import timedelta
 from os import stat
 from os.path import basename
@@ -124,6 +124,12 @@ def _params_payload(editor, params):
 def _generate_chains_and_image(sandable, sand, params, boundingBox, shouldSave=None):
     errors = None
     cancelled = False
+
+    # Drop superseded preview requests before spending CPU on generation.
+    if shouldSave is not None and not shouldSave():
+        cancelled = True
+        return [], errors, cancelled
+
     memoize = Memoize()
     if CACHE_ENABLE and memoize.match(sandable, params):
         chains = memoize.chains()
@@ -209,6 +215,7 @@ def _api_prepare_draw(payload, shouldSave=None):
     state = {
         'method': sandable,
         'action': action,
+        'realtime': bool(sand.isRealtime()),
         'sand': sand,
         'dialog': d,
         'paramsObj': params,
@@ -237,15 +244,18 @@ def _api_name_error(name):
     return None
 
 
-def _history_items(names):
+def _history_items(names, mutable=False, history=False):
     items = []
     for name in names:
-        png = '%s%s.png' % (STORE_PATH, name)
+        png = History.image_path(name, history=history)
         try:
             mtime = int(stat(png).st_mtime)
         except OSError:
             continue
-        items.append({'name': name, 'path': '%s%s.png?%d' % (STORE_PATH, name, mtime), 'mtime': mtime})
+        path = History.image_url(name, history=history)
+        if mutable:
+            path = '%s?%d' % (path, mtime)
+        items.append({'name': name, 'path': path, 'mtime': mtime})
     return items
 
 
@@ -262,6 +272,7 @@ def _api_response_from_state(state, includeFields=False, includeImageData=False)
     payload = {
         'method': state['method'],
         'action': state['action'],
+        'realtime': bool(state.get('realtime', True)),
         'errors': state['errors'],
         'fieldErrors': state['fieldErrors'],
         'params': state['params'],
@@ -322,7 +333,7 @@ def handle_schema(payload):
             'error': '"%s" is not a valid drawing method!' % method,
             'methods': drawers,
             'status': 400,
-        })
+        }, room=request.sid)
         return
 
     sand = sandableFactory(sandable, TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS)
@@ -337,7 +348,7 @@ def handle_schema(payload):
             'width': IMAGE_WIDTH,
             'height': IMAGE_HEIGHT,
         },
-    })
+    }, room=request.sid)
 
 
 @app.route('/api/draw/preview', methods=['POST'])
@@ -356,8 +367,8 @@ def drawPreviewApi():
 def drawHistoryApi():
     save, history = History.list()
     return jsonify({
-        'saved': _history_items(save),
-        'history': _history_items(history),
+        'saved': _history_items(save, mutable=True, history=False),
+        'history': _history_items(history, mutable=False, history=True),
     })
 
 
@@ -505,17 +516,37 @@ def drawExportApi():
 @app.route('/draw', methods=['GET', 'POST'])
 def drawPage():
     if request.method == 'GET':
+        loadName = request.args.get('loadname', '').strip()
+        initialParams = {}
+        for key, value in request.args.items():
+            if key in ('embed', 'view', 'method', 'loadname'):
+                continue
+            initialParams[key] = value
+        if request.args.get('embed') != '1':
+            selected = request.args.get('method', drawers[0])
+            if selected not in drawers:
+                selected = drawers[0]
+            redirectArgs = {'view': 'draw', 'method': selected}
+            if loadName:
+                redirectArgs['loadname'] = loadName
+            redirectArgs.update(initialParams)
+            return redirect(url_for('shellPage', **redirectArgs))
+
         cstuff = cgistuff('Draw')
         selected = request.args.get('method', drawers[0])
         if selected not in drawers:
             selected = drawers[0]
         return ''.join([
             cstuff.standardTopStr(),
-            render_template('draw-static-page.tpl', method=selected, sandables=drawers, width=IMAGE_WIDTH, height=IMAGE_HEIGHT, imagefile=IMAGE_FILE),
+            render_template('draw-static-page.tpl', method=selected, sandables=drawers, width=IMAGE_WIDTH, height=IMAGE_HEIGHT, imagefile=IMAGE_FILE, embedded=True, loadname=loadName, initial_params=initialParams),
             cstuff.endBodyStr()])
 
     cstuff = cgistuff('Draw')
     form = request.values
+    action = form.get('action', '')
+    drawName = form.get('_name', '').strip()
+    if action == 'load' or action == 'Load':
+        drawName = form.get('_loadname', '').strip()
 
     # Check to see if params are being loaded from a file
     sandable, params = _load_requested_sandable(form)
@@ -582,7 +613,7 @@ def drawPage():
             summary['pointCount'])
 
         # Make the form
-        editor = render_template('draw-form.tpl', sandable=sandable, dialog=d.html(), drawinfo=drawinfo, help=help)
+        editor = render_template('draw-form.tpl', sandable=sandable, dialog=d.html(), drawinfo=drawinfo, help=help, drawname=drawName)
     else:
         errors = '"%s" is not a valid drawing method!' % sandable
 
@@ -592,7 +623,7 @@ def drawPage():
 
     return ''.join([
         cstuff.standardTopStr(),
-        render_template('draw-page.tpl', sandables=drawers, sandable=sandable, imagefile=imagefile, width=IMAGE_WIDTH, height=IMAGE_HEIGHT, errors=errors, editor=editor),
+        render_template('draw-page.tpl', sandables=drawers, sandable=sandable, imagefile=imagefile, width=IMAGE_WIDTH, height=IMAGE_HEIGHT, errors=errors, editor=editor, drawname=drawName),
         cstuff.endBodyStr()])
 
 
@@ -618,15 +649,16 @@ def handle_preview(payload):
             'error': errorResponse.get_json().get('error') if hasattr(errorResponse, 'get_json') else str(errorResponse),
             'status': status,
             'requestId': requestId,
-        })
+        }, room=request.sid)
         return
 
     if state.get('cancelled'):
         return
 
-    response = _api_response_from_state(state, includeImageData=True)
+    includeFields = bool(payload.get('includeFields'))
+    response = _api_response_from_state(state, includeFields=includeFields, includeImageData=True)
     response['requestId'] = requestId
-    socketio.emit('draw:preview:response', response)
+    socketio.emit('draw:preview:response', response, room=request.sid)
 
 
 @socketio.on('disconnect')
@@ -642,7 +674,7 @@ def handle_execute(payload):
         socketio.emit('draw:execute:response', {
             'error': errorResponse.get_json().get('error') if hasattr(errorResponse, 'get_json') else str(errorResponse),
             'status': status,
-        })
+        }, room=request.sid)
         return
     if state['errors']:
         socketio.emit('draw:execute:response', {
@@ -651,7 +683,7 @@ def handle_execute(payload):
             'image': state['image'],
             'summary': state['summary'],
             'status': 'error',
-        })
+        }, room=request.sid)
         return
 
     with schedapi.schedapi() as sched:
@@ -663,9 +695,9 @@ def handle_execute(payload):
     socketio.emit('draw:execute:response', {
         'status': 'ok',
         'method': state['method'],
-        'image': dict(state['image'], dataUrl=_image_data_url(state['image']['path'])),
+        'image': state['image'],
         'summary': state['summary'],
-    })
+    }, room=request.sid)
 
 
 @socketio.on('draw:abort')
@@ -675,7 +707,7 @@ def handle_abort(payload):
         sched.demoHalt()
     with mach.mach() as e:
         e.stop()
-    socketio.emit('draw:abort:response', {'status': 'ok'})
+    socketio.emit('draw:abort:response', {'status': 'ok'}, room=request.sid)
 
 
 @socketio.on('draw:save')
@@ -686,7 +718,7 @@ def handle_save(payload):
         socketio.emit('draw:save:response', {
             'error': errorResponse.get_json().get('error') if hasattr(errorResponse, 'get_json') else str(errorResponse),
             'status': status,
-        })
+        }, room=request.sid)
         return
 
     name = str(payload.get('name', '')).strip()
@@ -697,7 +729,7 @@ def handle_save(payload):
             'image': state['image'],
             'summary': state['summary'],
             'status': 'error',
-        })
+        }, room=request.sid)
         return
 
     History.save(state['paramsObj'], state['method'], state['chains'], name)
@@ -706,7 +738,7 @@ def handle_save(payload):
         'name': name,
         'image': state['image'],
         'summary': state['summary'],
-    })
+    }, room=request.sid)
 
 
 @socketio.on('draw:export')
@@ -717,7 +749,7 @@ def handle_export(payload):
         socketio.emit('draw:export:response', {
             'error': errorResponse.get_json().get('error') if hasattr(errorResponse, 'get_json') else str(errorResponse),
             'status': status,
-        })
+        }, room=request.sid)
         return
 
     name = str(payload.get('name', '')).strip()
@@ -728,7 +760,7 @@ def handle_export(payload):
             'image': state['image'],
             'summary': state['summary'],
             'status': 'error',
-        })
+        }, room=request.sid)
         return
 
     fileName = "%s%s.svg" % (DATA_PATH, name)
@@ -739,7 +771,7 @@ def handle_export(payload):
         'file': fileName,
         'image': state['image'],
         'summary': state['summary'],
-    })
+    }, room=request.sid)
 
 
 @socketio.on('draw:playlist:add')
@@ -752,7 +784,7 @@ def handle_playlist_add(payload):
         socketio.emit('draw:playlist:add:response', {
             'status': 'error',
             'error': 'Invalid drawing method',
-        })
+        }, room=request.sid)
         return
 
     params = payload.get('params')
@@ -769,14 +801,14 @@ def handle_playlist_add(payload):
         socketio.emit('draw:playlist:add:response', {
             'status': 'error',
             'error': errorResponse.get_json().get('error') if hasattr(errorResponse, 'get_json') else str(errorResponse),
-        })
+        }, room=request.sid)
         return
     if state.get('errors'):
         socketio.emit('draw:playlist:add:response', {
             'status': 'error',
             'error': state['errors'],
             'fieldErrors': state.get('fieldErrors', {}),
-        })
+        }, room=request.sid)
         return
 
     item = Playlist.add(state['method'], state['params'])
@@ -799,4 +831,4 @@ def handle_playlist_add(payload):
         'status': 'ok',
         'item': item,
         'count': len(Playlist.list()),
-    })
+    }, room=request.sid)

@@ -49,7 +49,10 @@
     return;
   }
 
-  const socket = window.__sandtableStatusSocket || io({reconnection: true});
+  const socket = window.__sandtableStatusSocket || io({
+    reconnection: true,
+    transports: ['websocket']
+  });
   window.__sandtableStatusSocket = socket;
 
   function updateBodyPadding() {

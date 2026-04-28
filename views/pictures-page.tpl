@@ -5,7 +5,7 @@
  </div>
 </form>
 
-<form method="post" action="draw">
+<form method="get" action="/draw">
  <input name="method" type="hidden" value="Picture">
  <table>
   {% for f, filename in pictures %}

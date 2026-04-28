@@ -22,6 +22,10 @@ function myRename(nm,fn,ft) {
   }
 }
 function mySubmit(action,name,value,name2,value2) {
+  if (action === 'draw' && name === 'action' && value.toLowerCase() === 'load' && name2 === '_loadname') {
+    window.location.href = '/?view=draw&loadname=' + encodeURIComponent(value2);
+    return;
+  }
   $('<input />').attr('type','hidden').attr('name',name).attr('value',value).appendTo('#files');
   $('<input />').attr('type','hidden').attr('name',name2).attr('value',value2).appendTo('#files');
   document.getElementById('files').action = action;
@@ -29,9 +33,9 @@ function mySubmit(action,name,value,name2,value2) {
 }
 </script>
 
-<form method="post" action="filer">
+<form method="post" action="/filer" class="auto_submit_form">
  <div class="filerbox">
-  <select class="filer" name="filetype" onchange="this.form.submit()">
+  <select class="filer" name="filetype">
    {{ options|safe }}
   </select>
  </div>
@@ -51,6 +55,12 @@ function mySubmit(action,name,value,name2,value2) {
 <form id="files" method="post" action="filer">
  <input type="hidden" name="filetype" value="{{ft}}"/>
  <span class="filerTitle">{{path}}</span>
+ {% if ft == 'Saved Drawings' %}
+  <div class="filerbox" style="margin-top: 6px; margin-bottom: 8px;">
+   <button class="load" type="submit" name="directory" value="{{saved_directory}}">Saved only</button>
+   <button class="load" type="submit" name="directory" value="{{store_root}}">Top level</button>
+  </div>
+ {% endif %}
  <table id="filetable">
   {{ table|safe }}
  </table>

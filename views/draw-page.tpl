@@ -3,7 +3,7 @@
   <td valign="TOP">
    {% for sandy in sandables %}
     {% set style = 'selected' if sandy == sandable else 'sandable' %}
-    <a href="draw?method={{sandy}}"><img src="images/{{sandy}}.png" width="75" height="60" class="{{style}}" alt="{{sandy}}"></a>
+    <a href="/draw?method={{sandy}}"><img src="images/{{sandy}}.png" width="75" height="60" class="{{style}}" alt="{{sandy}}"></a>
     {% if loop.index0 % 3 == 2 %}
      <br>
     {% endif %}

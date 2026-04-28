@@ -1,8 +1,9 @@
 <table class="main">
  <tr>
-  <td valign="TOP" style="width: 230px;">
-   <div class="navigation" style="margin-bottom: 8px;">Method</div>
-     <div id="methodGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;"></div>
+  <td id="methodPane" valign="TOP" style="width: 95px;">
+   <div id="methodScroll" style="height: 300px; overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable;">
+   <div id="methodGrid" style="display: grid; grid-template-columns: repeat(auto-fill, 79px); gap: 4px; justify-content: start;"></div>
+   </div>
    <div id="statusMsg" class="navigation" style="margin-top: 12px;"></div>
   </td>
   <td valign="TOP">
@@ -28,6 +29,19 @@
  </tr>
 </table>
 
+<style>
+ #methodGrid img.sandable {
+  border: 1px solid #6f6f6f;
+  box-sizing: border-box;
+ }
+
+ #methodGrid img.selected {
+  border: 3px solid #ffd24d;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.85), 0 0 10px rgba(255, 210, 77, 0.85);
+  box-sizing: border-box;
+ }
+</style>
+
 <script>
 (function() {
   if (typeof window.__sandtablePageCleanup === 'function') {
@@ -39,7 +53,10 @@
   }
 
   const initialMethod = {{ method|tojson }};
+  const initialLoadName = {{ loadname|default('', true)|tojson }};
+  const initialParams = {{ initial_params|default({}, true)|tojson }};
   const fallbackMethods = {{ sandables|tojson }};
+  const isEmbedded = {{ embedded|tojson }};
   const pagePath = window.location.pathname || '/draw';
   const appBasePath = pagePath.replace(/\/draw\/?$/, '').replace(/\/$/, '');
 
@@ -49,6 +66,7 @@
     reconnectionDelay: 1000,
     reconnectionDelayMax: 5000,
     reconnectionAttempts: 5,
+    transports: ['websocket'],
     path: (appBasePath ? appBasePath : '') + '/socket.io'
   });
 
@@ -73,16 +91,62 @@
     params: {},
     realtime: true,
     latestPreviewRequestId: 0,
+    pendingPreviewRequests: {},
+    pendingPreviewByKey: {},
+    realtimeTimer: null,
+    methodLoadInFlight: false,
   };
   let destroyed = false;
 
   const methodGrid = document.getElementById('methodGrid');
+  const methodPane = document.getElementById('methodPane');
+  const methodScroll = document.getElementById('methodScroll');
   const planImage = document.getElementById('planImage');
   const errorBox = document.getElementById('errorBox');
   const drawInfo = document.getElementById('drawInfo');
   const dialogHost = document.getElementById('dialogHost');
   const statusMsg = document.getElementById('statusMsg');
   const nameInput = document.getElementById('nameInput');
+
+  const METHOD_TILE_WIDTH = 79;
+  const METHOD_TILE_GAP = 4;
+  const METHOD_MIN_WIDTH = 95;
+  const METHOD_MAX_WIDTH = 280;
+  const STATUSBAR_MARGIN = 8;
+
+  function methodGridWidth(columns) {
+    return (columns * METHOD_TILE_WIDTH) + (Math.max(columns - 1, 0) * METHOD_TILE_GAP);
+  }
+
+  function layoutMethodPane() {
+    if (!methodPane || !methodScroll || !methodGrid) {
+      return;
+    }
+
+    const top = methodScroll.getBoundingClientRect().top;
+    let bottom = window.innerHeight - STATUSBAR_MARGIN;
+    const globalStatusBar = document.getElementById('globalStatusBar');
+    if (globalStatusBar) {
+      const barRect = globalStatusBar.getBoundingClientRect();
+      if (barRect.top > 0) {
+        bottom = Math.min(bottom, barRect.top - STATUSBAR_MARGIN);
+      }
+    }
+    const availableHeight = Math.max(140, Math.floor(bottom - top));
+    methodScroll.style.height = String(availableHeight) + 'px';
+
+    const preferredWidth = Math.min(METHOD_MAX_WIDTH, Math.max(METHOD_MIN_WIDTH, Math.floor(window.innerWidth * 0.18)));
+    let columns = Math.max(1, Math.floor((preferredWidth + METHOD_TILE_GAP) / (METHOD_TILE_WIDTH + METHOD_TILE_GAP)));
+    if (state.methods.length) {
+      columns = Math.min(columns, state.methods.length);
+    }
+
+    const snappedGridWidth = methodGridWidth(columns);
+    const scrollbarWidth = Math.max(methodScroll.offsetWidth - methodScroll.clientWidth, 14);
+    const snappedPaneWidth = snappedGridWidth + scrollbarWidth;
+    methodPane.style.width = String(snappedPaneWidth) + 'px';
+    methodGrid.style.gridTemplateColumns = 'repeat(' + columns + ', ' + METHOD_TILE_WIDTH + 'px)';
+  }
 
   function twoDigit(value) {
     return String(value).padStart(2, '0');
@@ -112,29 +176,65 @@
     return buildUrl('/images/' + encodeURIComponent(method) + '.png');
   }
 
+  function methodsEqual(left, right) {
+    const a = Array.isArray(left) ? left : [];
+    const b = Array.isArray(right) ? right : [];
+    if (a.length !== b.length) {
+      return false;
+    }
+    for (let i = 0; i < a.length; i += 1) {
+      if (a[i] !== b[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function updateMethodSelection() {
+    const images = methodGrid.querySelectorAll('img[data-method-name]');
+    images.forEach(function(image) {
+      const isSelected = image.dataset.methodName === state.method;
+      image.className = isSelected ? 'selected' : 'sandable';
+    });
+  }
+
   function populateMethods(methods) {
+    const nextMethods = Array.isArray(methods) ? methods.slice() : [];
+    if (methodsEqual(state.methods, nextMethods) && methodGrid.childElementCount) {
+      state.methods = nextMethods;
+      updateMethodSelection();
+      layoutMethodPane();
+      return;
+    }
+
+    state.methods = nextMethods;
     methodGrid.innerHTML = '';
-    (methods || []).forEach(function(method) {
+    nextMethods.forEach(function(method) {
       const link = document.createElement('a');
-      link.href = drawUrlForMethod(method);
+      link.href = '#';
       link.title = method;
       link.style.display = 'block';
 
       const image = document.createElement('img');
+      image.dataset.methodName = method;
       image.src = methodImageUrl(method);
       image.width = 75;
       image.height = 60;
+      image.loading = 'lazy';
+      image.decoding = 'async';
       image.alt = method;
       image.className = method === state.method ? 'selected' : 'sandable';
       link.appendChild(image);
 
       link.addEventListener('click', function(event) {
         event.preventDefault();
+        event.stopPropagation();
         selectMethod(method);
       });
 
       methodGrid.appendChild(link);
     });
+    layoutMethodPane();
   }
 
   function setStatus(msg) {
@@ -411,6 +511,36 @@
     dialogHost.appendChild(table);
   }
 
+  function updateDialogValues(params) {
+    if (destroyed) {
+      return;
+    }
+    state.fields.forEach(function(field) {
+      if (!field.name) {
+        return;
+      }
+      const value = Object.prototype.hasOwnProperty.call(params, field.name) ? params[field.name] : field.default;
+      const node = dialogHost.querySelector('[data-field-name="' + field.name.replace(/"/g, '\\"') + '"]');
+      if (!node) {
+        return;
+      }
+      if (field.kind === 'DialogColor' && Array.isArray(value) && value.length === 3) {
+        const r = Number(value[0]).toString(16).padStart(2, '0');
+        const g = Number(value[1]).toString(16).padStart(2, '0');
+        const b = Number(value[2]).toString(16).padStart(2, '0');
+        node.value = '#' + r + g + b;
+      } else if (field.kind === 'DialogYesNo' || field.kind === 'DialogTrueFalse' || field.kind === 'DialogOnOff' || field.kind === 'Dialog2Choices') {
+        node.value = String(valueForChoiceField(field, value));
+      } else {
+        node.value = value == null ? '' : String(value);
+      }
+      const sliderNode = dialogHost.querySelector('[data-field-slider-name="' + field.name.replace(/"/g, '\\"') + '"]');
+      if (sliderNode) {
+        sliderNode.value = node.value;
+      }
+    });
+  }
+
   function collectParams() {
     const params = {};
     state.fields.forEach(function(field) {
@@ -427,13 +557,22 @@
   }
 
   function applyPreviewData(data) {
+    const previousMethod = state.method;
     if (data.method) {
       state.method = data.method;
     }
-    if (Array.isArray(data.fields)) {
+    if (state.method !== previousMethod) {
+      refreshDefaultFileName();
+    }
+    if (typeof data.realtime === 'boolean') {
+      state.realtime = data.realtime;
+    }
+    const schemaChanged = Array.isArray(data.fields);
+    if (schemaChanged) {
       state.fields = data.fields;
     }
-    state.params = data.params || {};
+    const newParams = data.params || {};
+    state.params = newParams;
     if (data.image && data.image.dataUrl) {
       planImage.src = data.image.dataUrl;
     } else if (data.image && data.image.url) {
@@ -442,14 +581,36 @@
     const summary = data.summary || {};
     renderDrawInfo(summary);
     showError(data.errors || '');
-    populateMethods(state.methods);
-    renderDialog();
+    if (schemaChanged) {
+      renderDialog();
+    } else {
+      updateDialogValues(newParams);
+    }
   }
 
   async function loadMethods() {
     const data = await fetchJson(buildUrl('/api/draw/methods?method=' + encodeURIComponent(state.method)));
     state.methods = data.methods || [];
     populateMethods(state.methods);
+  }
+
+  async function loadDrawing(name) {
+    const loadName = String(name || '').trim();
+    if (!loadName) {
+      return;
+    }
+    setStatus('Loading drawing...');
+    const data = await fetchJson(buildUrl('/api/draw/load'), {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name: loadName}),
+    });
+    applyPreviewData(data);
+    populateMethods(state.methods);
+    if (data && data.loadedName) {
+      nameInput.value = String(data.loadedName);
+      state.autoFileName = String(data.loadedName);
+    }
   }
 
   function loadSchema(method) {
@@ -469,7 +630,9 @@
             state.params[field.name] = field.default;
           }
         });
-        window.history.replaceState(null, '', drawUrlForMethod(state.method));
+        if (!isEmbedded) {
+          window.history.replaceState(null, '', drawUrlForMethod(state.method));
+        }
         refreshDefaultFileName();
         renderDialog();
         resolve(data);
@@ -479,45 +642,81 @@
     });
   }
 
-  const realtimePreview = (function() {
-    let timer = null;
+  function cancelRealtimePreview() {
+    if (state.realtimeTimer) {
+      clearTimeout(state.realtimeTimer);
+      state.realtimeTimer = null;
+    }
+  }
+
+  function realtimePreview() {
     const DELAY_MS = 250;
-    return function() {
-      if (!state.realtime) {
-        return;
-      }
-      if (timer) {
-        clearTimeout(timer);
-      }
-      timer = setTimeout(function() {
-        timer = null;
-        preview('refresh');
-      }, DELAY_MS);
-    };
-  })();
+    if (!state.realtime || state.methodLoadInFlight) {
+      return;
+    }
+    cancelRealtimePreview();
+    state.realtimeTimer = setTimeout(function() {
+      state.realtimeTimer = null;
+      preview('refresh');
+    }, DELAY_MS);
+  }
 
   async function selectMethod(method) {
+    if (state.methodLoadInFlight) {
+      return;
+    }
     setStatus('Loading method...');
+    state.methodLoadInFlight = true;
+    cancelRealtimePreview();
     try {
-      await loadSchema(method);
-      await preview('refresh');
+      await preview('refresh', {method: method, includeFields: true});
       populateMethods(state.methods);
     } catch (err) {
       showError(err.message || 'Method load failed');
       setStatus('');
+    } finally {
+      state.methodLoadInFlight = false;
     }
   }
 
   // WebSocket-based interactive requests
   function preview(action, extraPayload) {
     setStatus('Working...');
-    state.latestPreviewRequestId += 1;
-    socket.emit('draw:preview', Object.assign({
+    const payload = Object.assign({
       method: state.method,
       action: action || 'refresh',
       params: collectParams(),
-      requestId: state.latestPreviewRequestId,
-    }, extraPayload || {}));
+    }, extraPayload || {});
+
+    const dedupeKey = JSON.stringify({
+      method: payload.method,
+      action: payload.action,
+      params: payload.params,
+      fieldName: payload.fieldName || null,
+      includeFields: !!payload.includeFields,
+    });
+    const existingRequestId = state.pendingPreviewByKey[dedupeKey];
+    if (existingRequestId && state.pendingPreviewRequests[existingRequestId]) {
+      return state.pendingPreviewRequests[existingRequestId].promise;
+    }
+
+    state.latestPreviewRequestId += 1;
+    const requestId = state.latestPreviewRequestId;
+    payload.requestId = requestId;
+
+    let resolvePending;
+    const promise = new Promise(function(resolve) {
+      resolvePending = resolve;
+    });
+    state.pendingPreviewRequests[requestId] = {
+      resolve: resolvePending,
+      key: dedupeKey,
+      promise: promise,
+    };
+    state.pendingPreviewByKey[dedupeKey] = requestId;
+
+    socket.emit('draw:preview', payload);
+    return promise;
   }
 
   function randomizeField(fieldName) {
@@ -558,6 +757,15 @@
   socket.on('draw:preview:response', function(data) {
     if (destroyed) {
       return;
+    }
+    const responseRequestId = data && data.requestId;
+    if (responseRequestId && state.pendingPreviewRequests[responseRequestId]) {
+      const pending = state.pendingPreviewRequests[responseRequestId];
+      pending.resolve(data);
+      if (pending.key && state.pendingPreviewByKey[pending.key] === responseRequestId) {
+        delete state.pendingPreviewByKey[pending.key];
+      }
+      delete state.pendingPreviewRequests[responseRequestId];
     }
     if (data && data.requestId && data.requestId !== state.latestPreviewRequestId) {
       return;
@@ -687,6 +895,10 @@
 
   window.__sandtablePageCleanup = function() {
     destroyed = true;
+    cancelRealtimePreview();
+    state.pendingPreviewRequests = {};
+    state.pendingPreviewByKey = {};
+    window.removeEventListener('resize', layoutMethodPane);
     try {
       socket.disconnect();
     } catch (err) {
@@ -763,6 +975,11 @@
 
   (async function init() {
     try {
+      window.addEventListener('resize', layoutMethodPane);
+
+      // Initialize a sane default save/export name before first preview response.
+      refreshDefaultFileName();
+
       // Always show a method list immediately, even if API calls fail.
       populateMethods(state.methods);
 
@@ -772,8 +989,15 @@
         setStatus('Using built-in method list');
       }
 
-      await loadSchema(state.method);
-      await preview('refresh');
+      if (initialLoadName) {
+        await loadDrawing(initialLoadName);
+      } else {
+        const initialPreviewPayload = {includeFields: true};
+        if (initialParams && Object.keys(initialParams).length) {
+          initialPreviewPayload.params = initialParams;
+        }
+        await preview('refresh', initialPreviewPayload);
+      }
     } catch (err) {
       showError(err.message || 'Initialization failed');
       setStatus('Initialization failed');

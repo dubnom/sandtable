@@ -101,7 +101,7 @@ body {
   const contentInner = document.getElementById('shellContentInner');
   const buttons = Array.prototype.slice.call(document.querySelectorAll('#shellMenu [data-view]'));
   const bar = document.getElementById('globalStatusBar');
-  let currentPath = '/{{ initialView }}';
+    let currentPath = '/{{ initialView }}';
 
   function normalizeView(view) {
    view = String(view || 'draw').replace(/^\/+/, '');
@@ -118,6 +118,15 @@ body {
     btn.classList.toggle('active', btn.dataset.view === view);
    });
   }
+
+    function initialPathFromLocation() {
+     const shellUrl = new URL(window.location.href);
+     const view = normalizeView(shellUrl.searchParams.get('view') || '{{ initialView }}');
+     const passthrough = new URLSearchParams(shellUrl.search);
+     passthrough.delete('view');
+     const query = passthrough.toString();
+     return '/' + view + (query ? ('?' + query) : '');
+    }
 
   function layout() {
    const top = menu ? (menu.offsetHeight + 8) : 0;
@@ -155,6 +164,18 @@ body {
    return url;
   }
 
+  function normalizeTargetPath(path) {
+   const url = new URL(path || '/', window.location.origin);
+   if ((url.pathname === '/' || url.pathname === '') && url.searchParams.has('view')) {
+    const view = normalizeView(url.searchParams.get('view'));
+    const passthrough = new URLSearchParams(url.search);
+    passthrough.delete('view');
+    const query = passthrough.toString();
+    return '/' + view + (query ? ('?' + query) : '');
+   }
+   return url.pathname + (url.search || '');
+  }
+
   function cleanCurrentPath(url) {
    const cleaned = new URL(url.toString());
    cleaned.searchParams.delete('embed');
@@ -162,7 +183,8 @@ body {
   }
 
   async function loadPath(path, push) {
-   const url = buildEmbedUrl(path || currentPath);
+    const normalizedPath = normalizeTargetPath(path || currentPath);
+    const url = buildEmbedUrl(normalizedPath);
    const response = await fetch(url.toString(), {
     method: 'GET',
     headers: {'X-Requested-With': 'XMLHttpRequest'}
@@ -289,8 +311,10 @@ body {
    });
   });
 
-  layout();
-  loadPath('/{{ initialView }}', false).catch(function(err) {
+    currentPath = initialPathFromLocation();
+    setActive(extractView(currentPath));
+    layout();
+    loadPath(currentPath, false).catch(function(err) {
    contentInner.innerHTML = '<div class="error">Error: ' + String(err.message || err) + '</div>';
   });
  })();

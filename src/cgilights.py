@@ -1,7 +1,7 @@
 import base64
 from functools import lru_cache
 
-from flask import request, render_template
+from flask import request, render_template, redirect, url_for
 
 from Sand import ledPatterns, LED_COLUMNS, LED_ROWS
 from dialog import Dialog
@@ -28,6 +28,9 @@ def _pattern_images_data_urls():
 
 @app.route('/lights', methods=['GET', 'POST'])
 def lightsPage():
+    if request.method == 'GET' and request.args.get('embed') != '1':
+        return redirect(url_for('shellPage', view='lights'))
+
     cstuff = cgistuff('Lights', jQuery=True)
     form = request.form
 

@@ -1,4 +1,4 @@
-from flask import request, render_template
+from flask import request, render_template, redirect, url_for
 import os
 import subprocess
 
@@ -9,14 +9,26 @@ from cgistuff import cgistuff
 
 @app.route('/movie', methods=['GET', 'POST'])
 def moviePage():
+    if request.method == 'GET' and request.args.get('embed') != '1':
+        redirectArgs = {'view': 'movie'}
+        for key, value in request.args.items():
+            if key in ('embed', 'view'):
+                continue
+            redirectArgs[key] = value
+        return redirect(url_for('shellPage', **redirectArgs))
+
     # Handle form operations
-    form = request.form
+    form = request.values
     action = form.get('action', '').lower()
+    loadname = form.get('loadname', '').strip()
     name = form.get('_name', '')
+    if not action and loadname:
+        action = 'load'
+        name = loadname
 
     script = '<Movie>\n</Movie>'
     if action == 'load':
-        name = form.get('_loadname', '')
+        name = form.get('_loadname', '') or loadname
         try:
             with open('%s%s.xml' % (MOVIE_SCRIPT_PATH, name)) as f:
                 script = f.read()

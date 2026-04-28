@@ -1,6 +1,5 @@
-from flask import render_template, request
+from flask import render_template, request, redirect, url_for
 from datetime import datetime
-from os import stat
 
 from webapp import app
 from cgistuff import cgistuff
@@ -10,6 +9,9 @@ from playlist_runtime import runner
 
 @app.route('/playlist', methods=['GET', 'POST'])
 def playlistPage():
+    if request.method == 'GET' and request.args.get('embed') != '1':
+        return redirect(url_for('shellPage', view='playlist'))
+
     cstuff = cgistuff('Playlist')
     status = ''
     error = ''
@@ -51,11 +53,7 @@ def playlistPage():
 
         imageFile = str(item.get('imageFile', '') or '').strip()
         if imageFile:
-            try:
-                mtime = int(stat('store/%s' % imageFile).st_mtime)
-            except OSError:
-                mtime = 0
-            item['imageUrl'] = 'store/%s?%d' % (imageFile, mtime)
+            item['imageUrl'] = 'store/%s' % imageFile
         else:
             item['imageUrl'] = ''
 

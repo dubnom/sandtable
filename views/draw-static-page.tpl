@@ -57,6 +57,7 @@
   const initialParams = {{ initial_params|default({}, true)|tojson }};
   const fallbackMethods = {{ sandables|tojson }};
   const isEmbedded = {{ embedded|tojson }};
+  const DRAW_STATE_STORAGE_KEY = 'sandtable.drawState.v1';
   const pagePath = window.location.pathname || '/draw';
   const appBasePath = pagePath.replace(/\/draw\/?$/, '').replace(/\/$/, '');
 
@@ -82,6 +83,41 @@
       return appBasePath + '/draw?method=' + encodeURIComponent(method);
     }
     return '/draw?method=' + encodeURIComponent(method);
+  }
+
+  function loadPersistedDrawState() {
+    try {
+      const raw = window.sessionStorage.getItem(DRAW_STATE_STORAGE_KEY);
+      if (!raw) {
+        return null;
+      }
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') {
+        return null;
+      }
+      const method = typeof parsed.method === 'string' ? parsed.method : '';
+      const params = (parsed.params && typeof parsed.params === 'object') ? parsed.params : {};
+      const name = typeof parsed.name === 'string' ? parsed.name : '';
+      return {method: method, params: params, name: name};
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function persistDrawState() {
+    if (destroyed) {
+      return;
+    }
+    try {
+      const snapshot = {
+        method: state.method,
+        params: collectParams(),
+        name: nameInput ? String(nameInput.value || '') : '',
+      };
+      window.sessionStorage.setItem(DRAW_STATE_STORAGE_KEY, JSON.stringify(snapshot));
+    } catch (err) {
+      // Ignore persistence failures (private mode, quota, etc).
+    }
   }
 
   const state = {
@@ -669,7 +705,7 @@
     state.methodLoadInFlight = true;
     cancelRealtimePreview();
     try {
-      await preview('refresh', {method: method, includeFields: true});
+      await preview('refresh', {method: method, includeFields: true, params: {}});
       populateMethods(state.methods);
     } catch (err) {
       showError(err.message || 'Method load failed');
@@ -894,6 +930,7 @@
   });
 
   window.__sandtablePageCleanup = function() {
+    persistDrawState();
     destroyed = true;
     cancelRealtimePreview();
     state.pendingPreviewRequests = {};
@@ -977,6 +1014,11 @@
     try {
       window.addEventListener('resize', layoutMethodPane);
 
+      const persisted = initialLoadName ? null : loadPersistedDrawState();
+      if (persisted && persisted.method) {
+        state.method = persisted.method;
+      }
+
       // Initialize a sane default save/export name before first preview response.
       refreshDefaultFileName();
 
@@ -993,7 +1035,14 @@
         await loadDrawing(initialLoadName);
       } else {
         const initialPreviewPayload = {includeFields: true};
-        if (initialParams && Object.keys(initialParams).length) {
+        if (persisted && persisted.params && Object.keys(persisted.params).length) {
+          initialPreviewPayload.method = persisted.method || state.method;
+          initialPreviewPayload.params = persisted.params;
+          if (persisted.name) {
+            nameInput.value = persisted.name;
+            state.autoFileName = persisted.name;
+          }
+        } else if (initialParams && Object.keys(initialParams).length) {
           initialPreviewPayload.params = initialParams;
         }
         await preview('refresh', initialPreviewPayload);

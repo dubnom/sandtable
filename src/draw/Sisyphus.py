@@ -1,7 +1,7 @@
 from math import radians, sqrt
 from sandable import Sandable
 from Sand import THR_PATH
-from dialog import DialogFile, DialogFloat, DialogList, DialogYesNo
+from dialog import DialogFileList, DialogFloat, DialogList, DialogYesNo
 from Chains import Chains
 from thr import loadThr
 
@@ -31,7 +31,7 @@ Download tracks from [Dropbox](https://www.dropbox.com/sh/n2l29huvdrjalyx/AAA69j
         self.backgrounds = ['None', 'Spiral', "Full Spiral"]
 
         self.editor = [
-            DialogFile("filename",      "File Name",        default=THR_PATH, filter='.thr'),
+            DialogFileList("filename",   "File Name",        path=THR_PATH, filter='.thr', default=''),
             DialogFloat("rotation",     "Rotation",         units='Degrees', default=0, min=-360., max=360.),
             DialogList("background",    "Background",       default='None', list=self.backgrounds),
             DialogYesNo("fitToTable",   "Fit to table"),

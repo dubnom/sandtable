@@ -1,6 +1,6 @@
 from Sand import CLIPART_PATH
 from sandable import Sandable, inchesToUnits
-from dialog import DialogFile, DialogFloat, DialogInt, DialogBreak
+from dialog import DialogFileList, DialogFloat, DialogInt, DialogBreak
 
 import cam
 from Chains import Chains
@@ -34,7 +34,7 @@ sections of the drawing that aren't connected to one-another.
 
     def __init__(self, width, length, ballSize, units):
         self.editor = [
-            DialogFile("filename",            "File Name",                default=CLIPART_PATH, filter='.svg'),
+            DialogFileList("filename",        "File Name",                path=CLIPART_PATH, filter='.svg', default=''),
             DialogInt("iterations",          "Number of Fill Iterations", default=0, min=0, max=60),
             DialogFloat("decrement",           "Fill Decrement",           units=units, default=0.5, min=0.0, max=inchesToUnits(2.0, units)),
             DialogFloat("ballSize",            "Ball Size",                units=units, default=ballSize, min=inchesToUnits(0.25, units)),

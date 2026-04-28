@@ -421,6 +421,48 @@ class DialogFont(DialogField):
         return fonts[random.randint(0, len(fonts) - 1)][1]
 
 
+class DialogFileList(DialogField):
+    """Flat dropdown of all files under a directory matching a set of extensions.
+    Works like DialogFont: value is the full path, display is the filename only."""
+
+    def __init__(self, name, prompt, path='', filter='', default=''):
+        DialogField.__init__(self, name, prompt, '', default, None, None, None)
+        self.path = path
+        self.filters = [f.strip() for f in filter.split('|') if f.strip()]
+
+    def _extension(self, filename):
+        pieces = filename.split('.')
+        return ('.' + pieces[-1].lower()) if len(pieces) >= 2 else ''
+
+    def _getFiles(self):
+        files = []
+        try:
+            for f in sorted(os.listdir(self.path)):
+                if f.startswith('.'):
+                    continue
+                if self._extension(f) in self.filters:
+                    files.append((f, os.path.join(self.path, f)))
+        except OSError:
+            pass
+        return files
+
+    def toForm(self, value):
+        html = '<select name="%s">\n' % self.name
+        files = self._getFiles()
+        for display, fullpath in files:
+            selected = ' selected' if fullpath == value else ''
+            html += '<option value="%s"%s>%s</option>\n' % (fullpath, selected, display)
+        html += '</select>'
+        return html
+
+    def fromForm(self, value):
+        return value if value else self.default
+
+    def _random(self):
+        files = self._getFiles()
+        return files[random.randint(0, len(files) - 1)][1] if files else self.default
+
+
 class DialogMulti(DialogField):
     def __init__(self, name, prompt, default='', rows=5, cols=20):
         DialogField.__init__(self, name, prompt, '', default, None, None, None)

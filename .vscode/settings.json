@@ -1,0 +1,5 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/home/dubnom/.venv/bin/python": true
+    }
+}

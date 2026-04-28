@@ -71,6 +71,15 @@ def _field_to_schema(field):
         schema['extensions'] = bool(getattr(field, 'extensions'))
     if hasattr(field, 'fields'):
         schema['fields'] = [_field_to_schema(child) for child in getattr(field, 'fields')]
+    
+    # For DialogFont fields, include the list of available fonts
+    if kind == 'DialogFont' and hasattr(field, '_getFonts'):
+        fonts = field._getFonts()
+        schema['choices'] = [[display, path] for display, path in fonts]
+
+    # For DialogFileList fields, include the flat file list as [display, path] pairs
+    if kind == 'DialogFileList' and hasattr(field, '_getFiles'):
+        schema['choices'] = [[display, path] for display, path in field._getFiles()]
 
     return schema
 

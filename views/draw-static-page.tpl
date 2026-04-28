@@ -2,21 +2,7 @@
  <tr>
   <td valign="TOP" style="width: 230px;">
    <div class="navigation" style="margin-bottom: 8px;">Method</div>
-     <div id="methodGrid"></div>
-   <div class="navigation" style="margin-top: 10px; margin-bottom: 6px;">Drawn Images</div>
-   <div id="historyGrid"></div>
-   <div style="margin-top: 10px; line-height: 1.8;">
-    <button id="redrawBtn" class="redraw" type="button">Redraw Screen</button>
-    <button id="randomBtn" class="random" type="button">Random!</button>
-    <button id="drawBtn" class="doit" type="button">Draw in Sand!</button>
-    <button id="abortBtn" class="abort" type="button">Abort!</button>
-   </div>
-   <div class="savebox" style="margin-top: 10px;">
-    <span class="save">Name</span>
-    <input id="nameInput" class="save" type="text" size="24">
-    <button id="saveBtn" class="save" type="button">Save</button>
-    <button id="exportBtn" class="export" type="button">Export</button>
-   </div>
+     <div id="methodGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;"></div>
    <div id="statusMsg" class="navigation" style="margin-top: 12px;"></div>
   </td>
   <td valign="TOP">
@@ -25,6 +11,18 @@
     <div id="errorBox" class="error" style="display: none;"></div>
     <span id="drawInfo" class="drawtime"></span>
     <div id="dialogHost"></div>
+    <div style="margin-top: 10px; line-height: 1.8;">
+     <button id="redrawBtn" class="redraw" type="button">Redraw Screen</button>
+     <button id="randomBtn" class="random" type="button">Random!</button>
+     <button id="drawBtn" class="doit" type="button">Draw in Sand!</button>
+     <button id="abortBtn" class="abort" type="button">Abort!</button>
+    </div>
+    <div class="savebox" style="margin-top: 10px;">
+     <span class="save">Name</span>
+     <input id="nameInput" class="save" type="text" size="24">
+     <button id="saveBtn" class="save" type="button">Save</button>
+     <button id="exportBtn" class="export" type="button">Export</button>
+    </div>
    </center>
   </td>
  </tr>
@@ -70,7 +68,6 @@
 
   const methodGrid = document.getElementById('methodGrid');
   const planImage = document.getElementById('planImage');
-  const historyGrid = document.getElementById('historyGrid');
   const errorBox = document.getElementById('errorBox');
   const drawInfo = document.getElementById('drawInfo');
   const dialogHost = document.getElementById('dialogHost');
@@ -83,11 +80,11 @@
 
   function populateMethods(methods) {
     methodGrid.innerHTML = '';
-    let index = 0;
     (methods || []).forEach(function(method) {
       const link = document.createElement('a');
       link.href = drawUrlForMethod(method);
       link.title = method;
+      link.style.display = 'block';
 
       const image = document.createElement('img');
       image.src = methodImageUrl(method);
@@ -103,55 +100,7 @@
       });
 
       methodGrid.appendChild(link);
-      index += 1;
-      if (index % 3 === 0) {
-        methodGrid.appendChild(document.createElement('br'));
-      }
     });
-  }
-
-  function historyImageUrl(item) {
-    if (item && item.path) {
-      if (item.path.charAt(0) === '/') {
-        return buildUrl(item.path);
-      }
-      return buildUrl('/' + item.path);
-    }
-    return '';
-  }
-
-  function makeHistorySection(title, items) {
-    const wrapper = document.createElement('div');
-    const heading = document.createElement('div');
-    heading.className = 'historyTitle';
-    heading.style.marginTop = '6px';
-    heading.textContent = title;
-    wrapper.appendChild(heading);
-
-    (items || []).forEach(function(item) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'history';
-      btn.title = item.name;
-
-      const image = document.createElement('img');
-      image.src = historyImageUrl(item);
-      image.alt = item.name;
-      btn.appendChild(image);
-
-      btn.addEventListener('click', function() {
-        loadDrawing(item.name);
-      });
-      wrapper.appendChild(btn);
-    });
-
-    return wrapper;
-  }
-
-  function renderHistory(saved, history) {
-    historyGrid.innerHTML = '';
-    historyGrid.appendChild(makeHistorySection('Saved', saved || []));
-    historyGrid.appendChild(makeHistorySection('History', history || []));
   }
 
   function setStatus(msg) {
@@ -196,6 +145,24 @@
         opt.value = String(choice);
         opt.textContent = String(choice);
         if (String(choice) === String(value)) {
+          opt.selected = true;
+        }
+        select.appendChild(opt);
+      });
+      return select;
+    }
+
+    if (kind === 'DialogFont' || kind === 'DialogFileList') {
+      const select = document.createElement('select');
+      select.dataset.fieldName = field.name;
+      const choices = field.choices || [];
+      choices.forEach(function(choice) {
+        const opt = document.createElement('option');
+        const displayName = Array.isArray(choice) ? choice[0] : String(choice);
+        const filePath = Array.isArray(choice) ? choice[1] : String(choice);
+        opt.value = filePath;
+        opt.textContent = displayName;
+        if (filePath === String(value)) {
           opt.selected = true;
         }
         select.appendChild(opt);
@@ -331,11 +298,6 @@
     populateMethods(state.methods);
   }
 
-  async function loadHistory() {
-    const data = await fetchJson(buildUrl('/api/draw/history'));
-    renderHistory(data.saved || [], data.history || []);
-  }
-
   function loadSchema(method) {
     return new Promise(function(resolve, reject) {
       socket.once('draw:schema:response', function(data) {
@@ -369,22 +331,6 @@
       populateMethods(state.methods);
     } catch (err) {
       showError(err.message || 'Method load failed');
-      setStatus('');
-    }
-  }
-
-  async function loadDrawing(name) {
-    setStatus('Loading drawing...');
-    try {
-      const data = await fetchJson(buildUrl('/api/draw/load'), {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({name: name}),
-      });
-      applyPreviewData(data);
-      setStatus('Loaded ' + name);
-    } catch (err) {
-      showError(err.message || 'Load failed');
       setStatus('');
     }
   }
@@ -517,12 +463,6 @@
         await loadMethods();
       } catch (err) {
         setStatus('Using built-in method list');
-      }
-
-      try {
-        await loadHistory();
-      } catch (err) {
-        // History thumbnails are optional for initial load.
       }
 
       await loadSchema(state.method);

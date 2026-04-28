@@ -3,7 +3,7 @@ import potrace
 import numpy as np
 from Sand import PICTURE_PATH
 from sandable import Sandable
-from dialog import DialogFile, DialogInt, DialogFloat, DialogBreak
+from dialog import DialogFileList, DialogInt, DialogFloat, DialogBreak
 from Chains import Chains
 
 
@@ -34,7 +34,7 @@ Use the "Pictures" tab in the main navigation to more easily select photos.
 
     def __init__(self, width, length, ballSize, units):
         self.editor = [
-            DialogFile("filename",            "File Name",                default=PICTURE_PATH, filter='.png|.jpg|.gif|.bmp'),
+            DialogFileList("filename",        "File Name",                path=PICTURE_PATH, filter='.png|.jpg|.gif|.bmp', default=''),
             DialogInt("turdSize",            "Turd Size",                default=40, min=0, max=1000),
             DialogInt("iterations",          "Number of Fill Iterations", default=0, min=0, max=100),
             DialogFloat("decrement",           "Fill Decrement",           units=units, default=0.5, min=0.0, max=10.0),

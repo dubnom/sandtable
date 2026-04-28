@@ -19,22 +19,22 @@ updater();
 setInterval(updater, 2500);
 </script>
 
-%if message:
- <div class="admingood">{{!message}}</div>
- %if message2:
-  {{!message2}}
- %end
-%else:
+{% if message %}
+ <div class="admingood">{{ message|safe }}</div>
+ {% if message2 %}
+  {{ message2|safe }}
+ {% endif %}
+{% else %}
  <div class="adminwarn">
   This is for SandTable administrative tasks.
  </div>
-%end
+{% endif %}
 
 <form method="post" action="admin">
-%for k,v in iter(sorted(actions.items())):
- %if v[1]:
+{% for k,v in actions|dictsort %}
+ {% if v[1] %}
   <button class="doit" name="action" type="submit" value="{{k}}">{{v[1]}}</button><br>
- %end
-%end
+ {% endif %}
+{% endfor %}
 </form>
 

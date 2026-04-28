@@ -1,4 +1,4 @@
-from bottle import request, route, post, get, template
+from flask import request, render_template
 import signal
 from html import escape
 import os
@@ -7,6 +7,7 @@ from Sand import TABLE_WIDTH, TABLE_LENGTH, TABLE_UNITS, BALL_SIZE,\
     MACHINE, MACHINE_FEED, MACHINE_ACCEL, MACHINE_UNITS,\
     MACH_LOG, LED_LOG, SERVER_LOG, SCHEDULER_LOG, MOVIE_STATUS_LOG,\
     VER_FILE
+from webapp import app
 import mach
 import convert
 import ledapi
@@ -15,8 +16,7 @@ import MovieStatus
 from cgistuff import cgistuff
 
 
-@route('/admin/status')     # FIX: Remove this
-@post('/admin/status')
+@app.route('/admin/status', methods=['GET', 'POST'])
 def status():
     results = [
         ('Table Width',     '%g %s' % (TABLE_WIDTH, TABLE_UNITS)),
@@ -60,9 +60,7 @@ def status():
     return {'stuff': results}
 
 
-@route('/admin')
-@post('/admin')
-@get('/admin')
+@app.route('/admin', methods=['GET', 'POST'])
 def adminPage():
     actions = {
         "server_log":   (_serverLog,    "Server Log - View the web server log"),
@@ -84,18 +82,18 @@ def adminPage():
 
     cstuff = cgistuff('Admin', jQuery=True)
 
-    form = request.forms
-    action = form.action
+    form = request.form
+    action = form.get('action', '')
 
     if action in actions:
         message, message2 = actions[action][0]()
     else:
         message, message2 = None, None
 
-    return [
+    return ''.join([
         cstuff.standardTopStr(),
-        template('admin-page', message=message, message2=message2, actions=actions),
-        cstuff.endBodyStr()]
+        render_template('admin-page.tpl', message=message, message2=message2, actions=actions),
+        cstuff.endBodyStr()])
 
 
 def _escapeFile(filename):

@@ -1,6 +1,7 @@
 from sandable import Sandable
 from dialog import DialogFloat
 import mach
+from Sand import TABLE_UNITS, MACHINE_UNITS
 
 
 class Sander(Sandable):
@@ -22,6 +23,12 @@ To avoid drawing over things, move the ball away!
                 x, y = e.getStatus()['pos']
         except Exception:
             x, y = 0., 0.
+
+        if TABLE_UNITS != MACHINE_UNITS:
+            if MACHINE_UNITS == 'mm':
+                x, y = x / 25.4, y / 25.4
+            else:
+                x, y = x * 25.4, y * 25.4
 
         self.editor = [
             DialogFloat("xOffset",         "X Origin",                 units=units, default=x),

@@ -1,20 +1,20 @@
-from bottle import request, route, get, post, template
+from flask import request, render_template
 import os
 from Sand import PICTURE_PATH
+from webapp import app
 from cgistuff import cgistuff
 
 
-@route('/pictures')
-@get('/pictures')
-@post('/pictures')
+@app.route('/pictures', methods=['GET', 'POST'])
 def picturesPage():
-    form = request.forms
-    action = form.action.lower() if form.action else ''
+    form = request.form
+    action = form.get('action', '').lower()
     if action == 'upload':
         upload = request.files.get('_file')
-        name, ext = os.path.splitext(upload.filename)
-        if ext in ('.png', '.jpg', '.jpeg', '.gif'):
-            upload.save(PICTURE_PATH)
+        if upload is not None:
+            name, ext = os.path.splitext(upload.filename)
+            if ext in ('.png', '.jpg', '.jpeg', '.gif'):
+                upload.save(os.path.join(PICTURE_PATH, upload.filename))
 
     cstuff = cgistuff('Pictures')
 
@@ -27,7 +27,7 @@ def picturesPage():
         if not f.startswith('.') and not os.path.isdir(filename):
             pictures.append((f, filename))
 
-    return [
+    return ''.join([
         cstuff.standardTopStr(),
-        template('pictures-page', pictures=pictures, columns=4),
-        cstuff.endBodyStr()]
+        render_template('pictures-page.tpl', pictures=pictures, columns=4),
+        cstuff.endBodyStr()])

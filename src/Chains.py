@@ -179,54 +179,131 @@ class Chains():
     # creates some extra lines to move around the edge of the table to the new edge.
     @staticmethod
     def _nastySandTableLogic(p1, p2, boundary):
-        points = []
+        if p1 is None or p2 is None:
+            return []
+
         d1 = Chains._clipDirection(p1, boundary)
         d2 = Chains._clipDirection(p2, boundary)
+        sides1 = Chains._boundarySides(p1, d1, boundary)
+        sides2 = Chains._boundarySides(p2, d2, boundary)
 
-        if d1 & d2:
-            pass
-        elif d1 & Chains.LEFT:
-            if d2 & Chains.RIGHT:
-                height = boundary[1][1] - boundary[0][1]
-                distance = p1[1] - boundary[0][1] + p2[1] - boundary[0][1]
-                if distance < height:
-                    points = [(boundary[0][0], boundary[0][1]), (boundary[1][0], boundary[0][1])]
-                else:
-                    points = [(boundary[0][0], boundary[1][1]), (boundary[1][0], boundary[1][1])]
-            else:
-                points = [(p1[0], p2[1])]
-        elif d1 & Chains.RIGHT:
-            if d2 & Chains.LEFT:
-                height = boundary[1][1] - boundary[0][1]
-                distance = p1[1] - boundary[0][1] + p2[1] - boundary[0][1]
-                if distance < height:
-                    points = [(boundary[1][0], boundary[0][1]), (boundary[0][0], boundary[0][1])]
-                else:
-                    points = [(boundary[1][0], boundary[1][1]), (boundary[0][0], boundary[1][1])]
-            else:
-                points = [(p1[0], p2[1])]
-        elif d1 & Chains.TOP:
-            if d2 & Chains.BOTTOM:
-                width = boundary[1][0] - boundary[0][0]
-                distance = p1[0] - boundary[0][0] + p2[0] - boundary[0][0]
-                if distance < width:
-                    points = [(boundary[0][0], boundary[1][1]), (boundary[0][0], boundary[0][1])]
-                else:
-                    points = [(boundary[1][0], boundary[1][1]), (boundary[1][0], boundary[0][1])]
-            else:
-                points = [(p2[0], p1[1])]
-        elif d1 & Chains.BOTTOM:
-            if d2 & Chains.TOP:
-                width = boundary[1][0] - boundary[0][0]
-                distance = p1[0] - boundary[0][0] + p2[0] - boundary[0][0]
-                if distance < width:
-                    points = [(boundary[0][0], boundary[0][1]), (boundary[0][0], boundary[1][1])]
-                else:
-                    points = [(boundary[1][0], boundary[0][1]), (boundary[1][0], boundary[1][1])]
-            else:
-                points = [(p2[0], p1[1])]
+        bestPoints = []
+        bestCost = None
+        for side1 in sides1:
+            for side2 in sides2:
+                points, cost = Chains._boundaryRoute(p1, side1, p2, side2, boundary)
+                if bestCost is None or cost < bestCost:
+                    bestCost = cost
+                    bestPoints = points
+        return bestPoints
 
+    @staticmethod
+    def _boundarySides(point, code, boundary):
+        sides = []
+        if code & Chains.LEFT:
+            sides.append('left')
+        if code & Chains.RIGHT:
+            sides.append('right')
+        if code & Chains.TOP:
+            sides.append('top')
+        if code & Chains.BOTTOM:
+            sides.append('bottom')
+        if sides:
+            return sides
+
+        x0, y0 = boundary[0]
+        x1, y1 = boundary[1]
+        x, y = point
+        distances = [
+            (abs(x - x0), 'left'),
+            (abs(x - x1), 'right'),
+            (abs(y - y0), 'bottom'),
+            (abs(y - y1), 'top'),
+        ]
+        distances.sort(key=lambda item: item[0])
+        return [distances[0][1]]
+
+    @staticmethod
+    def _boundaryPointAndOffset(point, side, boundary):
+        x0, y0 = boundary[0]
+        x1, y1 = boundary[1]
+        width = x1 - x0
+        height = y1 - y0
+        x = min(max(point[0], x0), x1)
+        y = min(max(point[1], y0), y1)
+
+        if side == 'bottom':
+            p = (x, y0)
+            s = x - x0
+        elif side == 'right':
+            p = (x1, y)
+            s = width + (y - y0)
+        elif side == 'top':
+            p = (x, y1)
+            s = width + height + (x1 - x)
+        else:
+            p = (x0, y)
+            s = 2.0 * width + height + (y1 - y)
+        return p, s
+
+    @staticmethod
+    def _corners(boundary):
+        x0, y0 = boundary[0]
+        x1, y1 = boundary[1]
+        width = x1 - x0
+        height = y1 - y0
+        return [
+            ((x0, y0), 0.0),
+            ((x1, y0), width),
+            ((x1, y1), width + height),
+            ((x0, y1), 2.0 * width + height),
+        ]
+
+    @staticmethod
+    def _isBetweenClockwise(start, end, value):
+        if start < end:
+            return start < value < end
+        return value > start or value < end
+
+    @staticmethod
+    def _cornersClockwise(start, end, boundary):
+        points = []
+        for cornerPoint, cornerOffset in Chains._corners(boundary):
+            if Chains._isBetweenClockwise(start, end, cornerOffset):
+                points.append(cornerPoint)
         return points
+
+    @staticmethod
+    def _boundaryRoute(p1, side1, p2, side2, boundary):
+        x0, y0 = boundary[0]
+        x1, y1 = boundary[1]
+        width = x1 - x0
+        height = y1 - y0
+        perimeter = 2.0 * (width + height)
+        if perimeter <= 0.0:
+            return [], 0.0
+
+        p1b, s1 = Chains._boundaryPointAndOffset(p1, side1, boundary)
+        p2b, s2 = Chains._boundaryPointAndOffset(p2, side2, boundary)
+
+        cw = (s2 - s1) % perimeter
+        ccw = (s1 - s2) % perimeter
+
+        points = []
+        if p1b != p1:
+            points.append(p1b)
+
+        if cw <= ccw:
+            points += Chains._cornersClockwise(s1, s2, boundary)
+            cost = cw
+        else:
+            points += list(reversed(Chains._cornersClockwise(s2, s1, boundary)))
+            cost = ccw
+
+        if p2b != p2:
+            points.append(p2b)
+
+        return points, cost
 
     @staticmethod
     def _clipDirection(p, box):
@@ -300,22 +377,39 @@ class Chains():
                 outcode2 = Chains._compOutCode(p2, box)
 
     @staticmethod
-    def saveImage(chains, box, fileName, imageWidth, imageHeight, imageType):
-        """Save the chains as a PNG file to disk"""
+    def saveImage(chains, box, fileName, imageWidth, imageHeight, imageType, clipToTable=False):
+        """Save the chains as a PNG file to disk.
+
+        Supported image types:
+        - Realistic: sand-style shaded rendering clipped to the table.
+        - Line: schematic line rendering.
+        - ClippedLine: schematic line rendering clipped to the table.
+
+        The clipToTable flag is retained for backward compatibility and can be
+        used to request clipped schematic rendering regardless of imageType.
+        """
         if imageType == 'Realistic':
             pic = Chains.makeRealisticImage(chains, box, imageWidth, imageHeight)
         else:
-            pic = Chains.makeImage(chains, box, imageWidth, imageHeight)
+            clipToTable = clipToTable or imageType == 'ClippedLine'
+            pic = Chains.makeImage(chains, box, imageWidth, imageHeight, clipToTable=clipToTable)
         pic.save(fileName, "PNG")
 
     @staticmethod
-    def makeImage(chains, box, imageWidth, imageHeight):
-        """Convert chains into a schematic image"""
+    def makeImage(chains, box, imageWidth, imageHeight, clipToTable=False):
+        """Convert chains into a schematic image.
+
+        When clipToTable is true, render only the bounded table view. Otherwise,
+        preserve the existing diagnostic view that shows both the raw chains and
+        their bounded result.
+        """
         pic = Image.new("RGB", (imageWidth, imageHeight))
         draw = ImageDraw.Draw(pic)
 
+        boundedChains = Chains.bound(chains, box) if clipToTable else None
+
         # Scale the coordinate system
-        extents = Chains.calcExtents(chains + [box])
+        extents = Chains.calcExtents(([box] + boundedChains) if clipToTable else (chains + [box]))
         offset = (-extents[0][0], -extents[0][1])
         xScale = float(imageWidth - 1) / (extents[1][0] - extents[0][0])
         yScale = float(imageHeight - 1) / (extents[1][1] - extents[0][1])
@@ -333,12 +427,16 @@ class Chains():
             y += 5.0
         Chains._drawChains(draw, rules, offset, scale, (64, 32, 32), imageHeight)
 
-        # Draw the unbounded chains
-        Chains._drawChains(draw, chains, offset, scale, (128, 128, 128), imageHeight)
-
         # Draw the bounding box
         boxChains = [[box[0], (box[0][0], box[1][1]), box[1], (box[1][0], box[0][1]), box[0]]]
         Chains._drawChains(draw, boxChains, offset, scale, (200, 0, 0), imageHeight)
+
+        if clipToTable:
+            Chains._drawChains(draw, boundedChains, offset, scale, (128, 250, 250), imageHeight)
+            return pic
+
+        # Draw the unbounded chains
+        Chains._drawChains(draw, chains, offset, scale, (128, 128, 128), imageHeight)
 
         # Draw the bounded chains
         Chains._drawChains(draw, Chains.bound(chains, box), offset, scale, (128, 250, 250), imageHeight)
@@ -507,13 +605,42 @@ class Chains():
 
     @staticmethod
     def _reprocessChain(chain):
-        """Rearrange an individual chain (polygon) to have the right-most point first"""
-        index, xHigh = None, None
-        for i, (x, y) in enumerate(chain):
-            if xHigh is None or x > xHigh:
+        """Rearrange a chain for scanalize.
+
+        Closed chains are rotated so they begin at the right-most point while
+        preserving closure. Open chains are kept open and only direction may
+        change so the right-most end comes first.
+        """
+        if not chain:
+            return chain
+        if len(chain) == 1:
+            return chain
+
+        first = chain[0]
+        last = chain[-1]
+        isClosed = (abs(first[0] - last[0]) < Chains.EPSILON and
+                    abs(first[1] - last[1]) < Chains.EPSILON)
+
+        if not isClosed:
+            # Keep open chains open; choose direction so the right-most endpoint
+            # is first, avoiding synthetic closure segments.
+            if first[0] >= last[0]:
+                return chain
+            return list(reversed(chain))
+
+        # Closed chain: rotate to the right-most point and keep explicit closure.
+        work = chain[:-1]
+        if not work:
+            return chain
+
+        index, xHigh = 0, work[0][0]
+        for i, (x, y) in enumerate(work):
+            if x > xHigh:
                 index, xHigh = i, x
-        # Return the end of chain + start of chain
-        return chain[index:] + chain[:index+1]
+
+        rotated = work[index:] + work[:index]
+        rotated.append(rotated[0])
+        return rotated
 
     @staticmethod
     def morph(start, end, steps):

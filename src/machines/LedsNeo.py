@@ -4,7 +4,7 @@ from LedsBase import LedsBase
 
 
 class Leds(LedsBase):
-    """Communicate with a DotStar lighting system"""
+    """Communicate with a Neopixel lighting system"""
 
     def __init__(self, rows, cols, mapping, params):
         self.mapping = mapping

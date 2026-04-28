@@ -1,11 +1,13 @@
 <html>
 <head>
- <link rel="stylesheet" type="text/CSS" href="../sandtable.css" />
+ <style>
+{{ inline_css|safe }}
+ </style>
  <title>Sand Table - {{method}} Help</title>
 </head>
     
 <body>
 <h2>{{method}}</h2>
-{{!doc}}
+{{ doc|safe }}
 </body>
 </html>

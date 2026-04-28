@@ -1,12 +1,12 @@
 [Unit]
-Description=SandTable Web Service
+Description=SandTable Lights Service
 
 [Service]
 WorkingDirectory=/home/dubnom/sandtable
-ExecStart=/home/dubnom/.venv/bin/python src/sandtable.py
+ExecStart=/home/dubnom/.venv/bin/python src/ledaemon.py
 Restart=always
 RestartSec=10
-SyslogIdentifier=sandtable-server
+SyslogIdentifier=sandtable-lights
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 User=sandtable
 

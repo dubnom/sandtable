@@ -8,6 +8,8 @@ drawers = [
     "Text", "Maze", "Sun",
     "Snowflake", "Dragon", "Hilbert",
     "Waves", "Grid", "Checkers",
+    "FlowField",
+    "ReactionDiffusion",
     "Lorenz", "Shingles", "Lindenmayer",
     "Rocks", "Wood", "Grass",
     "WebPic", "Clipart", "Picture",

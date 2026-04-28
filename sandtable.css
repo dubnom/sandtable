@@ -1,4 +1,4 @@
-body {background-color: white; text: white; color: black; font-family: arial, sans-serif; background-image: url("images/sand_ripples.jpg")}
+body {background-color: white; text: white; color: black; font-family: arial, sans-serif; background-image: url("/images/sand_ripples.jpg")}
 
 .title 		{ font-size: 150%; line-height: 140% }
 .formTitle 	{ font-size: 80% }

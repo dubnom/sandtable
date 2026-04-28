@@ -1,18 +1,20 @@
 # Constants
 HOST_ADDR           = '0.0.0.0'
-HOST_PORT           = 80
+HOST_PORT           = 443
+ADHOC_SSL           = True
+SERVER_DEBUG        = False
 
 CACHE_ENABLE        = True
-IMAGE_TYPE          = 'Realistic'
+IMAGE_TYPE          = 'ClippedLine'   # 'Realistic', 'ClippedLine' or 'Line'
 BALL_SIZE           = 0.75          # Diameter of ball
 LOGGING_LEVEL       = "debug"
 SCHEDULER_ENABLE    = True
 
 TABLE_UNITS         = "inches"
-TABLE_WIDTH         = 30
-TABLE_LENGTH        = 20
+TABLE_WIDTH         = 38
+TABLE_LENGTH        = 17
 
-LED_DRIVER          = "LedsDS"
+LED_DRIVER          = "LedsNeo"
 LED_PARAMS          = None
 LED_COLUMNS         = 172 
 LED_ROWS            = 116
@@ -22,19 +24,14 @@ LED_MAPPING         = None
 
 MACHINE             = "fluidnc"
 MACHINE_UNITS       = "mm"
-MACHINE_FEED        = 1000.0         # Inches? per minute
-MACHINE_ACCEL       = 50.0          # Inches? per second squared
+MACHINE_FEED        = 3000.0         # Inches? per minute
+MACHINE_ACCEL       = 100.0          # Inches? per second squared
 
 
 MACHINE_PARAMS = {
     'port': "/dev/ttyUSB0",
     'baud': 115200,
     'init': [
-        '$Sta/SSID=quokka',
-        '$Sta/Password=$mokecheddadaassgetta]',
-        '$Sta/IPMode=DHCP',
-        '$STA/SSDP/Enable=true',
-        '$Hostname=fluidnc',
         ]
 }
 

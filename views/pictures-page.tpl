@@ -8,22 +8,19 @@
 <form method="post" action="draw">
  <input name="method" type="hidden" value="Picture">
  <table>
-  %for i, (f, filename) in enumerate(pictures):
-    %if not i % columns:
+  {% for f, filename in pictures %}
+    {% if loop.index0 % columns == 0 %}
       <tr>
-    %end
+    {% endif %}
     <td class="picture" valign="bottom">
      <button class="picture" type="submit" name="filename" value="{{filename}}">
       <img src="{{filename}}" width="160" align="center">
       <p class="picturename">{{f}}</p>
      </button>
     </td>
-    %if not (i+1)%columns:
+    {% if loop.index % columns == 0 or loop.last %}
       </tr>
-    %end
-  %end
-  %if i % columns:
-    </tr>
-  %end
+    {% endif %}
+  {% endfor %}
  </table>
 </form>

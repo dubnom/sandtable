@@ -2,7 +2,7 @@
  <div class="loadbox">
   <select class="load" name="_loadname">
    <option></option>
-    {{!filenames}}
+    {{ filenames|safe }}
   </select>
   <button class="load" name="action" type="submit" value="load">Load</button>
   <span class="navigation"><a href="help" target="sand_help">Help!</a></span>

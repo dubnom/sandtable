@@ -39,10 +39,14 @@ class Dialog:
         self.params = params if params else Params()
 
     def getAction(self):
-        return self.form.action
+        if hasattr(self.form, 'get'):
+            return self.form.get('action', '')
+        return getattr(self.form, 'action', '')
 
     def getMethod(self):
-        return self.form.method
+        if hasattr(self.form, 'get'):
+            return self.form.get('method', '')
+        return getattr(self.form, 'method', '')
 
     def getParams(self):
         # Run through all of the editor fields converting form or editor defaults into params

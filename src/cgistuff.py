@@ -1,4 +1,5 @@
-from bottle import template, SimpleTemplate
+from flask import render_template
+from pathlib import Path
 
 menuItems = (
     ('Draw', 'draw'),
@@ -11,8 +12,15 @@ menuItems = (
     ('Admin', 'admin'),
 )
 
+_CSS_PATH = Path(__file__).resolve().parent.parent / 'sandtable.css'
+try:
+    _INLINE_CSS = _CSS_PATH.read_text(encoding='utf-8')
+except OSError:
+    _INLINE_CSS = ''
 
-startBodyTemplate = SimpleTemplate("""<body><span class="title">Sand Table - {{title}}</span><br>""")
+
+def getInlineCss():
+    return _INLINE_CSS
 
 
 class cgistuff:
@@ -22,10 +30,10 @@ class cgistuff:
         self.jQueryUI = jQueryUI
 
     def headerStr(self, meta=''):
-        return template('header', jQuery=self.jQuery, jQueryUI=self.jQueryUI, meta=meta, title=self.title)
+        return render_template('header.tpl', jQuery=self.jQuery, jQueryUI=self.jQueryUI, meta=meta, title=self.title, inline_css=_INLINE_CSS)
 
     def startBodyStr(self):
-        return startBodyTemplate.render(title=self.title)
+        return '<body><span class="title">Sand Table - %s</span><br>' % self.title
 
     def navigationStr(self):
         return '<div class="navigation">' + ' | '.join(['<a href="%s">%s</a>' % (item[1], item[0]) for item in menuItems]) + '</div>'
@@ -34,4 +42,4 @@ class cgistuff:
         return self.headerStr() + self.startBodyStr() + self.navigationStr()
 
     def endBodyStr(self):
-        return template('footer', jQuery=self.jQuery)
+        return render_template('footer.tpl', jQuery=self.jQuery)

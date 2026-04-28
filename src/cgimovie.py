@@ -1,23 +1,22 @@
-from bottle import request, route, post, get, template
+from flask import request, render_template
 import os
 import subprocess
 
 from Sand import MOVIE_SCRIPT_PATH, ROOT_DIRECTORY, MOVIE_STATUS_LOG
+from webapp import app
 from cgistuff import cgistuff
 
 
-@route('/movie')
-@post('/movie')
-@get('/movie')
+@app.route('/movie', methods=['GET', 'POST'])
 def moviePage():
     # Handle form operations
-    form = request.forms
-    action = form.action.lower() if form.action else ''
-    name = form._name
+    form = request.form
+    action = form.get('action', '').lower()
+    name = form.get('_name', '')
 
     script = '<Movie>\n</Movie>'
     if action == 'load':
-        name = form._loadname
+        name = form.get('_loadname', '')
         try:
             with open('%s%s.xml' % (MOVIE_SCRIPT_PATH, name)) as f:
                 script = f.read()
@@ -25,7 +24,7 @@ def moviePage():
             script = "Couldn't load '%s'\n%s" % (name, e)
 
     if action in ('save', 'preview', 'sand'):
-        script = form.script
+        script = form.get('script', script)
         with open('%s%s.xml' % (MOVIE_SCRIPT_PATH, name), 'wt') as f:
             f.write(script)
         flags = '--sand' if action == 'sand' else ''
@@ -40,7 +39,7 @@ def moviePage():
             scripts.append('<option value=%s>%s</option>' % (sname, sname))
 
     cstuff = cgistuff('Make Movies')
-    return [
+    return ''.join([
         cstuff.standardTopStr(),
-        template('movie-page', filenames='\n'.join(scripts), script=script, name=name),
-        cstuff.endBodyStr()]
+        render_template('movie-page.tpl', filenames='\n'.join(scripts), script=script, name=name),
+        cstuff.endBodyStr()])

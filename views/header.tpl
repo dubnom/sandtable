@@ -1,7 +1,7 @@
 <html>
 <head>
-%if jQuery:
- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+{% if jQuery %}
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
  <script>
   $(function() {
    $(".auto_submit_form").change(function() {
@@ -9,11 +9,11 @@
    });
   });
  </script>
-%end
-%if jQueryUI:
+{% endif %}
+{% if jQueryUI %}
  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" />
  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
-%end
+{% endif %}
  <script>
   function randomInt( field, min, max ) {
    number = min + Math.floor( Math.random()*(max - min));
@@ -24,7 +24,9 @@
    field.value = number; }
  </script>
 <meta name="viewport" content="width=device-width, user-scalable=yes" />
-{{!meta}}
-<link rel="stylesheet" type="text/CSS" href="sandtable.css" />
+{{ meta|safe }}
+<style>
+{{ inline_css|safe }}
+</style>
 <title>Sand Table - {{title}}</title>
 </head>

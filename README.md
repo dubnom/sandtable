@@ -64,7 +64,7 @@ I highly recommend adding controllable LED lighting and support already exists f
 * [potrace](http://potrace.sourceforge.net/) - Bitmap image to vector conversion
 * [scipy](https://www.scipy.org/) - Python science/math package
 * [pillow](https://pillow.readthedocs.io/en/stable/) - Python image package
-* [bottle](http://bottlepy.org/docs/dev/) - Lightweight Python web framework
+* [Flask](https://flask.palletsprojects.com/) - Lightweight Python web framework
 * [shapely](https://pypi.org/project/Shapely/) - Python interface to GEOS to operate on planar geometry
 * [apscheduler](https://apscheduler.readthedocs.io/en/latest/) - Advanced Python scheduler
 * [sqlalchemy](https://www.sqlalchemy.org/) - Python SQL toolkit and object relational manager
@@ -84,6 +84,18 @@ bin/install.sh
 Configure your controller:
 * Copy an existing configuration and modify it to fit your machine.
 * Edit src/config/hostmap.py and add your host name and config file name.
+
+Runtime server flags:
+* `ADHOC_SSL` (config file) or `SANDTABLE_ADHOC_SSL` (environment): enable ad-hoc HTTPS certificates when running the built-in server.
+* `SERVER_DEBUG` (config file) or `SANDTABLE_DEBUG` (environment): enable Flask debug mode and reloader.
+
+Defaults:
+* `ADHOC_SSL=False`
+* `SERVER_DEBUG=False`
+
+Notes:
+* Environment variables override config-file defaults.
+* Ad-hoc SSL uses a self-signed certificate and browsers will show a warning unless the cert is trusted.
 
 Restart the machine.
 

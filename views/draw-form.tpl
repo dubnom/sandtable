@@ -1,7 +1,7 @@
-<span class="drawtime">{{!drawinfo}}{{!help}}</span>
+<span class="drawtime">{{ drawinfo|safe }}{{ help|safe }}</span>
 <form method="post" action="draw">
  <input name="method" type="hidden" value="{{sandable}}">
- {{!dialog}}
+ {{ dialog|safe }}
  <button class="redraw" name="action" type="submit" value="refresh">Redraw Screen</button>
  <button class="random" name="action" type="submit" value="random">Random!</button>
  <button class="doit" name="action" type="submit" value="doit">Draw in Sand!</button>

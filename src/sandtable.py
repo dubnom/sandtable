@@ -1,8 +1,11 @@
 #!/usr/bin/python3 -u
-from bottle import route, run, static_file
 import logging
+import os
+from flask import send_from_directory
 
+import Sand
 from Sand import HOST_ADDR, HOST_PORT
+from webapp import PROJECT_ROOT, app
 import cgidraw
 import cgihistory
 import cgilights
@@ -15,46 +18,61 @@ import cgifiler
 import cgidhelp
 
 
-@route('/images/<filename>')
-def server_static(filename):
-    return static_file(filename, root='images')
+def _env_flag(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in ('1', 'true', 'yes', 'on')
 
 
-@route('/data/<filename>')
-def server_static(filename):
-    return static_file(filename, root='data')
+@app.route('/images/<path:filename>')
+def images_static(filename):
+    # Cache image assets to avoid repeated conditional GETs for draw button thumbnails.
+    return send_from_directory(str(PROJECT_ROOT / 'images'), filename, max_age=86400)
 
 
-@route('/store/<filename>')
-def server_static(filename):
-    return static_file(filename, root='store')
+@app.route('/data/<path:filename>')
+def data_static(filename):
+    return send_from_directory(str(PROJECT_ROOT / 'data'), filename)
 
 
-@route('/pictures/<filename>')
-def server_static(filename):
-    return static_file(filename, root='pictures')
+@app.route('/store/<path:filename>')
+def store_static(filename):
+    return send_from_directory(str(PROJECT_ROOT / 'store'), filename)
 
 
-@route('/movies/<filename>')
-def server_static(filename):
-    return static_file(filename, root='movies')
+@app.route('/pictures/<path:filename>')
+def pictures_static(filename):
+    return send_from_directory(str(PROJECT_ROOT / 'pictures'), filename)
 
 
-@route('/scripts/<filename>')
-def server_static(filename):
-    return static_file(filename, root='scripts')
+@app.route('/movies/<path:filename>')
+def movies_static(filename):
+    return send_from_directory(str(PROJECT_ROOT / 'movies'), filename)
 
 
-@route('/sandtable.css')
-def server_static():
-    return static_file('sandtable.css', root='')
+@app.route('/scripts/<path:filename>')
+def scripts_static(filename):
+    return send_from_directory(str(PROJECT_ROOT / 'scripts'), filename)
 
 
-@route('/favicon.ico')
-def server_static():
-    return static_file('favicon.ico', root='images')
+@app.route('/favicon.ico')
+def favicon_static():
+    return send_from_directory(str(PROJECT_ROOT / 'images'), 'favicon.ico')
 
 
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
-    run(host=HOST_ADDR, port=HOST_PORT, debug=True)
+    adhoc_ssl_default = bool(getattr(Sand, 'ADHOC_SSL', False))
+    adhoc_ssl = _env_flag('SANDTABLE_ADHOC_SSL', adhoc_ssl_default)
+    debug_default = bool(getattr(Sand, 'SERVER_DEBUG', False))
+    debug_mode = _env_flag('SANDTABLE_DEBUG', debug_default)
+    ssl_context = 'adhoc' if adhoc_ssl else None
+    app.run(
+        host=HOST_ADDR,
+        port=HOST_PORT,
+        debug=debug_mode,
+        use_reloader=debug_mode,
+        threaded=True,
+        ssl_context=ssl_context,
+    )

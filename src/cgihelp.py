@@ -1,7 +1,10 @@
-from bottle import route, get, template
+from flask import render_template
 from html import escape
-from Sand import drawers
+from types import SimpleNamespace
+from Sand import drawers, TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS
 from sandable import sandableFactory
+from webapp import app
+from cgistuff import getInlineCss
 
 overview = escape("""
 Movies are specified in an XML file that expresses the various keyframes that should be drawn.
@@ -30,7 +33,12 @@ The tables below list the Types of Things and the first column indicates the Nam
 The other columns briefly describe the fields and their units.""", quote=True)
 
 
-@route('/help')
-@get('/help')
+@app.route('/help', methods=['GET'])
 def helpPage():
-    return [template('help-page', overview=overview, sandables=drawers, sandableFactory=sandableFactory)]
+  def makeSandable(name):
+    try:
+      return sandableFactory(name, TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS)
+    except Exception:
+      return SimpleNamespace(editor=[])
+
+  return render_template('help-page.tpl', overview=overview, sandables=drawers, makeSandable=makeSandable, inline_css=getInlineCss())

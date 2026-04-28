@@ -32,12 +32,12 @@ function mySubmit(action,name,value,name2,value2) {
 <form method="post" action="filer">
  <div class="filerbox">
   <select class="filer" name="filetype" onchange="this.form.submit()">
-   {{!options}}
+   {{ options|safe }}
   </select>
  </div>
 </form>
 
-%if upload:
+{% if upload %}
  <form enctype="multipart/form-data" method="post">
   <div class="savebox">
    <input type="hidden" name="filetype" value="{{ft}}"/>
@@ -46,12 +46,12 @@ function mySubmit(action,name,value,name2,value2) {
    <button class="upload" name="action" type="submit" value="upload">Upload</Button>
   </div>
  </form>
-%end
+{% endif %}
 
 <form id="files" method="post" action="filer">
  <input type="hidden" name="filetype" value="{{ft}}"/>
  <span class="filerTitle">{{path}}</span>
  <table id="filetable">
-  {{!table}}
+  {{ table|safe }}
  </table>
 </form>

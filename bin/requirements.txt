@@ -1,7 +1,10 @@
 future
 pillow
 evdev
-bottle
+flask
+flask-socketio
+python-socketio
+python-engineio
 cython
 pypotrace
 shapely

@@ -1,6 +1,8 @@
 # Constants
 HOST_ADDR           = '0.0.0.0'
 HOST_PORT           = 80
+ADHOC_SSL           = False
+SERVER_DEBUG        = False
 
 CACHE_ENABLE        = True
 IMAGE_TYPE          = 'Realistic'

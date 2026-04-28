@@ -7,8 +7,19 @@ import time
 from machine import Machine
 
 
-POSITION_POLL_FREQ = 30     # Poll for status every 30 instructions
-POSITION_POLL_TIME = 5      # Or every 5 seconds
+POLL_TIME = 5      #  Time to wait for queue
+MAX_QUEUE_DEPTH = 10
+
+HOMING_SEQUENCE = [
+    '$X',       # Reset   
+    '$10=2',    # Report work coordinates
+    '$11=1',    # Junction deviation mm
+    '$Report/Interval=2000', # Reporting period
+    '$H',       # Home
+    'G54',      # G54 work offset
+    'G90',      # Absolute mode
+]
+
 
 class machiner(Machine):
     """Driver for FLUIDNC compatible controllers."""
@@ -44,8 +55,11 @@ class machiner(Machine):
             time.sleep(.2)
         logging.info('Grbl ready')
             
-        for i in initialize:
-            self.send(i)
+        self.send_many(initialize)
+
+    def send_many(self, cmds):
+        for cmd in cmds:
+            self.send(cmd)
 
     def run(self, chains, units, feed):
         if units == 'inches':
@@ -62,18 +76,7 @@ class machiner(Machine):
         self.send('M2')
 
     def home(self):
-        self.send('$X')
-        self.send('$10=2')
-        self.send('G54')
-        self.send('G92.1')
-        self.send('G91')
-        self.send('G0X%gY%g' % (-10*60, -10*60))    # FIX: Remove hardcoded values
-        self.send('G0X5Y5')                         # FIX: hardcoded, backoff
-        self.send('G90')
-        self.send('G92 X0 Y0 Z0')
-        #time.sleep(10.)     # FIX: This sucks
-        #self.send(chr(24))
-        #self.send('$X')
+        self.send_many(HOMING_SEQUENCE)
 
     def halt(self):
         self.flush()
@@ -152,24 +155,16 @@ class WriteThread(Thread):
 
         while self.running:
             try:
-                data = self.queue.get(timeout=POSITION_POLL_TIME)
-                while self.machine.queueDepth > 5:
+                data = self.queue.get(timeout=POLL_TIME)
+                while self.machine.queueDepth > MAX_QUEUE_DEPTH:
                     time.sleep(.1)
                 self.machine.queueDepth += 1
                 self._write(data)
                 self.queue.task_done()
                 logging.warning(" Writing %4d:%s" % (self.machine.queueDepth, data))
 
-                # Pause a bit if writing to the eeprom or resetting
-                if data.startswith(('$', chr(24))):
-                    time.sleep(2.)
-
-                # Ask for the machine's status periodically
-                self.num += 1
-                if self.num % POSITION_POLL_FREQ == 0:
-                    self._getStatus()
             except Empty:
-                self._getStatus()
+                pass
 
         logging.info("Write thread exiting")
 
@@ -178,10 +173,6 @@ class WriteThread(Thread):
 
     def _write_raw(self, data):
         self.ser.write(data)
-
-    def _getStatus(self):
-        self.num = 0
-        self._write('?')
 
     def stop(self):
         self.running = False

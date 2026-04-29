@@ -1,11 +1,12 @@
 <table class="main">
  <tr>
-  <td valign="TOP" style="width: 230px;">
-   <div class="navigation" style="margin-bottom: 8px;">Method</div>
-     <div id="methodGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;"></div>
+  <td id="methodGridCell" valign="TOP" style="width: 247px;">
+     <div id="methodGridScroller" style="overflow-y: scroll; overflow-x: hidden; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; width: fit-content; height: calc(100vh - 170px); min-height: 160px;">
+       <div id="methodGrid" style="display: grid; grid-template-columns: repeat(3, 79px); gap: 4px;"></div>
+     </div>
    <div id="statusMsg" class="navigation" style="margin-top: 12px;"></div>
   </td>
-  <td valign="TOP">
+  <td id="drawDialogCell" valign="TOP">
    <center>
     <img id="planImage" class="plan" src="{{ imagefile }}" width="{{ width }}" height="{{ height }}"><br>
     <div id="errorBox" class="error" style="display: none;"></div>
@@ -32,6 +33,7 @@
 <script>
 (function() {
   const initialMethod = {{ method|tojson }};
+  const initialParams = {{ initial_params|default({}, true)|tojson }};
   const fallbackMethods = {{ sandables|tojson }};
   const pagePath = window.location.pathname || '/draw';
   const appBasePath = pagePath.replace(/\/draw\/?$/, '').replace(/\/$/, '');
@@ -69,6 +71,9 @@
   };
 
   const methodGrid = document.getElementById('methodGrid');
+  const methodGridCell = document.getElementById('methodGridCell');
+  const methodGridScroller = document.getElementById('methodGridScroller');
+  const drawDialogCell = document.getElementById('drawDialogCell');
   const planImage = document.getElementById('planImage');
   const errorBox = document.getElementById('errorBox');
   const drawInfo = document.getElementById('drawInfo');
@@ -81,6 +86,7 @@
   }
 
   function populateMethods(methods) {
+    const previousScrollTop = methodGridScroller ? methodGridScroller.scrollTop : 0;
     methodGrid.innerHTML = '';
     (methods || []).forEach(function(method) {
       const link = document.createElement('a');
@@ -103,6 +109,51 @@
 
       methodGrid.appendChild(link);
     });
+    if (methodGridScroller) {
+      methodGridScroller.scrollTop = previousScrollTop;
+    }
+  }
+
+  function layoutMethodGrid() {
+    if (!methodGridScroller) {
+      return;
+    }
+    const top = methodGridScroller.getBoundingClientRect().top;
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+    const statusBar = document.getElementById('globalStatusBar');
+    const statusTop = statusBar ? statusBar.getBoundingClientRect().top : viewportHeight;
+    const bottomLimit = Math.min(viewportHeight, statusTop - 8);
+    const available = Math.max(160, bottomLimit - top);
+    methodGridScroller.style.height = String(available) + 'px';
+  }
+
+  function layoutMethodColumns() {
+    if (!methodGrid || !methodGridCell) {
+      return;
+    }
+    const tileWidth = 79;
+    const gap = 4;
+    const threeColWidth = tileWidth * 3 + gap * 2;
+    const twoColWidth = tileWidth * 2 + gap;
+    const oneColWidth = tileWidth;
+
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+    const imageWidth = planImage ? Math.ceil(planImage.getBoundingClientRect().width) : 0;
+    const dialogMin = drawDialogCell ? Math.ceil(drawDialogCell.scrollWidth) : 0;
+    const minRightWidth = Math.max(520, imageWidth, Math.min(dialogMin + 16, 760));
+    const availableForLeft = Math.max(0, viewportWidth - minRightWidth - 32);
+
+    let columns = 3;
+    if (availableForLeft < threeColWidth) {
+      columns = availableForLeft >= twoColWidth ? 2 : 1;
+    }
+
+    const selectedWidth = columns === 3 ? threeColWidth : (columns === 2 ? twoColWidth : oneColWidth);
+    methodGrid.style.gridTemplateColumns = 'repeat(' + columns + ', ' + tileWidth + 'px)';
+    methodGridCell.style.width = String(selectedWidth) + 'px';
+    if (methodGridScroller) {
+      methodGridScroller.style.width = String(selectedWidth) + 'px';
+    }
   }
 
   function setStatus(msg) {
@@ -301,6 +352,7 @@
 
     dialogHost.innerHTML = '';
     dialogHost.appendChild(table);
+    layoutMethodColumns();
   }
 
   function collectParams() {
@@ -552,6 +604,10 @@
   document.getElementById('abortBtn').addEventListener('click', abortDraw);
   document.getElementById('saveBtn').addEventListener('click', saveDrawing);
   document.getElementById('exportBtn').addEventListener('click', exportDrawing);
+  window.addEventListener('resize', function() {
+    layoutMethodGrid();
+    layoutMethodColumns();
+  });
 
   dialogHost.addEventListener('change', function(event) {
     if (event.target && event.target.dataset && event.target.dataset.fieldName) {
@@ -581,6 +637,8 @@
 
   (async function init() {
     try {
+      layoutMethodGrid();
+      layoutMethodColumns();
       // Always show a method list immediately, even if API calls fail.
       populateMethods(state.methods);
 
@@ -591,7 +649,11 @@
       }
 
       await loadSchema(state.method);
-      await preview('refresh');
+      if (initialParams && Object.keys(initialParams).length) {
+        await preview('refresh', {params: initialParams});
+      } else {
+        await preview('refresh');
+      }
     } catch (err) {
       showError(err.message || 'Initialization failed');
       setStatus('Initialization failed');

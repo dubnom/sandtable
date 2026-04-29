@@ -194,9 +194,11 @@ body {
     throw new Error('Failed to load ' + path);
    }
 
+   window.__sandtableNextPath = normalizedPath;
    disposeCurrentContent();
    contentInner.innerHTML = html;
    executeScripts(contentInner);
+   window.__sandtableNextPath = null;
 
    currentPath = cleanCurrentPath(url);
    const view = extractView(currentPath);
@@ -212,7 +214,8 @@ body {
   async function submitForm(form, push, submitter) {
    const method = String(form.getAttribute('method') || 'GET').toUpperCase();
    const action = form.getAttribute('action') || currentPath || '/' + extractView(currentPath);
-   const url = buildEmbedUrl(action);
+   const normalizedAction = normalizeTargetPath(action);
+   const url = buildEmbedUrl(normalizedAction);
    const options = {
     method: method,
     headers: {'X-Requested-With': 'XMLHttpRequest'}
@@ -237,9 +240,11 @@ body {
     throw new Error('Request failed');
    }
 
+   window.__sandtableNextPath = cleanCurrentPath(url);
    disposeCurrentContent();
    contentInner.innerHTML = html;
    executeScripts(contentInner);
+   window.__sandtableNextPath = null;
 
    currentPath = cleanCurrentPath(url);
    const view = extractView(currentPath);

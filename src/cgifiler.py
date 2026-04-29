@@ -25,13 +25,12 @@ class ftPictures(ftBase):
     def __init__(self):
         self.path = PICTURE_PATH
         self.columns = 6
-        self.filter = ['png', 'jpg', 'gif']
+        self.filter = ['png', 'jpg', 'jpeg', 'gif']
         self.allowUpload = True
 
     def imgFunc(self, f, fn, p):
-        return """<a class="filer" href="/?view=draw&method=Picture&filename=%s">
-             <img src="%s" width="80" align="center">
-             </a>""" % (quote(fn, safe=''), fn)
+        url = f"/?view=draw&method=Picture&filename={quote(fn, safe='')}"
+        return f'<a class="filer" href="{url}"><img src="{fn}" width="80" align="center"></a>'
 
 
 class ftClipart(ftBase):
@@ -42,9 +41,9 @@ class ftClipart(ftBase):
         self.allowUpload = True
 
     def imgFunc(self, f, fn, p):
-        return """<a class="filer" href="/?view=draw&method=Clipart&filename=%s">
-             <img src="images/DXF.png" width="80">
-             </a>""" % quote(fn, safe='')
+        src = fn if fn.endswith('.svg') else "images/file.png"
+        url = f"/?view=draw&method=Clipart&filename={quote(fn, safe='')}"
+        return f'<a class="filer" href="{url}"><img src="{src}" width="80"></a>'
 
     def rename(self, f, oldName, newName):
         path = os.path.dirname(oldName)
@@ -61,9 +60,8 @@ class ftSisyphus(ftBase):
         self.allowUpload = True
 
     def imgFunc(self, f, fn, p):
-        return """<a class="filer" href="/?view=draw&method=Sisyphus&filename=%s">
-             <img src="images/thr.png" width="80">
-             </a>""" % quote(fn, safe='')
+        url = f"/?view=draw&method=Sisyphus&filename={quote(fn, safe='')}"
+        return f'<a class="filer" href="{url}"><img src="images/thr.png" width="80"></a>'
 
 class ftScripts(ftBase):
     def __init__(self):
@@ -73,9 +71,9 @@ class ftScripts(ftBase):
         self.allowUpload = True
 
     def imgFunc(self, f, fn, p):
-        return """<a class="filer" href="/?view=movie&loadname=%s">
+        return f"""<a class="filer" href="/?view=movie&loadname={quote(p[0], safe='')}">
              <img src="images/script.png" width="80">
-             </a>""" % quote(p[0], safe='')
+             </a>"""
 
 
 class ftMovies(ftBase):
@@ -86,14 +84,14 @@ class ftMovies(ftBase):
         self.allowUpload = False
 
     def imgFunc(self, f, fn, p):
-        return """<a class="filer" href="/?view=watch&_loadname=%s">
+        return f"""<a class="filer" href="/?view=watch&_loadname={quote(f, safe='')}">
              <img src="images/MPEG4.png" width="80">
-             </a>""" % quote(f, safe='')
+             </a>"""
 
 
 class ftDrawings(ftBase):
     def __init__(self):
-        self.path = STORE_PATH
+        self.path = os.path.join(STORE_PATH, 'saved')
         self.columns = 3
         self.filter = ['sand']
         self.allowUpload = False
@@ -101,9 +99,9 @@ class ftDrawings(ftBase):
     def imgFunc(self, f, fn, p):
         pngPath = os.path.splitext(fn)[0] + '.png'
         pngUrl = '/' + pngPath.replace(os.sep, '/').lstrip('/')
-        return """<a class="filer" href="/?view=draw&loadname=%s">
-               <img src="%s">
-               </a>""" % (p[0], pngUrl)
+        return f"""<a class="filer" href="/?view=draw&loadname={quote(p[0], safe='')}">
+               <img src="{pngUrl}">
+               </a>"""
 
     def delete(self, f, filename):
         base, _ = os.path.splitext(filename)
@@ -120,6 +118,14 @@ class ftDrawings(ftBase):
         return (True, 'Renamed')
 
 
+class ftHistory(ftDrawings):
+    def __init__(self):
+        self.path = os.path.join(STORE_PATH, 'history')
+        self.columns = 3
+        self.filter = ['sand']
+        self.allowUpload = False
+
+
 filetypes = {
     'Pictures':         ftPictures(),
     'Clipart':          ftClipart(),
@@ -127,18 +133,30 @@ filetypes = {
     'Movie Scripts':    ftScripts(),
     'Movies':           ftMovies(),
     'Saved Drawings':   ftDrawings(),
+    'History':          ftHistory(),
 }
 
 
 def render_actions(nm, fn, ft):
+    drawTargets = {
+        'Pictures': ('Picture', fn),
+        'Clipart': ('Clipart', fn),
+        'Sisyphus': ('Sisyphus', fn),
+    }
     nm = escape(nm, quote=True)
     fn = escape(fn, quote=True)
     ft = escape(ft, quote=True)
+    drawButton = ''
+    if ft in drawTargets:
+        method, filename = drawTargets[ft]
+        drawUrl = '/?view=draw&method=%s&filename=%s' % (quote(method, safe=''), quote(filename, safe=''))
+        drawButton = '<button class="load" type="button" onclick="window.location.href=\'%s\'">Draw</button>' % drawUrl
     return (
         '<center>'
+        '%s'
         '<button class="delete" type="button" onclick="myDelete(\'%s\',\'%s\',\'%s\')">Delete</button>'
         '<button class="rename" type="button" onclick="myRename(\'%s\',\'%s\',\'%s\')">Rename</button>'
-        '</center>' % (nm, fn, ft, nm, fn, ft)
+        '</center>' % (drawButton, nm, fn, ft, nm, fn, ft)
     )
 
 
@@ -166,14 +184,19 @@ def filerPage():
     action = form.get('action', '').lower()
     if action == 'upload':
         logging.info('Uploading')
-        fUpload = request.files.get('_file')
-        if fUpload is not None:
-            name, ext = os.path.splitext(fUpload.filename)
+        uploads = request.files.getlist('_file')
+        allowedExts = set([ext.lower() for ext in filetype.filter])
+        for fUpload in uploads:
+            if fUpload is None or not fUpload.filename:
+                continue
+            uploadName = os.path.basename(fUpload.filename)
+            name, ext = os.path.splitext(uploadName)
+            extNoDot = ext[1:].lower()
             logging.info('name: %s, extension: %s' % (name, ext))
             logging.info('path: ' + path)
-            if ext[1:] in filetype.filter and filetype.allowUpload:
+            if extNoDot in allowedExts and filetype.allowUpload:
                 fullName = os.path.join(path, name + ext)
-                logging.info('saving picture to: %s' % fullName)
+                logging.info('saving file to: %s' % fullName)
                 if os.path.exists(fullName):
                     os.remove(fullName)
                 fUpload.save(fullName)
@@ -220,8 +243,7 @@ def filerPage():
         cstuff.headerStr(),
         cstuff.startBodyStr(),
         cstuff.navigationStr(),
-        render_template('filer-page.tpl', options=options, ft=ft, path=path, table=res, upload=upload, ftfilter=ftfilter,
-                        store_root=STORE_PATH, saved_directory=os.path.join(STORE_PATH, 'saved')),
+        render_template('filer-page.tpl', options=options, ft=ft, path=path, table=res, upload=upload, ftfilter=ftfilter),
         cstuff.endBodyStr()])
 
 

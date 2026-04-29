@@ -64,6 +64,11 @@ def pictures_static(filename):
     return _send_static_asset(PROJECT_ROOT / 'pictures', filename)
 
 
+@app.route('/clipart/<path:filename>')
+def clipart_static(filename):
+    return _send_static_asset(PROJECT_ROOT / 'clipart', filename)
+
+
 @app.route('/movies/<path:filename>')
 def movies_static(filename):
     return _send_static_asset(PROJECT_ROOT / 'movies', filename)

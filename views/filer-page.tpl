@@ -1,4 +1,7 @@
 <script>
+var FILER_STATE_KEY = '__sandtableFilerState';
+var FILER_RESTORE_FLAG_KEY = '__sandtableFilerShouldRestore';
+
 function myDelete(nm,fn,ft) {
   var deleted = confirm( "Permanently delete " + nm + "?" );
   if (deleted == true) {
@@ -31,6 +34,106 @@ function mySubmit(action,name,value,name2,value2) {
   document.getElementById('files').action = action;
   document.getElementById('files').submit();
 }
+
+function filerSetState(filetype, directory) {
+  window[FILER_STATE_KEY] = {
+    filetype: String(filetype || ''),
+    directory: String(directory || '')
+  };
+}
+
+function filerRestoreStateIfNeeded() {
+  const saved = window[FILER_STATE_KEY];
+  const shouldRestore = !!window[FILER_RESTORE_FLAG_KEY];
+  if (!saved || typeof saved !== 'object') {
+    filerSetState({{ ft|tojson }}, {{ path|tojson }});
+    return;
+  }
+  const currentFiletype = {{ ft|tojson }};
+  const currentDirectory = {{ path|tojson }};
+  const targetFiletype = typeof saved.filetype === 'string' ? saved.filetype : '';
+  const targetDirectory = typeof saved.directory === 'string' ? saved.directory : '';
+  if (!shouldRestore || !targetFiletype || (targetFiletype === currentFiletype && targetDirectory === currentDirectory)) {
+    window[FILER_RESTORE_FLAG_KEY] = false;
+    filerSetState(currentFiletype, currentDirectory);
+    return;
+  }
+
+  window[FILER_RESTORE_FLAG_KEY] = false;
+  const data = new FormData();
+  data.append('filetype', targetFiletype);
+  if (targetDirectory) {
+    data.append('directory', targetDirectory);
+  }
+
+  fetch('/filer?embed=1', {
+    method: 'POST',
+    body: data,
+    headers: {'X-Requested-With': 'XMLHttpRequest'}
+  }).then(function(response) {
+    return response.text();
+  }).then(function(html) {
+    const contentInner = document.getElementById('shellContentInner');
+    if (!contentInner) {
+      return;
+    }
+    contentInner.innerHTML = html;
+    const scripts = Array.prototype.slice.call(contentInner.querySelectorAll('script'));
+    scripts.forEach(function(oldScript) {
+      const script = document.createElement('script');
+      Array.prototype.slice.call(oldScript.attributes).forEach(function(attr) {
+        script.setAttribute(attr.name, attr.value);
+      });
+      script.text = oldScript.text || oldScript.textContent || oldScript.innerHTML || '';
+      oldScript.parentNode.replaceChild(script, oldScript);
+    });
+  }).catch(function(err) {
+    console.error(err);
+  });
+}
+
+if (typeof window.__sandtablePageCleanup !== 'function') {
+  window.__sandtablePageCleanup = function() {
+    const nextPath = String(window.__sandtableNextPath || '');
+    if (nextPath.startsWith('/filer')) {
+      return;
+    }
+    filerSetState({{ ft|tojson }}, {{ path|tojson }});
+    window[FILER_RESTORE_FLAG_KEY] = true;
+  };
+} else {
+  const previousCleanup = window.__sandtablePageCleanup;
+  window.__sandtablePageCleanup = function() {
+    const nextPath = String(window.__sandtableNextPath || '');
+    if (!nextPath.startsWith('/filer')) {
+      filerSetState({{ ft|tojson }}, {{ path|tojson }});
+      window[FILER_RESTORE_FLAG_KEY] = true;
+    }
+    previousCleanup();
+  };
+}
+
+filerRestoreStateIfNeeded();
+
+document.addEventListener('click', function(event) {
+  const filesForm = document.getElementById('files');
+  if (!filesForm) {
+    return;
+  }
+  const button = event.target.closest('button[name="directory"]');
+  if (!button || !filesForm.contains(button)) {
+    return;
+  }
+  filerSetState({{ ft|tojson }}, String(button.value || {{ path|tojson }}));
+});
+
+document.addEventListener('change', function(event) {
+  const select = event.target;
+  if (!select || select.name !== 'filetype') {
+    return;
+  }
+  filerSetState(String(select.value || {{ ft|tojson }}), '');
+});
 </script>
 
 <form method="post" action="/filer" class="auto_submit_form">
@@ -42,25 +145,89 @@ function mySubmit(action,name,value,name2,value2) {
 </form>
 
 {% if upload %}
- <form enctype="multipart/form-data" method="post">
+ <form id="uploadForm" enctype="multipart/form-data" method="post" action="/filer">
   <div class="savebox">
    <input type="hidden" name="filetype" value="{{ft}}"/>
    <input type="hidden" name="directory" value="{{path}}"/>
-   <input class="upload" name="_file" type="file" accept="{{ftfilter}}" required/>
+   <input id="uploadInput" class="upload" name="_file" type="file" accept="{{ftfilter}}" required multiple/>
    <button class="upload" name="action" type="submit" value="upload">Upload</Button>
   </div>
+  <div id="uploadDropZone" class="savebox" style="margin-top: 8px; border: 2px dashed #888; border-radius: 6px; padding: 10px; text-align: center;">
+   Drag and drop files here to upload
+  </div>
  </form>
+ <script>
+ (function() {
+  const form = document.getElementById('uploadForm');
+  const input = document.getElementById('uploadInput');
+  const zone = document.getElementById('uploadDropZone');
+  if (!form || !input || !zone) {
+   return;
+  }
+
+  function uploadFiles(fileList) {
+   if (!fileList || !fileList.length) {
+    return;
+   }
+   const data = new FormData();
+   data.append('filetype', '{{ft}}');
+   data.append('directory', '{{path}}');
+   data.append('action', 'upload');
+   for (let i = 0; i < fileList.length; i += 1) {
+    data.append('_file', fileList[i]);
+   }
+
+   fetch('/filer?embed=1', {
+    method: 'POST',
+    body: data,
+    headers: {'X-Requested-With': 'XMLHttpRequest'}
+   }).then(function(response) {
+    return response.text();
+   }).then(function(html) {
+    const contentInner = document.getElementById('shellContentInner');
+    if (contentInner) {
+     contentInner.innerHTML = html;
+     const scripts = Array.prototype.slice.call(contentInner.querySelectorAll('script'));
+     scripts.forEach(function(oldScript) {
+      const script = document.createElement('script');
+      Array.prototype.slice.call(oldScript.attributes).forEach(function(attr) {
+       script.setAttribute(attr.name, attr.value);
+      });
+      script.text = oldScript.text || oldScript.textContent || oldScript.innerHTML || '';
+      oldScript.parentNode.replaceChild(script, oldScript);
+     });
+    }
+   }).catch(function(err) {
+    console.error(err);
+   });
+  }
+
+  zone.addEventListener('dragover', function(event) {
+   event.preventDefault();
+   zone.style.borderColor = '#dfbf00';
+  });
+
+  zone.addEventListener('dragleave', function(event) {
+   event.preventDefault();
+   zone.style.borderColor = '#888';
+  });
+
+  zone.addEventListener('drop', function(event) {
+   event.preventDefault();
+   zone.style.borderColor = '#888';
+   uploadFiles(event.dataTransfer && event.dataTransfer.files ? event.dataTransfer.files : null);
+  });
+
+  input.addEventListener('change', function() {
+   uploadFiles(input.files);
+  });
+ })();
+ </script>
 {% endif %}
 
 <form id="files" method="post" action="filer">
  <input type="hidden" name="filetype" value="{{ft}}"/>
  <span class="filerTitle">{{path}}</span>
- {% if ft == 'Saved Drawings' %}
-  <div class="filerbox" style="margin-top: 6px; margin-bottom: 8px;">
-   <button class="load" type="submit" name="directory" value="{{saved_directory}}">Saved only</button>
-   <button class="load" type="submit" name="directory" value="{{store_root}}">Top level</button>
-  </div>
- {% endif %}
  <table id="filetable">
   {{ table|safe }}
  </table>

@@ -40,8 +40,11 @@ def lightsPage():
     d = Dialog(pattern.editor, form, None, autoSubmit=True)
     params = d.getParams()
     if method:
-        with ledapi.ledapi() as led:
-            led.setPattern(ledPattern, params)
+        try:
+            with ledapi.ledapi() as led:
+                led.setPattern(ledPattern, params)
+        except Exception:
+            pass
 
     return ''.join([
         cstuff.standardTopStr(),

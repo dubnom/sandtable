@@ -12,3 +12,4 @@ User=sandtable
 
 [Install]
 WantedBy=multi-user.target
+

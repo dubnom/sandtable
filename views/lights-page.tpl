@@ -1,10 +1,12 @@
+<form id="patternForm" method="post" action="lights">
+  <input type="hidden" id="patternMethodInput" name="method" value="">
+</form>
 <table class="main">
  <tr>
-  <form method="post" action="lights">
    <td valign="TOP">
     {% for pat in ledPatterns %}
       {% set style = 'ledselected' if pat == pattern else 'led' %}
-      <button class="{{style}}" type="submit" name="method" value="{{pat}}">
+      <button class="{{style}}" type="button" data-pattern="{{pat}}">
        <img src="{{ patternImages.get(pat, 'images/' ~ pat ~ '.png') }}" width="100" height="80" alt="{{pat}}">
       </button>
       {% if loop.index0 % 3 == 2 %}
@@ -12,7 +14,6 @@
       {% endif %}
     {% endfor %}
    </td>
-  </form>
 
   <td valign="TOP">
    <center>
@@ -26,4 +27,16 @@
   </td>
  </tr>
 </table>
+<script>
+(function() {
+  var form = document.getElementById('patternForm');
+  var methodInput = document.getElementById('patternMethodInput');
+  document.querySelectorAll('[data-pattern]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      methodInput.value = btn.dataset.pattern;
+      form.requestSubmit();
+    });
+  });
+})();
+</script>
 

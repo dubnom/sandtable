@@ -1,9 +1,8 @@
 <table class="main">
  <tr>
-  <td id="methodPane" valign="TOP" style="width: 95px;">
-   <div id="methodScroll" style="height: 300px; overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable;">
-   <div id="methodGrid" style="display: grid; grid-template-columns: repeat(auto-fill, 79px); gap: 4px; justify-content: start;"></div>
-   </div>
+  <td valign="TOP" style="width: 230px;">
+   <div class="navigation" style="margin-bottom: 8px;">Method</div>
+     <div id="methodGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;"></div>
    <div id="statusMsg" class="navigation" style="margin-top: 12px;"></div>
   </td>
   <td valign="TOP">
@@ -16,48 +15,24 @@
      <button id="redrawBtn" class="redraw" type="button">Redraw Screen</button>
      <button id="randomBtn" class="random" type="button">Random!</button>
      <button id="drawBtn" class="doit" type="button">Draw in Sand!</button>
+     <button id="abortBtn" class="abort" type="button">Abort!</button>
     </div>
     <div class="savebox" style="margin-top: 10px;">
      <span class="save">Name</span>
      <input id="nameInput" class="save" type="text" size="24">
      <button id="saveBtn" class="save" type="button">Save</button>
      <button id="exportBtn" class="export" type="button">Export</button>
-      <button id="playlistBtn" class="load" type="button">Add to Playlist</button>
     </div>
    </center>
   </td>
  </tr>
 </table>
 
-<style>
- #methodGrid img.sandable {
-  border: 1px solid #6f6f6f;
-  box-sizing: border-box;
- }
-
- #methodGrid img.selected {
-  border: 3px solid #ffd24d;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.85), 0 0 10px rgba(255, 210, 77, 0.85);
-  box-sizing: border-box;
- }
-</style>
-
+<script src="//cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script>
 (function() {
-  if (typeof window.__sandtablePageCleanup === 'function') {
-    try {
-      window.__sandtablePageCleanup();
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
   const initialMethod = {{ method|tojson }};
-  const initialLoadName = {{ loadname|default('', true)|tojson }};
-  const initialParams = {{ initial_params|default({}, true)|tojson }};
   const fallbackMethods = {{ sandables|tojson }};
-  const isEmbedded = {{ embedded|tojson }};
-  const DRAW_STATE_STORAGE_KEY = 'sandtable.drawState.v1';
   const pagePath = window.location.pathname || '/draw';
   const appBasePath = pagePath.replace(/\/draw\/?$/, '').replace(/\/$/, '');
 
@@ -67,7 +42,6 @@
     reconnectionDelay: 1000,
     reconnectionDelayMax: 5000,
     reconnectionAttempts: 5,
-    transports: ['websocket'],
     path: (appBasePath ? appBasePath : '') + '/socket.io'
   });
 
@@ -85,41 +59,6 @@
     return '/draw?method=' + encodeURIComponent(method);
   }
 
-  function loadPersistedDrawState() {
-    try {
-      const raw = window.sessionStorage.getItem(DRAW_STATE_STORAGE_KEY);
-      if (!raw) {
-        return null;
-      }
-      const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== 'object') {
-        return null;
-      }
-      const method = typeof parsed.method === 'string' ? parsed.method : '';
-      const params = (parsed.params && typeof parsed.params === 'object') ? parsed.params : {};
-      const name = typeof parsed.name === 'string' ? parsed.name : '';
-      return {method: method, params: params, name: name};
-    } catch (err) {
-      return null;
-    }
-  }
-
-  function persistDrawState() {
-    if (destroyed) {
-      return;
-    }
-    try {
-      const snapshot = {
-        method: state.method,
-        params: collectParams(),
-        name: nameInput ? String(nameInput.value || '') : '',
-      };
-      window.sessionStorage.setItem(DRAW_STATE_STORAGE_KEY, JSON.stringify(snapshot));
-    } catch (err) {
-      // Ignore persistence failures (private mode, quota, etc).
-    }
-  }
-
   const state = {
     method: initialMethod,
     methods: fallbackMethods || [],
@@ -127,16 +66,9 @@
     params: {},
     realtime: true,
     latestPreviewRequestId: 0,
-    pendingPreviewRequests: {},
-    pendingPreviewByKey: {},
-    realtimeTimer: null,
-    methodLoadInFlight: false,
   };
-  let destroyed = false;
 
   const methodGrid = document.getElementById('methodGrid');
-  const methodPane = document.getElementById('methodPane');
-  const methodScroll = document.getElementById('methodScroll');
   const planImage = document.getElementById('planImage');
   const errorBox = document.getElementById('errorBox');
   const drawInfo = document.getElementById('drawInfo');
@@ -144,179 +76,46 @@
   const statusMsg = document.getElementById('statusMsg');
   const nameInput = document.getElementById('nameInput');
 
-  const METHOD_TILE_WIDTH = 79;
-  const METHOD_TILE_GAP = 4;
-  const METHOD_MIN_WIDTH = 95;
-  const METHOD_MAX_WIDTH = 280;
-  const STATUSBAR_MARGIN = 8;
-
-  function methodGridWidth(columns) {
-    return (columns * METHOD_TILE_WIDTH) + (Math.max(columns - 1, 0) * METHOD_TILE_GAP);
-  }
-
-  function layoutMethodPane() {
-    if (!methodPane || !methodScroll || !methodGrid) {
-      return;
-    }
-
-    const top = methodScroll.getBoundingClientRect().top;
-    let bottom = window.innerHeight - STATUSBAR_MARGIN;
-    const globalStatusBar = document.getElementById('globalStatusBar');
-    if (globalStatusBar) {
-      const barRect = globalStatusBar.getBoundingClientRect();
-      if (barRect.top > 0) {
-        bottom = Math.min(bottom, barRect.top - STATUSBAR_MARGIN);
-      }
-    }
-    const availableHeight = Math.max(140, Math.floor(bottom - top));
-    methodScroll.style.height = String(availableHeight) + 'px';
-
-    const preferredWidth = Math.min(METHOD_MAX_WIDTH, Math.max(METHOD_MIN_WIDTH, Math.floor(window.innerWidth * 0.18)));
-    let columns = Math.max(1, Math.floor((preferredWidth + METHOD_TILE_GAP) / (METHOD_TILE_WIDTH + METHOD_TILE_GAP)));
-    if (state.methods.length) {
-      columns = Math.min(columns, state.methods.length);
-    }
-
-    const snappedGridWidth = methodGridWidth(columns);
-    const scrollbarWidth = Math.max(methodScroll.offsetWidth - methodScroll.clientWidth, 14);
-    const snappedPaneWidth = snappedGridWidth + scrollbarWidth;
-    methodPane.style.width = String(snappedPaneWidth) + 'px';
-    methodGrid.style.gridTemplateColumns = 'repeat(' + columns + ', ' + METHOD_TILE_WIDTH + 'px)';
-  }
-
-  function twoDigit(value) {
-    return String(value).padStart(2, '0');
-  }
-
-  function makeDefaultFileName(method) {
-    const now = new Date();
-    const stamp = String(now.getFullYear()) +
-      twoDigit(now.getMonth() + 1) +
-      twoDigit(now.getDate()) + '_' +
-      twoDigit(now.getHours()) +
-      twoDigit(now.getMinutes()) +
-      twoDigit(now.getSeconds());
-    const safeMethod = String(method || 'drawing').replace(/[^A-Za-z0-9_-]+/g, '_');
-    return safeMethod + '_' + stamp;
-  }
-
-  function refreshDefaultFileName() {
-    const previousAutoName = state.autoFileName || '';
-    state.autoFileName = makeDefaultFileName(state.method);
-    if (!nameInput.value || nameInput.value === previousAutoName) {
-      nameInput.value = state.autoFileName;
-    }
-  }
-
   function methodImageUrl(method) {
     return buildUrl('/images/' + encodeURIComponent(method) + '.png');
   }
 
-  function methodsEqual(left, right) {
-    const a = Array.isArray(left) ? left : [];
-    const b = Array.isArray(right) ? right : [];
-    if (a.length !== b.length) {
-      return false;
-    }
-    for (let i = 0; i < a.length; i += 1) {
-      if (a[i] !== b[i]) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  function updateMethodSelection() {
-    const images = methodGrid.querySelectorAll('img[data-method-name]');
-    images.forEach(function(image) {
-      const isSelected = image.dataset.methodName === state.method;
-      image.className = isSelected ? 'selected' : 'sandable';
-    });
-  }
-
   function populateMethods(methods) {
-    const nextMethods = Array.isArray(methods) ? methods.slice() : [];
-    if (methodsEqual(state.methods, nextMethods) && methodGrid.childElementCount) {
-      state.methods = nextMethods;
-      updateMethodSelection();
-      layoutMethodPane();
-      return;
-    }
-
-    state.methods = nextMethods;
     methodGrid.innerHTML = '';
-    nextMethods.forEach(function(method) {
+    (methods || []).forEach(function(method) {
       const link = document.createElement('a');
-      link.href = '#';
+      link.href = drawUrlForMethod(method);
       link.title = method;
       link.style.display = 'block';
 
       const image = document.createElement('img');
-      image.dataset.methodName = method;
       image.src = methodImageUrl(method);
       image.width = 75;
       image.height = 60;
-      image.loading = 'lazy';
-      image.decoding = 'async';
       image.alt = method;
       image.className = method === state.method ? 'selected' : 'sandable';
       link.appendChild(image);
 
       link.addEventListener('click', function(event) {
         event.preventDefault();
-        event.stopPropagation();
         selectMethod(method);
       });
 
       methodGrid.appendChild(link);
     });
-    layoutMethodPane();
   }
 
   function setStatus(msg) {
-    if (destroyed) {
-      return;
-    }
     statusMsg.textContent = msg || '';
   }
 
   function showError(msg) {
-    if (destroyed) {
-      return;
-    }
     if (msg) {
       errorBox.style.display = 'block';
       errorBox.textContent = 'Error: ' + msg;
     } else {
       errorBox.style.display = 'none';
       errorBox.textContent = '';
-    }
-  }
-
-  function renderDrawInfo(summary) {
-    const info = (summary && summary.drawinfo) ? String(summary.drawinfo) : '';
-    const helpPath = (summary && summary.helpUrl) ? String(summary.helpUrl) : '';
-
-    drawInfo.innerHTML = '';
-    if (!info && !helpPath) {
-      return;
-    }
-
-    if (info) {
-      drawInfo.appendChild(document.createTextNode(info));
-    }
-
-    if (helpPath) {
-      if (info) {
-        drawInfo.appendChild(document.createTextNode('    '));
-      }
-      const link = document.createElement('a');
-      link.href = buildUrl('/' + helpPath.replace(/^\/+/, ''));
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      link.className = 'navigation';
-      link.textContent = 'Help!';
-      drawInfo.appendChild(link);
     }
   }
 
@@ -436,50 +235,10 @@
       } else {
         input.step = 'any';
       }
-
-      input.value = value == null ? '' : String(value);
-
-      const useSlider = field.slider === true && field.min !== undefined && field.min !== null && field.max !== undefined && field.max !== null;
-      if (!useSlider) {
-        return input;
-      }
-
-      const wrapper = document.createElement('span');
-      wrapper.appendChild(input);
-
-      const slider = document.createElement('input');
-      slider.type = 'range';
-      slider.dataset.fieldName = field.name;
-      slider.dataset.fieldSliderName = field.name;
-      slider.min = String(field.min);
-      slider.max = String(field.max);
-      if (kind === 'DialogInt') {
-        slider.step = '1';
-      } else if (field.step !== undefined && field.step !== null) {
-        slider.step = String(field.step);
-      }
-      slider.value = input.value;
-      slider.style.marginLeft = '6px';
-      slider.style.verticalAlign = 'middle';
-
-      input.addEventListener('input', function() {
-        slider.value = input.value;
-      });
-      input.addEventListener('change', function() {
-        slider.value = input.value;
-      });
-      slider.addEventListener('input', function() {
-        input.value = slider.value;
-      });
-      slider.addEventListener('change', function() {
-        input.value = slider.value;
-      });
-
-      wrapper.appendChild(slider);
-      return wrapper;
+    } else {
+      input.type = 'text';
     }
 
-    input.type = 'text';
     input.value = value == null ? '' : String(value);
     if (kind === 'DialogStr' && field.length) {
       input.size = field.length;
@@ -488,9 +247,6 @@
   }
 
   function renderDialog() {
-    if (destroyed) {
-      return;
-    }
     const table = document.createElement('table');
     table.className = 'form';
 
@@ -547,36 +303,6 @@
     dialogHost.appendChild(table);
   }
 
-  function updateDialogValues(params) {
-    if (destroyed) {
-      return;
-    }
-    state.fields.forEach(function(field) {
-      if (!field.name) {
-        return;
-      }
-      const value = Object.prototype.hasOwnProperty.call(params, field.name) ? params[field.name] : field.default;
-      const node = dialogHost.querySelector('[data-field-name="' + field.name.replace(/"/g, '\\"') + '"]');
-      if (!node) {
-        return;
-      }
-      if (field.kind === 'DialogColor' && Array.isArray(value) && value.length === 3) {
-        const r = Number(value[0]).toString(16).padStart(2, '0');
-        const g = Number(value[1]).toString(16).padStart(2, '0');
-        const b = Number(value[2]).toString(16).padStart(2, '0');
-        node.value = '#' + r + g + b;
-      } else if (field.kind === 'DialogYesNo' || field.kind === 'DialogTrueFalse' || field.kind === 'DialogOnOff' || field.kind === 'Dialog2Choices') {
-        node.value = String(valueForChoiceField(field, value));
-      } else {
-        node.value = value == null ? '' : String(value);
-      }
-      const sliderNode = dialogHost.querySelector('[data-field-slider-name="' + field.name.replace(/"/g, '\\"') + '"]');
-      if (sliderNode) {
-        sliderNode.value = node.value;
-      }
-    });
-  }
-
   function collectParams() {
     const params = {};
     state.fields.forEach(function(field) {
@@ -593,60 +319,29 @@
   }
 
   function applyPreviewData(data) {
-    const previousMethod = state.method;
     if (data.method) {
       state.method = data.method;
     }
-    if (state.method !== previousMethod) {
-      refreshDefaultFileName();
-    }
-    if (typeof data.realtime === 'boolean') {
-      state.realtime = data.realtime;
-    }
-    const schemaChanged = Array.isArray(data.fields);
-    if (schemaChanged) {
+    if (Array.isArray(data.fields)) {
       state.fields = data.fields;
     }
-    const newParams = data.params || {};
-    state.params = newParams;
+    state.params = data.params || {};
     if (data.image && data.image.dataUrl) {
       planImage.src = data.image.dataUrl;
     } else if (data.image && data.image.url) {
       planImage.src = data.image.url;
     }
     const summary = data.summary || {};
-    renderDrawInfo(summary);
+    drawInfo.textContent = summary.drawinfo || '';
     showError(data.errors || '');
-    if (schemaChanged) {
-      renderDialog();
-    } else {
-      updateDialogValues(newParams);
-    }
+    populateMethods(state.methods);
+    renderDialog();
   }
 
   async function loadMethods() {
     const data = await fetchJson(buildUrl('/api/draw/methods?method=' + encodeURIComponent(state.method)));
     state.methods = data.methods || [];
     populateMethods(state.methods);
-  }
-
-  async function loadDrawing(name) {
-    const loadName = String(name || '').trim();
-    if (!loadName) {
-      return;
-    }
-    setStatus('Loading drawing...');
-    const data = await fetchJson(buildUrl('/api/draw/load'), {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({name: loadName}),
-    });
-    applyPreviewData(data);
-    populateMethods(state.methods);
-    if (data && data.loadedName) {
-      nameInput.value = String(data.loadedName);
-      state.autoFileName = String(data.loadedName);
-    }
   }
 
   function loadSchema(method) {
@@ -666,10 +361,7 @@
             state.params[field.name] = field.default;
           }
         });
-        if (!isEmbedded) {
-          window.history.replaceState(null, '', drawUrlForMethod(state.method));
-        }
-        refreshDefaultFileName();
+        window.history.replaceState(null, '', drawUrlForMethod(state.method));
         renderDialog();
         resolve(data);
       });
@@ -678,81 +370,45 @@
     });
   }
 
-  function cancelRealtimePreview() {
-    if (state.realtimeTimer) {
-      clearTimeout(state.realtimeTimer);
-      state.realtimeTimer = null;
-    }
-  }
-
-  function realtimePreview() {
+  const realtimePreview = (function() {
+    let timer = null;
     const DELAY_MS = 250;
-    if (!state.realtime || state.methodLoadInFlight) {
-      return;
-    }
-    cancelRealtimePreview();
-    state.realtimeTimer = setTimeout(function() {
-      state.realtimeTimer = null;
-      preview('refresh');
-    }, DELAY_MS);
-  }
+    return function() {
+      if (!state.realtime) {
+        return;
+      }
+      if (timer) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        timer = null;
+        preview('refresh');
+      }, DELAY_MS);
+    };
+  })();
 
   async function selectMethod(method) {
-    if (state.methodLoadInFlight) {
-      return;
-    }
     setStatus('Loading method...');
-    state.methodLoadInFlight = true;
-    cancelRealtimePreview();
     try {
-      await preview('refresh', {method: method, includeFields: true, params: {}});
+      await loadSchema(method);
+      await preview('refresh');
       populateMethods(state.methods);
     } catch (err) {
       showError(err.message || 'Method load failed');
       setStatus('');
-    } finally {
-      state.methodLoadInFlight = false;
     }
   }
 
   // WebSocket-based interactive requests
   function preview(action, extraPayload) {
     setStatus('Working...');
-    const payload = Object.assign({
+    state.latestPreviewRequestId += 1;
+    socket.emit('draw:preview', Object.assign({
       method: state.method,
       action: action || 'refresh',
       params: collectParams(),
-    }, extraPayload || {});
-
-    const dedupeKey = JSON.stringify({
-      method: payload.method,
-      action: payload.action,
-      params: payload.params,
-      fieldName: payload.fieldName || null,
-      includeFields: !!payload.includeFields,
-    });
-    const existingRequestId = state.pendingPreviewByKey[dedupeKey];
-    if (existingRequestId && state.pendingPreviewRequests[existingRequestId]) {
-      return state.pendingPreviewRequests[existingRequestId].promise;
-    }
-
-    state.latestPreviewRequestId += 1;
-    const requestId = state.latestPreviewRequestId;
-    payload.requestId = requestId;
-
-    let resolvePending;
-    const promise = new Promise(function(resolve) {
-      resolvePending = resolve;
-    });
-    state.pendingPreviewRequests[requestId] = {
-      resolve: resolvePending,
-      key: dedupeKey,
-      promise: promise,
-    };
-    state.pendingPreviewByKey[dedupeKey] = requestId;
-
-    socket.emit('draw:preview', payload);
-    return promise;
+      requestId: state.latestPreviewRequestId,
+    }, extraPayload || {}));
   }
 
   function randomizeField(fieldName) {
@@ -782,27 +438,10 @@
       node.value = defaultValue == null ? '' : String(defaultValue);
     }
 
-    const sliderNode = dialogHost.querySelector('[data-field-slider-name="' + fieldName.replace(/"/g, '\\"') + '"]');
-    if (sliderNode) {
-      sliderNode.value = node.value;
-    }
-
     preview('refresh');
   }
 
   socket.on('draw:preview:response', function(data) {
-    if (destroyed) {
-      return;
-    }
-    const responseRequestId = data && data.requestId;
-    if (responseRequestId && state.pendingPreviewRequests[responseRequestId]) {
-      const pending = state.pendingPreviewRequests[responseRequestId];
-      pending.resolve(data);
-      if (pending.key && state.pendingPreviewByKey[pending.key] === responseRequestId) {
-        delete state.pendingPreviewByKey[pending.key];
-      }
-      delete state.pendingPreviewRequests[responseRequestId];
-    }
     if (data && data.requestId && data.requestId !== state.latestPreviewRequestId) {
       return;
     }
@@ -824,9 +463,6 @@
   }
 
   socket.on('draw:execute:response', function(data) {
-    if (destroyed) {
-      return;
-    }
     if (data.error) {
       showError(data.error);
       setStatus('');
@@ -841,19 +477,30 @@
     }
   });
 
+  function abortDraw() {
+    setStatus('Stopping...');
+    socket.emit('draw:abort', {});
+  }
+
+  socket.on('draw:abort:response', function(data) {
+    if (data.error) {
+      showError(data.error);
+    } else {
+      setStatus('Stopped');
+      showError('');
+    }
+  });
+
   function saveDrawing() {
     setStatus('Saving...');
     socket.emit('draw:save', {
       method: state.method,
-      name: nameInput.value || state.autoFileName || '',
+      name: nameInput.value || '',
       params: collectParams(),
     });
   }
 
   socket.on('draw:save:response', function(data) {
-    if (destroyed) {
-      return;
-    }
     if (data.error) {
       showError(data.error);
       setStatus('');
@@ -867,23 +514,12 @@
     setStatus('Exporting...');
     socket.emit('draw:export', {
       method: state.method,
-      name: nameInput.value || state.autoFileName || '',
-      params: collectParams(),
-    });
-  }
-
-  function addToPlaylist() {
-    setStatus('Adding to playlist...');
-    socket.emit('draw:playlist:add', {
-      method: state.method,
+      name: nameInput.value || '',
       params: collectParams(),
     });
   }
 
   socket.on('draw:export:response', function(data) {
-    if (destroyed) {
-      return;
-    }
     if (data.error) {
       showError(data.error);
       setStatus('');
@@ -893,55 +529,18 @@
     }
   });
 
-  socket.on('draw:playlist:add:response', function(data) {
-    if (destroyed) {
-      return;
-    }
-    if (data.error || data.status !== 'ok') {
-      showError((data && data.error) ? data.error : 'Unable to add to playlist');
-      setStatus('');
-    } else {
-      const title = data.item && data.item.title ? String(data.item.title) : 'playlist';
-      setStatus('Added: ' + title);
-      showError('');
-    }
-  });
-
   // WebSocket connection handlers
   socket.on('connect', function() {
-    if (destroyed) {
-      return;
-    }
     setStatus('Connected');
   });
 
   socket.on('disconnect', function() {
-    if (destroyed) {
-      return;
-    }
     setStatus('Disconnected - attempting to reconnect');
   });
 
   socket.on('connect_error', function(error) {
-    if (destroyed) {
-      return;
-    }
     showError('Connection error: ' + error.message);
   });
-
-  window.__sandtablePageCleanup = function() {
-    persistDrawState();
-    destroyed = true;
-    cancelRealtimePreview();
-    state.pendingPreviewRequests = {};
-    state.pendingPreviewByKey = {};
-    window.removeEventListener('resize', layoutMethodPane);
-    try {
-      socket.disconnect();
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   document.getElementById('redrawBtn').addEventListener('click', function() {
     preview('refresh');
@@ -950,9 +549,9 @@
     preview('random');
   });
   document.getElementById('drawBtn').addEventListener('click', executeDraw);
+  document.getElementById('abortBtn').addEventListener('click', abortDraw);
   document.getElementById('saveBtn').addEventListener('click', saveDrawing);
   document.getElementById('exportBtn').addEventListener('click', exportDrawing);
-  document.getElementById('playlistBtn').addEventListener('click', addToPlaylist);
 
   dialogHost.addEventListener('change', function(event) {
     if (event.target && event.target.dataset && event.target.dataset.fieldName) {
@@ -960,40 +559,10 @@
     }
   });
 
-  function isDeferredTypingField(target) {
-    if (!target || !target.dataset || !target.dataset.fieldName) {
-      return false;
-    }
-    if (target.tagName === 'TEXTAREA') {
-      return true;
-    }
-    if (target.tagName !== 'INPUT') {
-      return false;
-    }
-    const inputType = (target.type || '').toLowerCase();
-    return inputType === 'text' || inputType === 'number';
-  }
-
   dialogHost.addEventListener('input', function(event) {
     if (event.target && event.target.dataset && event.target.dataset.fieldName) {
-      if (isDeferredTypingField(event.target)) {
-        return;
-      }
       realtimePreview();
     }
-  });
-
-  dialogHost.addEventListener('keydown', function(event) {
-    if (event.key !== 'Enter') {
-      return;
-    }
-    if (!isDeferredTypingField(event.target)) {
-      return;
-    }
-    if (event.target.tagName === 'INPUT') {
-      event.preventDefault();
-    }
-    realtimePreview();
   });
 
   dialogHost.addEventListener('mousedown', function(event) {
@@ -1012,16 +581,6 @@
 
   (async function init() {
     try {
-      window.addEventListener('resize', layoutMethodPane);
-
-      const persisted = initialLoadName ? null : loadPersistedDrawState();
-      if (persisted && persisted.method) {
-        state.method = persisted.method;
-      }
-
-      // Initialize a sane default save/export name before first preview response.
-      refreshDefaultFileName();
-
       // Always show a method list immediately, even if API calls fail.
       populateMethods(state.methods);
 
@@ -1031,22 +590,8 @@
         setStatus('Using built-in method list');
       }
 
-      if (initialLoadName) {
-        await loadDrawing(initialLoadName);
-      } else {
-        const initialPreviewPayload = {includeFields: true};
-        if (persisted && persisted.params && Object.keys(persisted.params).length) {
-          initialPreviewPayload.method = persisted.method || state.method;
-          initialPreviewPayload.params = persisted.params;
-          if (persisted.name) {
-            nameInput.value = persisted.name;
-            state.autoFileName = persisted.name;
-          }
-        } else if (initialParams && Object.keys(initialParams).length) {
-          initialPreviewPayload.params = initialParams;
-        }
-        await preview('refresh', initialPreviewPayload);
-      }
+      await loadSchema(state.method);
+      await preview('refresh');
     } catch (err) {
       showError(err.message || 'Initialization failed');
       setStatus('Initialization failed');

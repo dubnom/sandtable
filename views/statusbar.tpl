@@ -21,20 +21,26 @@
 }
 </style>
 <div id="globalStatusBar" style="position: fixed; left: 8px; right: 8px; bottom: 8px; margin: 0; padding: 8px 10px; background-color: rgba(255,255,255,0.92); border-radius: 6px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.25); z-index: 1000;">
- <span class="statusbar-group"><strong>Machine:</strong> <span id="globalMachineStatus">Loading...</span></span>
+ <span class="statusbar-group"><strong>Table:</strong> <span id="globalMachineStatus">Loading...</span></span>
  <span class="statusbar-group"><strong>Playlist:</strong> <span id="globalPlaylistStatus">Loading...</span></span>
  <button id="globalPlaylistPlayBtn" class="doit" type="button">Play</button>
  <button id="globalPlaylistStopBtn" class="load" type="button">Stop</button>
- <button id="globalPlaylistAbortBtn" class="abort" type="button">Abort</button>
 </div>
 <script>
 (function() {
+  const pagePath = window.location.pathname || '/';
+  const rootLikePath = pagePath.replace(/\/+$/, '');
+  const appBasePath = rootLikePath === '' ? '' : rootLikePath;
+
+  function buildUrl(path) {
+    return (appBasePath ? appBasePath : '') + path;
+  }
+
   const machineNode = document.getElementById('globalMachineStatus');
   const playlistNode = document.getElementById('globalPlaylistStatus');
   const playBtn = document.getElementById('globalPlaylistPlayBtn');
   const stopBtn = document.getElementById('globalPlaylistStopBtn');
-  const abortBtn = document.getElementById('globalPlaylistAbortBtn');
-  if (!machineNode || !playlistNode || !playBtn || !stopBtn || !abortBtn) {
+  if (!machineNode || !playlistNode || !playBtn || !stopBtn) {
     return;
   }
 
@@ -45,13 +51,13 @@
     playlistNode.textContent = 'Socket.IO not loaded';
     playBtn.disabled = true;
     stopBtn.disabled = true;
-    abortBtn.disabled = true;
     return;
   }
 
   const socket = window.__sandtableStatusSocket || io({
     reconnection: true,
-    transports: ['websocket']
+    transports: ['websocket'],
+    path: buildUrl('/socket.io')
   });
   window.__sandtableStatusSocket = socket;
 
@@ -68,10 +74,11 @@
     if (!status) {
       return 'Unavailable';
     }
+    const playlistName = status.name ? String(status.name) : '';
     const state = status.state || 'idle';
     const count = Number(status.count || 0);
     const current = status.current || null;
-    let text = state;
+    let text = playlistName ? (playlistName + ': ' + state) : state;
     if (count) {
       text += ' (' + count + ' item' + (count === 1 ? '' : 's') + ')';
     }
@@ -91,7 +98,6 @@
     const running = state === 'playing' || state === 'stopping' || state === 'aborting';
     playBtn.disabled = running || !status || !status.count;
     stopBtn.disabled = !running;
-    abortBtn.disabled = !running;
   }
 
   function applyStatus(data) {
@@ -102,6 +108,23 @@
 
   function controlPlaylist(action) {
     socket.emit('statusbar:control', {action: action});
+  }
+
+  function fetchStatusFallback() {
+    fetch(buildUrl('/api/statusbar'))
+      .then(function(response) {
+        if (!response.ok) {
+          throw new Error('Status request failed');
+        }
+        return response.json();
+      })
+      .then(function(data) {
+        applyStatus(data);
+        updateBodyPadding();
+      })
+      .catch(function() {
+        // Keep prior UI state if fallback fetch fails.
+      });
   }
 
   socket.on('statusbar:update', function(data) {
@@ -117,6 +140,7 @@
 
   socket.on('connect', function() {
     socket.emit('statusbar:subscribe');
+    fetchStatusFallback();
   });
 
   socket.on('disconnect', function() {
@@ -128,10 +152,10 @@
 
   playBtn.addEventListener('click', function() { controlPlaylist('play'); });
   stopBtn.addEventListener('click', function() { controlPlaylist('stop'); });
-  abortBtn.addEventListener('click', function() { controlPlaylist('abort'); });
 
   if (socket.connected) {
     socket.emit('statusbar:subscribe');
   }
+  fetchStatusFallback();
 })();
 </script>

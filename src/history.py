@@ -1,6 +1,6 @@
 from Sand import STORE_PATH, TABLE_WIDTH, TABLE_LENGTH,\
-    IMAGE_TYPE, IMAGE_WIDTH, IMAGE_HEIGHT, CACHE_FILE,\
-    HISTORY_COUNT
+    IMAGE_WIDTH, IMAGE_HEIGHT, CACHE_FILE,\
+    HISTORY_COUNT, get_image_type
 from os import listdir, remove
 import os
 import json
@@ -311,7 +311,7 @@ class History():
         with open(sandPath, 'wb') as f:
             pickle.dump(params, f)
         boundingBox = [(0.0, 0.0), (TABLE_WIDTH, TABLE_LENGTH)]
-        Chains.saveImage(chains, boundingBox, pngPath, int(IMAGE_WIDTH/2), int(IMAGE_HEIGHT/2), IMAGE_TYPE, clipToTable=True)
+        Chains.saveImage(chains, boundingBox, pngPath, int(IMAGE_WIDTH/2), int(IMAGE_HEIGHT/2), get_image_type(), clipToTable=True)
 
     @staticmethod
     def delete(name):

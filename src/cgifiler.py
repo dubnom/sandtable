@@ -126,6 +126,20 @@ class ftHistory(ftDrawings):
         self.allowUpload = False
 
 
+class ftPlaylists(ftBase):
+    def __init__(self):
+        self.path = os.path.join(STORE_PATH, 'playlists')
+        os.makedirs(self.path, exist_ok=True)
+        self.columns = 6
+        self.filter = ['json']
+        self.allowUpload = False
+
+    def imgFunc(self, f, fn, p):
+        return f"""<a class="filer" href="/?view=playlist&loadname={quote(p[0], safe='')}">
+             <img src="images/script.png" width="80">
+             </a>"""
+
+
 filetypes = {
     'Pictures':         ftPictures(),
     'Clipart':          ftClipart(),
@@ -134,6 +148,7 @@ filetypes = {
     'Movies':           ftMovies(),
     'Saved Drawings':   ftDrawings(),
     'History':          ftHistory(),
+    'Playlists':        ftPlaylists(),
 }
 
 
@@ -168,7 +183,7 @@ def filerPage():
     cstuff = cgistuff('Filer', jQuery=True)
 
     form = request.values
-    ft = form.get('filetype', '') or 'Saved Drawings'
+    ft = form.get('filetype', '') or 'Clipart'
 
     options = '\n'.join(['<option%s>%s</option>' % (' selected' if ft == name else '', name) for name in list(filetypes.keys())])
 

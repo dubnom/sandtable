@@ -1,7 +1,7 @@
 <table class="main">
  <tr>
   <td id="methodGridCell" valign="TOP" style="width: 247px;">
-     <div id="methodGridScroller" style="overflow-y: scroll; overflow-x: hidden; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; width: fit-content; height: calc(100vh - 170px); min-height: 160px;">
+    <div id="methodGridScroller" style="overflow-y: scroll; overflow-x: hidden; overscroll-behavior: contain; scrollbar-gutter: stable; -webkit-overflow-scrolling: touch; width: fit-content; height: calc(100vh - 170px); min-height: 160px;">
        <div id="methodGrid" style="display: grid; grid-template-columns: repeat(3, 79px); gap: 4px;"></div>
      </div>
    <div id="statusMsg" class="navigation" style="margin-top: 12px;"></div>
@@ -13,16 +13,15 @@
     <span id="drawInfo" class="drawtime"></span>
     <div id="dialogHost"></div>
     <div style="margin-top: 10px; line-height: 1.8;">
-     <button id="redrawBtn" class="redraw" type="button">Redraw Screen</button>
+      <button id="redrawBtn" class="redraw" type="button">Refresh</button>
      <button id="randomBtn" class="random" type="button">Random!</button>
-     <button id="drawBtn" class="doit" type="button">Draw in Sand!</button>
-     <button id="abortBtn" class="abort" type="button">Abort!</button>
+      <button id="defaultsBtn" class="defaults" type="button">Defaults</button>
+      <button id="drawBtn" class="doit" type="button">Draw Now!</button>
+      <button id="playlistBtn" class="load" type="button">Add to Playlist</button>
     </div>
     <div class="savebox" style="margin-top: 10px;">
-     <span class="save">Name</span>
-     <input id="nameInput" class="save" type="text" size="24">
-     <button id="saveBtn" class="save" type="button">Save</button>
-     <button id="exportBtn" class="export" type="button">Export</button>
+      <button id="saveBtn" class="save" type="button">Save...</button>
+      <button id="exportBtn" class="export" type="button">Export...</button>
     </div>
    </center>
   </td>
@@ -79,7 +78,6 @@
   const drawInfo = document.getElementById('drawInfo');
   const dialogHost = document.getElementById('dialogHost');
   const statusMsg = document.getElementById('statusMsg');
-  const nameInput = document.getElementById('nameInput');
 
   function methodImageUrl(method) {
     return buildUrl('/images/' + encodeURIComponent(method) + '.png');
@@ -136,6 +134,7 @@
     const threeColWidth = tileWidth * 3 + gap * 2;
     const twoColWidth = tileWidth * 2 + gap;
     const oneColWidth = tileWidth;
+    const scrollbarReserve = 14;
 
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
     const imageWidth = planImage ? Math.ceil(planImage.getBoundingClientRect().width) : 0;
@@ -150,9 +149,10 @@
 
     const selectedWidth = columns === 3 ? threeColWidth : (columns === 2 ? twoColWidth : oneColWidth);
     methodGrid.style.gridTemplateColumns = 'repeat(' + columns + ', ' + tileWidth + 'px)';
-    methodGridCell.style.width = String(selectedWidth) + 'px';
+    const selectedCellWidth = selectedWidth + scrollbarReserve;
+    methodGridCell.style.width = String(selectedCellWidth) + 'px';
     if (methodGridScroller) {
-      methodGridScroller.style.width = String(selectedWidth) + 'px';
+      methodGridScroller.style.width = String(selectedCellWidth) + 'px';
     }
   }
 
@@ -467,6 +467,27 @@
     preview('random-field', {fieldName: fieldName});
   }
 
+  function restoreAllDefaults() {
+    state.fields.forEach(function(field) {
+      if (!field.name || field.kind === 'DialogBreak') return;
+      const node = dialogHost.querySelector('[data-field-name="' + field.name.replace(/"/g, '\\"') + '"]');
+      if (!node) return;
+      let defaultValue = field.default;
+      if (node.tagName === 'SELECT') {
+        defaultValue = valueForChoiceField(field, defaultValue);
+        node.value = defaultValue == null ? '' : String(defaultValue);
+      } else if (field.kind === 'DialogColor' && Array.isArray(defaultValue) && defaultValue.length === 3) {
+        const r = Number(defaultValue[0]).toString(16).padStart(2, '0');
+        const g = Number(defaultValue[1]).toString(16).padStart(2, '0');
+        const b = Number(defaultValue[2]).toString(16).padStart(2, '0');
+        node.value = '#' + r + g + b;
+      } else {
+        node.value = defaultValue == null ? '' : String(defaultValue);
+      }
+    });
+    preview('refresh');
+  }
+
   function restoreFieldDefault(fieldName) {
     const field = (state.fields || []).find(function(f) { return f.name === fieldName; });
     if (!field) {
@@ -529,25 +550,43 @@
     }
   });
 
-  function abortDraw() {
-    setStatus('Stopping...');
-    socket.emit('draw:abort', {});
+  function addToPlaylist() {
+    setStatus('Adding to playlist...');
+    socket.emit('draw:playlist:add', {
+      method: state.method,
+      params: collectParams(),
+    });
   }
 
-  socket.on('draw:abort:response', function(data) {
-    if (data.error) {
+  socket.on('draw:playlist:add:response', function(data) {
+    if (data && data.error) {
       showError(data.error);
-    } else {
-      setStatus('Stopped');
-      showError('');
+      setStatus('');
+      return;
     }
+    const count = data && typeof data.count === 'number' ? data.count : null;
+    setStatus(count === null ? 'Added to playlist' : ('Added to playlist (' + count + ' items)'));
+    showError('');
   });
 
+  function askForDrawingName(promptTitle) {
+    const suggested = String(state.method || 'drawing').trim() || 'drawing';
+    const entered = window.prompt(promptTitle, suggested);
+    if (entered === null) {
+      return '';
+    }
+    return String(entered).trim();
+  }
+
   function saveDrawing() {
+    const name = askForDrawingName('Save drawing as');
+    if (!name) {
+      return;
+    }
     setStatus('Saving...');
     socket.emit('draw:save', {
       method: state.method,
-      name: nameInput.value || '',
+      name: name,
       params: collectParams(),
     });
   }
@@ -563,10 +602,14 @@
   });
 
   function exportDrawing() {
+    const name = askForDrawingName('Export drawing as');
+    if (!name) {
+      return;
+    }
     setStatus('Exporting...');
     socket.emit('draw:export', {
       method: state.method,
-      name: nameInput.value || '',
+      name: name,
       params: collectParams(),
     });
   }
@@ -600,8 +643,9 @@
   document.getElementById('randomBtn').addEventListener('click', function() {
     preview('random');
   });
+  document.getElementById('defaultsBtn').addEventListener('click', restoreAllDefaults);
   document.getElementById('drawBtn').addEventListener('click', executeDraw);
-  document.getElementById('abortBtn').addEventListener('click', abortDraw);
+  document.getElementById('playlistBtn').addEventListener('click', addToPlaylist);
   document.getElementById('saveBtn').addEventListener('click', saveDrawing);
   document.getElementById('exportBtn').addEventListener('click', exportDrawing);
   window.addEventListener('resize', function() {

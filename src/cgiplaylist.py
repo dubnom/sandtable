@@ -15,6 +15,7 @@ def playlistPage():
     cstuff = cgistuff('Playlist')
     status = ''
     error = ''
+    selectedSaved = str(request.values.get('loadname', '') or request.values.get('_loadname', '')).strip() or Playlist.active_name()
 
     if request.method == 'POST':
         action = request.values.get('action', '')
@@ -43,8 +44,46 @@ def playlistPage():
                 status = msg
             else:
                 error = msg
+        elif action == 'save':
+            ok, msg, savedName = Playlist.save_named(request.values.get('_name', ''))
+            if ok:
+                status = msg
+                selectedSaved = savedName
+            else:
+                error = msg
+        elif action == 'load':
+            ok, msg, loadedName = Playlist.load_named(request.values.get('_loadname', ''))
+            if ok:
+                status = msg
+                selectedSaved = loadedName
+            else:
+                error = msg
+        elif action == 'rename':
+            ok, msg, renamedName = Playlist.rename_named(request.values.get('_loadname', ''), request.values.get('_name', ''))
+            if ok:
+                status = msg
+                selectedSaved = renamedName
+            else:
+                error = msg
+        elif action == 'delete':
+            ok, msg = Playlist.delete_named(request.values.get('_loadname', ''))
+            if ok:
+                status = msg
+                selectedSaved = ''
+            else:
+                error = msg
+    elif selectedSaved:
+        ok, msg, loadedName = Playlist.load_named(selectedSaved)
+        if ok:
+            status = msg
+            selectedSaved = loadedName
+        else:
+            error = msg
 
     items = Playlist.list()
+    savedPlaylists = Playlist.list_saved()
+    if (not selectedSaved or selectedSaved not in savedPlaylists) and savedPlaylists:
+        selectedSaved = savedPlaylists[0]
     for item in items:
         try:
             item['createdText'] = datetime.fromtimestamp(int(item.get('created', 0))).strftime('%Y-%m-%d %H:%M:%S')
@@ -59,5 +98,5 @@ def playlistPage():
 
     return ''.join([
         cstuff.standardTopStr(),
-        render_template('playlist-page.tpl', items=items, status=status, error=error),
+        render_template('playlist-page.tpl', items=items, status=status, error=error, savedPlaylists=savedPlaylists, selectedSaved=selectedSaved),
         cstuff.endBodyStr()])

@@ -6,7 +6,7 @@ import os
 from Sand import TABLE_WIDTH, TABLE_LENGTH, TABLE_UNITS, BALL_SIZE,\
     MACHINE, MACHINE_FEED, MACHINE_ACCEL, MACHINE_UNITS,\
     MACH_LOG, LED_LOG, SERVER_LOG, SCHEDULER_LOG, MOVIE_STATUS_LOG,\
-    VER_FILE
+    VER_FILE, get_image_type, set_image_type, IMAGE_TYPES
 from webapp import app
 import mach
 import convert
@@ -88,14 +88,20 @@ def adminPage():
     form = request.form
     action = form.get('action', '')
 
-    if action in actions:
+    if action == 'set_image_type':
+        val = form.get('image_type', '')
+        if val in IMAGE_TYPES:
+            set_image_type(val)
+        message, message2 = 'Image type set to %s' % get_image_type(), None
+    elif action in actions:
         message, message2 = actions[action][0]()
     else:
         message, message2 = None, None
 
     return ''.join([
         cstuff.standardTopStr(),
-        render_template('admin-page.tpl', message=message, message2=message2, actions=actions),
+        render_template('admin-page.tpl', message=message, message2=message2, actions=actions,
+                        imageType=get_image_type(), imageTypes=IMAGE_TYPES),
         cstuff.endBodyStr()])
 
 

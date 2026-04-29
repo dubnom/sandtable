@@ -4,7 +4,7 @@
 <table class="main">
  <tr>
    <td id="patternGridCell" valign="TOP" style="width: 330px;">
-    <div id="patternGridScroller" style="overflow-y: scroll; overflow-x: hidden; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; width: fit-content; height: calc(100vh - 170px); min-height: 160px;">
+    <div id="patternGridScroller" style="overflow-y: scroll; overflow-x: hidden; overscroll-behavior: contain; scrollbar-gutter: stable; -webkit-overflow-scrolling: touch; width: fit-content; height: calc(100vh - 170px); min-height: 160px;">
       <div id="patternGrid" style="display: grid; grid-template-columns: repeat(3, 106px); gap: 4px;">
       {% for pat in ledPatterns %}
         {% set style = 'ledselected' if pat == pattern else 'led' %}
@@ -59,6 +59,7 @@
     var threeColWidth = tileWidth * 3 + gap * 2;
     var twoColWidth = tileWidth * 2 + gap;
     var oneColWidth = tileWidth;
+    var scrollbarReserve = 14;
 
     var viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
     var dialogMin = lightsDialogCell ? Math.ceil(lightsDialogCell.scrollWidth) : 0;
@@ -72,9 +73,10 @@
 
     var selectedWidth = columns === 3 ? threeColWidth : (columns === 2 ? twoColWidth : oneColWidth);
     patternGrid.style.gridTemplateColumns = 'repeat(' + columns + ', ' + tileWidth + 'px)';
-    patternGridCell.style.width = String(selectedWidth) + 'px';
+    var selectedCellWidth = selectedWidth + scrollbarReserve;
+    patternGridCell.style.width = String(selectedCellWidth) + 'px';
     if (patternGridScroller) {
-      patternGridScroller.style.width = String(selectedWidth) + 'px';
+      patternGridScroller.style.width = String(selectedCellWidth) + 'px';
     }
   }
 

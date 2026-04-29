@@ -50,6 +50,7 @@ class PlaylistRunner:
         with self._lock:
             current = dict(self._current) if isinstance(self._current, dict) else None
             return {
+                'name': Playlist.active_name(),
                 'state': self._state,
                 'message': self._message,
                 'current': current,

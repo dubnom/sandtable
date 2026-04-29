@@ -82,3 +82,26 @@ exec("from %s.%s import *" % (CONFIG_PATH, hostmap[HOST_NAME]))
 
 IMAGE_HEIGHT = int(IMAGE_WIDTH * (TABLE_LENGTH / TABLE_WIDTH))
 MACH_FILE = '%smachines/%s.py' % (SOURCE_PATH, MACHINE)
+
+_IMAGE_TYPE_FILE = '%simage_type.txt' % DATA_PATH
+IMAGE_TYPES = ('Realistic', 'ClippedLine', 'Line')
+
+
+def get_image_type():
+    """Return the current IMAGE_TYPE, overridden by data/image_type.txt if present."""
+    try:
+        with open(_IMAGE_TYPE_FILE, 'r') as f:
+            val = f.read().strip()
+            if val in IMAGE_TYPES:
+                return val
+    except Exception:
+        pass
+    return IMAGE_TYPE
+
+
+def set_image_type(val):
+    """Persist a new IMAGE_TYPE override to data/image_type.txt."""
+    if val not in IMAGE_TYPES:
+        raise ValueError('Invalid IMAGE_TYPE: %s' % val)
+    with open(_IMAGE_TYPE_FILE, 'w') as f:
+        f.write(val)

@@ -4,7 +4,7 @@ from pathlib import Path
 menuItems = (
     ('Draw', 'draw'),
     ('History', 'history'),
-    ('Playlist', 'playlist'),
+    ('Playlists', 'playlist'),
     ('Lights', 'lights'),
     ('Pictures', 'pictures'),
     ('Watch Movie', 'watch'),

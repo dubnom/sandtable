@@ -41,6 +41,16 @@ window.__sandtablePageCleanup = function() {
 {% endif %}
 
 <form method="post" action="admin">
+ <fieldset>
+  <legend>Preview Image Style</legend>
+  {% for t in imageTypes %}
+   <label><input type="radio" name="image_type" value="{{t}}"{% if t == imageType %} checked{% endif %}> {{t}}</label>
+  {% endfor %}
+  <button class="doit" name="action" type="submit" value="set_image_type">Set</button>
+ </fieldset>
+</form>
+
+<form method="post" action="admin">
 {% for k,v in actions|dictsort %}
  {% if v[1] %}
   <button class="doit" name="action" type="submit" value="{{k}}">{{v[1]}}</button><br>

@@ -4,12 +4,11 @@ from threading import Lock
 from flask import request, render_template, jsonify, redirect, url_for
 from datetime import timedelta
 from os import stat
-from os.path import basename
 
 from Sand import TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS,\
     MACHINE_UNITS, MACHINE_FEED, MACHINE_ACCEL,\
-    IMAGE_TYPE, IMAGE_FILE, IMAGE_WIDTH, IMAGE_HEIGHT,\
-    CACHE_ENABLE, DATA_PATH, STORE_PATH, drawers
+    IMAGE_FILE, IMAGE_WIDTH, IMAGE_HEIGHT,\
+    CACHE_ENABLE, DATA_PATH, drawers, get_image_type
 from sandable import sandableFactory, SandException
 from Chains import Chains
 from webapp import app, socketio
@@ -144,7 +143,7 @@ def _generate_chains_and_image(sandable, sand, params, boundingBox, shouldSave=N
             cancelled = True
             return chains, errors, cancelled
 
-        Chains.saveImage(chains, boundingBox, IMAGE_FILE, IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_TYPE, clipToTable=True)
+        Chains.saveImage(chains, boundingBox, IMAGE_FILE, IMAGE_WIDTH, IMAGE_HEIGHT, get_image_type(), clipToTable=True)
         memoize.save(sandable, params, chains)
     return chains, errors, cancelled
 
@@ -813,19 +812,18 @@ def handle_playlist_add(payload):
 
     item = Playlist.add(state['method'], state['params'])
 
-    imageFile = '_playlist_%s.png' % item['id']
-    imagePath = '%s%s' % (STORE_PATH, imageFile)
+    imageFile, imagePath = Playlist.image_paths(item['id'])
     Chains.saveImage(
         state['chains'],
         state['boundingBox'],
         imagePath,
         int(IMAGE_WIDTH / 2),
         int(IMAGE_HEIGHT / 2),
-        IMAGE_TYPE,
+        get_image_type(),
         clipToTable=True,
     )
     Playlist.setImage(item['id'], imageFile)
-    item['imageFile'] = basename(imageFile)
+    item['imageFile'] = imageFile
 
     socketio.emit('draw:playlist:add:response', {
         'status': 'ok',

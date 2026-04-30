@@ -1,10 +1,86 @@
+<style>
+#methodDrawerTouchArea,
+#methodDrawerBackdrop {
+ display: none;
+}
+
+#methodDrawerPanel {
+ position: static;
+}
+
+#methodGridCell.drawer-mode {
+ width: 0 !important;
+}
+
+#methodGridCell.drawer-mode #methodDrawerPanel {
+ position: fixed;
+ left: 0;
+ z-index: 1002;
+ width: 116px;
+ padding: 10px 8px 12px 24px;
+ background: rgba(255, 255, 255, 0.96);
+ border-right: 1px solid rgba(0, 0, 0, 0.15);
+ box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+ box-sizing: border-box;
+ transform: translateX(calc(-100% + 16px));
+ transition: transform 0.18s ease;
+}
+
+#methodGridCell.drawer-mode #methodDrawerPanel.drawer-open {
+ transform: translateX(0);
+}
+
+#methodGridCell.drawer-mode #methodGridScroller {
+ padding-right: 0 !important;
+ width: 84px !important;
+}
+
+#methodGridCell.drawer-mode #statusMsg {
+ margin-top: 8px !important;
+ font-size: 80%;
+ color: #3a3a3a;
+}
+
+#methodDrawerTouchArea.visible {
+ display: flex;
+ position: fixed;
+ left: 0;
+ z-index: 1003;
+ width: 16px;
+ align-items: center;
+ justify-content: center;
+ background: rgba(223, 191, 0, 0.92);
+ color: #000;
+ border-radius: 0 6px 6px 0;
+ box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+ font-size: 10px;
+ font-weight: bold;
+ letter-spacing: 0.08em;
+ text-transform: uppercase;
+ writing-mode: vertical-rl;
+ text-orientation: mixed;
+ user-select: none;
+ cursor: pointer;
+}
+
+#methodDrawerBackdrop.visible {
+ display: block;
+ position: fixed;
+ inset: 0;
+ z-index: 1001;
+ background: rgba(0, 0, 0, 0.08);
+}
+</style>
+
 <table class="main">
  <tr>
   <td id="methodGridCell" valign="TOP" style="width: 247px;">
-    <div id="methodGridScroller" style="overflow-y: scroll; overflow-x: hidden; overscroll-behavior: contain; scrollbar-gutter: stable; -webkit-overflow-scrolling: touch; width: fit-content; height: calc(100vh - 170px); min-height: 160px; padding-right: 6px; box-sizing: content-box;">
-       <div id="methodGrid" style="display: grid; grid-template-columns: repeat(3, 79px); gap: 4px;"></div>
-     </div>
+  <div id="methodDrawerPanel">
+   <div id="methodGridScroller" style="overflow-y: scroll; overflow-x: hidden; overscroll-behavior: contain; scrollbar-gutter: stable; -webkit-overflow-scrolling: touch; width: fit-content; height: calc(100vh - 170px); min-height: 160px; padding-right: 6px; box-sizing: content-box;">
+     <div id="methodGrid" style="display: grid; grid-template-columns: repeat(3, 79px); gap: 4px;"></div>
+   </div>
    <div id="statusMsg" class="navigation" style="margin-top: 12px;"></div>
+  </div>
   </td>
   <td id="drawDialogCell" valign="TOP">
    <center>
@@ -27,6 +103,8 @@
   </td>
  </tr>
 </table>
+  <div id="methodDrawerTouchArea" aria-label="Show drawing methods" title="Show drawing methods">Methods</div>
+  <div id="methodDrawerBackdrop"></div>
 
 <script src="//cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script>
@@ -89,10 +167,15 @@
     lastPreviewAt: 0,
     switchRequestId: null,
     switchBusyTimer: null,
+    drawerMode: false,
+    drawerOpen: false,
   };
 
   const methodGrid = document.getElementById('methodGrid');
   const methodGridCell = document.getElementById('methodGridCell');
+  const methodDrawerPanel = document.getElementById('methodDrawerPanel');
+  const methodDrawerTouchArea = document.getElementById('methodDrawerTouchArea');
+  const methodDrawerBackdrop = document.getElementById('methodDrawerBackdrop');
   const methodGridScroller = document.getElementById('methodGridScroller');
   const drawDialogCell = document.getElementById('drawDialogCell');
   const planImage = document.getElementById('planImage');
@@ -101,6 +184,10 @@
   const dialogHost = document.getElementById('dialogHost');
   const statusMsg = document.getElementById('statusMsg');
   const redrawBtn = document.getElementById('redrawBtn');
+  const METHOD_TILE_WIDTH = 79;
+  const METHOD_TILE_GAP = 4;
+  const METHOD_SCROLLBAR_RESERVE = 24;
+  const METHOD_DRAWER_HANDLE_WIDTH = 16;
 
   planImage.src = LOADING_SRC;
 
@@ -148,44 +235,107 @@
     if (!methodGridScroller) {
       return;
     }
-    const top = methodGridScroller.getBoundingClientRect().top;
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
     const statusBar = document.getElementById('globalStatusBar');
     const statusTop = statusBar ? statusBar.getBoundingClientRect().top : viewportHeight;
     const bottomLimit = Math.min(viewportHeight, statusTop - 8);
+    const top = state.drawerMode && methodDrawerPanel
+      ? parseFloat(methodDrawerPanel.style.top || '0') || 0
+      : methodGridScroller.getBoundingClientRect().top;
     const available = Math.max(160, bottomLimit - top);
     methodGridScroller.style.height = String(available) + 'px';
+    if (state.drawerMode && methodDrawerPanel) {
+      methodDrawerPanel.style.height = String(available + 54) + 'px';
+    }
+  }
+
+  function syncMethodDrawerChrome() {
+    if (!methodDrawerTouchArea || !methodDrawerBackdrop || !methodDrawerPanel) {
+      return;
+    }
+    const menu = document.getElementById('shellMenu');
+    const top = menu ? (menu.getBoundingClientRect().bottom + 8) : 8;
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+    const statusBar = document.getElementById('globalStatusBar');
+    const statusTop = statusBar ? statusBar.getBoundingClientRect().top : viewportHeight;
+    const bottomInset = Math.max(8, viewportHeight - statusTop + 8);
+    const handleHeight = Math.max(120, Math.min(220, statusTop - top - 24));
+    const handleTop = top + Math.max(12, ((statusTop - top - handleHeight) / 2));
+
+    methodDrawerPanel.style.top = String(top) + 'px';
+    methodDrawerPanel.style.bottom = String(bottomInset) + 'px';
+    methodDrawerTouchArea.style.top = String(handleTop) + 'px';
+    methodDrawerTouchArea.style.height = String(handleHeight) + 'px';
+  }
+
+  function setMethodDrawerOpen(open) {
+    state.drawerOpen = !!(state.drawerMode && open);
+    if (methodDrawerPanel) {
+      methodDrawerPanel.classList.toggle('drawer-open', state.drawerOpen);
+    }
+    if (methodDrawerBackdrop) {
+      methodDrawerBackdrop.classList.toggle('visible', state.drawerOpen);
+    }
+    if (methodDrawerTouchArea) {
+      methodDrawerTouchArea.textContent = state.drawerOpen ? 'Close' : 'Methods';
+      methodDrawerTouchArea.setAttribute('aria-expanded', state.drawerOpen ? 'true' : 'false');
+    }
+  }
+
+  function setMethodDrawerMode(enabled) {
+    state.drawerMode = !!enabled;
+    if (methodGridCell) {
+      methodGridCell.classList.toggle('drawer-mode', state.drawerMode);
+    }
+    if (methodDrawerTouchArea) {
+      methodDrawerTouchArea.classList.toggle('visible', state.drawerMode);
+    }
+    if (!state.drawerMode) {
+      setMethodDrawerOpen(false);
+      if (methodDrawerPanel) {
+        methodDrawerPanel.style.top = '';
+        methodDrawerPanel.style.bottom = '';
+        methodDrawerPanel.style.height = '';
+      }
+      if (methodDrawerTouchArea) {
+        methodDrawerTouchArea.style.top = '';
+        methodDrawerTouchArea.style.height = '';
+      }
+    } else {
+      syncMethodDrawerChrome();
+    }
   }
 
   function layoutMethodColumns() {
     if (!methodGrid || !methodGridCell) {
       return;
     }
-    const tileWidth = 79;
-    const gap = 4;
-    const threeColWidth = tileWidth * 3 + gap * 2;
-    const twoColWidth = tileWidth * 2 + gap;
-    const oneColWidth = tileWidth;
-    const scrollbarReserve = 24;
+    const threeColWidth = METHOD_TILE_WIDTH * 3 + METHOD_TILE_GAP * 2;
+    const twoColWidth = METHOD_TILE_WIDTH * 2 + METHOD_TILE_GAP;
+    const oneColWidth = METHOD_TILE_WIDTH;
 
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
     const imageWidth = planImage ? Math.ceil(planImage.getBoundingClientRect().width) : 0;
     const dialogMin = drawDialogCell ? Math.ceil(drawDialogCell.scrollWidth) : 0;
     const minRightWidth = Math.max(520, imageWidth, Math.min(dialogMin + 16, 760));
     const availableForLeft = Math.max(0, viewportWidth - minRightWidth - 32);
+    const drawerMode = availableForLeft < (oneColWidth + METHOD_SCROLLBAR_RESERVE + 8);
 
-    let columns = 3;
-    if (availableForLeft < threeColWidth) {
+    setMethodDrawerMode(drawerMode);
+
+    let columns = drawerMode ? 1 : 3;
+    if (!drawerMode && availableForLeft < threeColWidth) {
       columns = availableForLeft >= twoColWidth ? 2 : 1;
     }
 
     const selectedWidth = columns === 3 ? threeColWidth : (columns === 2 ? twoColWidth : oneColWidth);
-    methodGrid.style.gridTemplateColumns = 'repeat(' + columns + ', ' + tileWidth + 'px)';
-    const selectedCellWidth = selectedWidth + scrollbarReserve;
-    methodGridCell.style.width = String(selectedCellWidth) + 'px';
+    methodGrid.style.gridTemplateColumns = 'repeat(' + columns + ', ' + METHOD_TILE_WIDTH + 'px)';
+    const selectedCellWidth = selectedWidth + METHOD_SCROLLBAR_RESERVE;
+    methodGridCell.style.width = drawerMode ? '0px' : String(selectedCellWidth) + 'px';
     if (methodGridScroller) {
       methodGridScroller.style.width = String(selectedCellWidth) + 'px';
     }
+    syncMethodDrawerChrome();
   }
 
   function setStatus(msg, owner) {
@@ -609,6 +759,9 @@
     setStatus('Loading method...');
     planImage.src = LOADING_SRC;
     try {
+      if (state.drawerMode) {
+        setMethodDrawerOpen(false);
+      }
       state.method = method;
       window.history.replaceState(null, '', drawUrlForMethod(state.method));
       const requestId = preview('refresh', { includeFields: true, params: {} });
@@ -860,6 +1013,16 @@
   document.getElementById('playlistBtn').addEventListener('click', addToPlaylist);
   document.getElementById('saveBtn').addEventListener('click', saveDrawing);
   document.getElementById('exportBtn').addEventListener('click', exportDrawing);
+  if (methodDrawerTouchArea) {
+    methodDrawerTouchArea.addEventListener('click', function() {
+      setMethodDrawerOpen(!state.drawerOpen);
+    });
+  }
+  if (methodDrawerBackdrop) {
+    methodDrawerBackdrop.addEventListener('click', function() {
+      setMethodDrawerOpen(false);
+    });
+  }
   const onResize = function() {
     layoutMethodGrid();
     layoutMethodColumns();

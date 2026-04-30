@@ -22,7 +22,6 @@
    <form method="post" action="lights" class="auto_submit_form">
     <input name="method" type="hidden" value="{{pattern}}">
     {{ editor|safe }}
-    <button class="doit" name="action" type="submit" value="doit">Lights!</button>
    </form>
    </center>
   </td>

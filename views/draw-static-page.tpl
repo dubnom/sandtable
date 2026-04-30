@@ -85,6 +85,8 @@
     latestPreviewRequestId: 0,
     lastPreviewSignature: '',
     lastPreviewAt: 0,
+    switchRequestId: null,
+    switchBusyTimer: null,
   };
 
   const methodGrid = document.getElementById('methodGrid');
@@ -96,6 +98,7 @@
   const drawInfo = document.getElementById('drawInfo');
   const dialogHost = document.getElementById('dialogHost');
   const statusMsg = document.getElementById('statusMsg');
+  const redrawBtn = document.getElementById('redrawBtn');
 
   planImage.src = LOADING_SRC;
 
@@ -195,6 +198,58 @@
       errorBox.style.display = 'none';
       errorBox.textContent = '';
     }
+  }
+
+  function updateRefreshButtonVisibility() {
+    if (!redrawBtn) {
+      return;
+    }
+    redrawBtn.style.display = state.realtime ? 'none' : '';
+  }
+
+  function setMethodSwitchBusy(isBusy) {
+    const gridButtons = methodGrid ? methodGrid.querySelectorAll('a, button') : [];
+    gridButtons.forEach(function(node) {
+      node.style.pointerEvents = isBusy ? 'none' : '';
+      node.style.opacity = isBusy ? '0.6' : '';
+    });
+
+    if (redrawBtn) {
+      redrawBtn.disabled = !!isBusy;
+    }
+    document.getElementById('randomBtn').disabled = !!isBusy;
+    document.getElementById('defaultsBtn').disabled = !!isBusy;
+    document.getElementById('drawBtn').disabled = !!isBusy;
+    document.getElementById('playlistBtn').disabled = !!isBusy;
+    document.getElementById('saveBtn').disabled = !!isBusy;
+    document.getElementById('exportBtn').disabled = !!isBusy;
+  }
+
+  function startMethodSwitchBusy(requestId) {
+    state.switchRequestId = requestId;
+    if (state.switchBusyTimer) {
+      clearTimeout(state.switchBusyTimer);
+      state.switchBusyTimer = null;
+    }
+    setMethodSwitchBusy(true);
+    // Safety release in case of lost websocket response
+    state.switchBusyTimer = setTimeout(function() {
+      state.switchBusyTimer = null;
+      state.switchRequestId = null;
+      setMethodSwitchBusy(false);
+    }, 10000);
+  }
+
+  function endMethodSwitchBusy(requestId) {
+    if (state.switchRequestId !== null && requestId !== state.switchRequestId) {
+      return;
+    }
+    state.switchRequestId = null;
+    if (state.switchBusyTimer) {
+      clearTimeout(state.switchBusyTimer);
+      state.switchBusyTimer = null;
+    }
+    setMethodSwitchBusy(false);
   }
 
   async function fetchJson(url, options) {
@@ -463,6 +518,7 @@
     if (data.realtime !== undefined) {
       state.realtime = data.realtime !== false;
     }
+    updateRefreshButtonVisibility();
     let methodsChanged = false;
     if (Array.isArray(data.methods)) {
       const nextMethods = data.methods;
@@ -510,6 +566,7 @@
   function _applySchema(data) {
     state.method = data.method;
     state.realtime = data.realtime !== false;
+    updateRefreshButtonVisibility();
     state.fields = data.fields || [];
     state.params = {};
     state.fields.forEach(function(field) {
@@ -544,11 +601,13 @@
     try {
       state.method = method;
       window.history.replaceState(null, '', drawUrlForMethod(state.method));
-      preview('refresh', { includeFields: true, params: {} });
+      const requestId = preview('refresh', { includeFields: true, params: {} });
+      startMethodSwitchBusy(requestId);
       updateMethodSelection(method);
     } catch (err) {
       showError(err.message || 'Method load failed');
       setStatus('');
+      endMethodSwitchBusy(state.switchRequestId);
     }
   }
 
@@ -580,6 +639,7 @@
     state.latestPreviewRequestId += 1;
     payload.requestId = state.latestPreviewRequestId;
     socket.emit('draw:preview', payload);
+    return payload.requestId;
   }
 
   function randomizeField(fieldName) {
@@ -649,9 +709,11 @@
     if (data.error) {
       showError(data.error);
       setStatus('');
+      endMethodSwitchBusy(data && data.requestId);
     } else {
       applyPreviewData(data);
       setStatus('');
+      endMethodSwitchBusy(data && data.requestId);
     }
   });
 
@@ -769,7 +831,7 @@
     showError('Connection error: ' + error.message);
   });
 
-  document.getElementById('redrawBtn').addEventListener('click', function() {
+  redrawBtn.addEventListener('click', function() {
     preview('refresh');
   });
   document.getElementById('randomBtn').addEventListener('click', function() {
@@ -827,6 +889,7 @@
     try {
       layoutMethodGrid();
       layoutMethodColumns();
+      updateRefreshButtonVisibility();
       populateMethods(state.methods);
 
       if (initialLoadname) {

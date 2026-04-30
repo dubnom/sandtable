@@ -187,6 +187,18 @@ def _api_prepare_draw(payload, shouldSave=None):
     d = Dialog(sand.editor, form, None)
     params = d.getParams()
 
+    # If a file-list field is empty, pick the first available file so methods like
+    # Clipart/Sisyphus render a preview immediately after switching methods.
+    for field in sand.editor:
+        fieldName = getattr(field, 'name', '')
+        if not fieldName or not hasattr(field, '_getFiles'):
+            continue
+        if params.get(fieldName):
+            continue
+        files = field._getFiles()
+        if files:
+            params[fieldName] = files[0][1]
+
     action = payload.get('action', 'refresh')
     if action == 'random' or action == 'Random!':
         params.randomize(sand.editor)

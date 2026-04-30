@@ -52,6 +52,7 @@ def playlistPage():
             if ok:
                 status = msg
                 selectedSaved = savedName
+                cgistatus._emit_statusbar_update(force=True)
             else:
                 error = msg
         elif action == 'load':
@@ -59,6 +60,7 @@ def playlistPage():
             if ok:
                 status = msg
                 selectedSaved = loadedName
+                cgistatus._emit_statusbar_update(force=True)
             else:
                 error = msg
         elif action == 'rename':
@@ -66,6 +68,7 @@ def playlistPage():
             if ok:
                 status = msg
                 selectedSaved = renamedName
+                cgistatus._emit_statusbar_update(force=True)
             else:
                 error = msg
         elif action == 'delete':
@@ -73,6 +76,7 @@ def playlistPage():
             if ok:
                 status = msg
                 selectedSaved = ''
+                cgistatus._emit_statusbar_update(force=True)
             else:
                 error = msg
     elif selectedSaved:

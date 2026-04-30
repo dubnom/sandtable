@@ -1,4 +1,5 @@
 from flask import request, render_template, redirect, url_for
+import base64
 import os
 import logging
 from html import escape
@@ -33,7 +34,7 @@ class ftPictures(ftBase):
 
     def imgFunc(self, f, fn, p):
         url = f"/?view=draw&method=Picture&filename={quote(fn, safe='')}"
-        return f'<a class="filer" href="{url}"><img src="{fn}" width="80" align="center"></a>'
+        return f'<button class="filer" type="button" onclick="window.location.href=\'{url}\'"><img src="{fn}" width="80" align="center"></button>'
 
 
 class ftClipart(ftBase):
@@ -46,7 +47,7 @@ class ftClipart(ftBase):
     def imgFunc(self, f, fn, p):
         src = fn if fn.endswith('.svg') else "images/file.png"
         url = f"/?view=draw&method=Clipart&filename={quote(fn, safe='')}"
-        return f'<a class="filer" href="{url}"><img src="{src}" width="80"></a>'
+        return f'<button class="filer" type="button" onclick="window.location.href=\'{url}\'"><img src="{src}" width="80"></button>'
 
     def rename(self, f, oldName, newName):
         path = os.path.dirname(oldName)
@@ -65,8 +66,14 @@ class ftSisyphus(ftBase):
     def imgFunc(self, f, fn, p):
         url = f"/?view=draw&method=Sisyphus&filename={quote(fn, safe='')}"
         thumb = get_or_create_thumb(fn)
-        img_src = thumb if thumb else "images/thr.png"
-        return f'<a class="filer" href="{url}"><img src="{img_src}" width="80"></a>'
+        img_src = "images/thr.png"
+        if thumb:
+            try:
+                with open(thumb, 'rb') as thumb_file:
+                    img_src = 'data:image/png;base64,' + base64.b64encode(thumb_file.read()).decode('ascii')
+            except OSError:
+                img_src = thumb
+        return f'<button class="filer" type="button" onclick="window.location.href=\'{url}\'"><img src="{img_src}" width="80"></button>'
 
 class ftScripts(ftBase):
     def __init__(self):
@@ -76,9 +83,9 @@ class ftScripts(ftBase):
         self.allowUpload = True
 
     def imgFunc(self, f, fn, p):
-        return f"""<a class="filer" href="/?view=movie&loadname={quote(p[0], safe='')}">
-             <img src="images/script.png" width="80">
-             </a>"""
+           return f"""<button class="filer" type="button" onclick="window.location.href='/?view=movie&loadname={quote(p[0], safe='')}'">
+               <img src="images/script.png" width="80">
+               </button>"""
 
 
 class ftMovies(ftBase):
@@ -89,9 +96,9 @@ class ftMovies(ftBase):
         self.allowUpload = False
 
     def imgFunc(self, f, fn, p):
-        return f"""<a class="filer" href="/?view=watch&_loadname={quote(f, safe='')}">
-             <img src="images/MPEG4.png" width="80">
-             </a>"""
+        return f"""<button class="filer" type="button" onclick="window.location.href='/?view=watch&_loadname={quote(f, safe='')}'">
+               <img src="images/MPEG4.png" width="80">
+               </button>"""
 
 
 class ftDrawings(ftBase):
@@ -104,9 +111,9 @@ class ftDrawings(ftBase):
     def imgFunc(self, f, fn, p):
         pngPath = os.path.splitext(fn)[0] + '.png'
         pngUrl = '/' + pngPath.replace(os.sep, '/').lstrip('/')
-        return f"""<a class="filer" href="/?view=draw&loadname={quote(p[0], safe='')}">
-               <img src="{pngUrl}">
-               </a>"""
+        return f"""<button class="filer" type="button" onclick="window.location.href='/?view=draw&loadname={quote(p[0], safe='')}'">
+             <img src="{pngUrl}">
+             </button>"""
 
     def delete(self, f, filename):
         base, _ = os.path.splitext(filename)
@@ -140,9 +147,9 @@ class ftPlaylists(ftBase):
         self.allowUpload = False
 
     def imgFunc(self, f, fn, p):
-        return f"""<a class="filer" href="/?view=playlist&loadname={quote(p[0], safe='')}">
-             <img src="images/script.png" width="80">
-             </a>"""
+           return f"""<button class="filer" type="button" onclick="window.location.href='/?view=playlist&loadname={quote(p[0], safe='')}'">
+               <img src="images/script.png" width="80">
+               </button>"""
 
 
 filetypes = {

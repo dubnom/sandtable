@@ -59,7 +59,7 @@ button.export   { color: #FFFFFF; background-color: #6F5F00; font-size: 100%; ma
 button.upload   { color: #FFFFFF; background-color: #00007F; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
 button.load	    { color: #FFFFFF; background-color: #00007F; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
 button.delete	{ color: #FFFFFF; background-color: #7F0000; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
-button.rename	{ color: #FFFFFF; background-color: #00007F; font-size: 80%; margin: 1px 1px 1px 1px; padding: 1px; vertical-align: middle }
+button.rename	{ color: #FFFFFF; background-color: #00007F; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
 button.sandable	{ background-color: #6F6F6F; border: 2px solid #6F6F6F; margin: 0px 0px 0px 0px; padding: 0px }
 button.selected	{ background-color: #000000; border: 3px solid #FFE000; margin: 0px 0px 0px 0px; padding: 0px; box-shadow: 0 0 0 2px rgba(255, 224, 0, 0.65), 0 0 14px rgba(255, 224, 0, 0.7) }
 button.led		    { background-color: #6F6F6F; border: 2px solid #6F6F6F; margin: 0px 0px 0px 0px; padding: 0px }

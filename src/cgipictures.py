@@ -16,7 +16,7 @@ def picturesPage():
         upload = request.files.get('_file')
         if upload is not None:
             name, ext = os.path.splitext(upload.filename)
-            if ext in ('.png', '.jpg', '.jpeg', '.gif'):
+            if ext in ('.png', '.jpg', '.jpeg', '.gif', '.webp'):
                 upload.save(os.path.join(PICTURE_PATH, upload.filename))
 
     cstuff = cgistuff('Pictures')

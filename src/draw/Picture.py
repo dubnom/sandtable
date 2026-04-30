@@ -34,7 +34,7 @@ Use the "Pictures" tab in the main navigation to more easily select photos.
 
     def __init__(self, width, length, ballSize, units):
         self.editor = [
-            DialogFileList("filename",        "File Name",                path=PICTURE_PATH, filter='.png|.jpg|.gif|.bmp', default=''),
+            DialogFileList("filename",        "File Name",                path=PICTURE_PATH, filter='.png|.jpg|.gif|.bmp|.webp', default=''),
             DialogInt("turdSize",            "Turd Size",                default=40, min=0, max=1000),
             DialogInt("iterations",          "Number of Fill Iterations", default=0, min=0, max=100),
             DialogFloat("decrement",           "Fill Decrement",           units=units, default=0.5, min=0.0, max=10.0),

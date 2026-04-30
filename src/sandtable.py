@@ -79,6 +79,11 @@ def scripts_static(filename):
     return _send_static_asset(PROJECT_ROOT / 'scripts', filename)
 
 
+@app.route('/thr/<path:filename>')
+def thr_static(filename):
+    return _send_static_asset(PROJECT_ROOT / 'thr', filename)
+
+
 @app.route('/favicon.ico')
 def favicon_static():
     return _send_static_asset(PROJECT_ROOT / 'images', 'favicon.ico')

@@ -71,10 +71,11 @@
   }
 
   // Restore state saved from a previous visit to the draw page
-  const _savedDraw = window.__sandtableSavedDraw || null;
-  if (_savedDraw) {
-    window.__sandtableSavedDraw = null;
-  }
+  // initialParams being non-empty means the user navigated here with explicit intent (e.g. filer click).
+  // In that case, ignore any saved draw state so the requested file/method loads correctly.
+  const _hasExplicitParams = initialParams && Object.keys(initialParams).length > 0;
+  const _savedDraw = (!_hasExplicitParams && window.__sandtableSavedDraw) ? window.__sandtableSavedDraw : null;
+  window.__sandtableSavedDraw = null;
 
   const state = {
     method: (_savedDraw && _savedDraw.method) ? _savedDraw.method : initialMethod,
@@ -907,10 +908,10 @@
         applyPreviewData(loadData);
         window.history.replaceState(null, '', drawUrlForMethod(state.method));
       } else {
-        if (_savedDraw && _savedDraw.method) {
-          preview('refresh', { includeFields: true, params: _savedDraw.params || {} });
-        } else if (initialParams && Object.keys(initialParams).length) {
+        if (_hasExplicitParams) {
           preview('refresh', { includeFields: true, params: initialParams });
+        } else if (_savedDraw && _savedDraw.method) {
+          preview('refresh', { includeFields: true, params: _savedDraw.params || {} });
         } else {
           preview('refresh', { includeFields: true, params: {} });
         }

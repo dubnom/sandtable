@@ -25,6 +25,7 @@
  <span class="statusbar-group"><strong>Playlist:</strong> <span id="globalPlaylistStatus">Loading...</span></span>
  <button id="globalPlaylistPlayBtn" class="doit" type="button">Play</button>
  <button id="globalPlaylistStopBtn" class="load" type="button">Stop</button>
+ <button id="globalReconnectBtn" type="button" style="display: none; color: #FFFFFF; background-color: #B00020;">Reconnect</button>
 </div>
 <script>
 (function() {
@@ -40,7 +41,8 @@
   const playlistNode = document.getElementById('globalPlaylistStatus');
   const playBtn = document.getElementById('globalPlaylistPlayBtn');
   const stopBtn = document.getElementById('globalPlaylistStopBtn');
-  if (!machineNode || !playlistNode || !playBtn || !stopBtn) {
+  const reconnectBtn = document.getElementById('globalReconnectBtn');
+  if (!machineNode || !playlistNode || !playBtn || !stopBtn || !reconnectBtn) {
     return;
   }
 
@@ -51,6 +53,7 @@
     playlistNode.textContent = 'Socket.IO not loaded';
     playBtn.disabled = true;
     stopBtn.disabled = true;
+    reconnectBtn.style.display = '';
     return;
   }
 
@@ -110,6 +113,10 @@
     socket.emit('statusbar:control', {action: action});
   }
 
+  function setReconnectVisible(visible) {
+    reconnectBtn.style.display = visible ? '' : 'none';
+  }
+
   socket.on('statusbar:update', function(data) {
     applyStatus(data);
     updateBodyPadding();
@@ -122,6 +129,7 @@
   });
 
   socket.on('connect', function() {
+    setReconnectVisible(false);
     socket.emit('statusbar:subscribe');
   });
 
@@ -129,14 +137,24 @@
     machineNode.textContent = 'Disconnected';
     playlistNode.textContent = 'Disconnected';
     updateControls(null);
+    setReconnectVisible(true);
+    updateBodyPadding();
+  });
+
+  socket.on('reconnect_failed', function() {
+    setReconnectVisible(true);
     updateBodyPadding();
   });
 
   playBtn.addEventListener('click', function() { controlPlaylist('play'); });
   stopBtn.addEventListener('click', function() { controlPlaylist('stop'); });
+  reconnectBtn.addEventListener('click', function() { window.location.reload(); });
 
   if (socket.connected) {
+    setReconnectVisible(false);
     socket.emit('statusbar:subscribe');
+  } else {
+    setReconnectVisible(true);
   }
 })();
 </script>

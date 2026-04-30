@@ -1,6 +1,32 @@
 <script>
 var FILER_STATE_KEY = '__sandtableFilerState';
 var FILER_RESTORE_FLAG_KEY = '__sandtableFilerShouldRestore';
+var FILER_ACTIONS_VISIBLE_KEY = '__sandtableFilerActionsVisible';
+
+function filerActionsVisible() {
+  return window[FILER_ACTIONS_VISIBLE_KEY] === true;
+}
+
+function filerApplyActionsVisibility(visible) {
+  var filesForm = document.getElementById('files');
+  if (!filesForm) {
+    return;
+  }
+  if (visible) {
+    filesForm.classList.remove('filer-actions-hidden');
+  } else {
+    filesForm.classList.add('filer-actions-hidden');
+  }
+  window[FILER_ACTIONS_VISIBLE_KEY] = !!visible;
+  var button = document.getElementById('toggleFileActions');
+  if (button) {
+    button.textContent = visible ? 'Hide Actions' : 'Show Actions';
+  }
+}
+
+function filerToggleActions() {
+  filerApplyActionsVisibility(!filerActionsVisible());
+}
 
 function myDelete(nm,fn,ft) {
   var deleted = confirm( "Permanently delete " + nm + "?" );
@@ -77,6 +103,8 @@ function filerRestoreStateIfNeeded() {
     if (!contentInner) {
       return;
     }
+    // Clear cleanup before re-injecting so new scripts take the first (non-chaining) branch
+    window.__sandtablePageCleanup = null;
     contentInner.innerHTML = html;
     const scripts = Array.prototype.slice.call(contentInner.querySelectorAll('script'));
     scripts.forEach(function(oldScript) {
@@ -101,40 +129,48 @@ if (typeof window.__sandtablePageCleanup !== 'function') {
     filerSetState({{ ft|tojson }}, {{ path|tojson }});
     window[FILER_RESTORE_FLAG_KEY] = true;
   };
-} else {
-  const previousCleanup = window.__sandtablePageCleanup;
-  window.__sandtablePageCleanup = function() {
-    const nextPath = String(window.__sandtableNextPath || '');
-    if (!nextPath.startsWith('/filer')) {
-      filerSetState({{ ft|tojson }}, {{ path|tojson }});
-      window[FILER_RESTORE_FLAG_KEY] = true;
-    }
-    previousCleanup();
-  };
 }
 
 filerRestoreStateIfNeeded();
 
-document.addEventListener('click', function(event) {
-  const filesForm = document.getElementById('files');
-  if (!filesForm) {
-    return;
-  }
-  const button = event.target.closest('button[name="directory"]');
-  if (!button || !filesForm.contains(button)) {
-    return;
-  }
-  filerSetState({{ ft|tojson }}, String(button.value || {{ path|tojson }}));
-});
+if (!window.__sandtableFilerListenersBound) {
+  document.addEventListener('click', function(event) {
+    const button = event.target.closest('#toggleFileActions');
+    if (button) {
+      filerToggleActions();
+      return;
+    }
 
-document.addEventListener('change', function(event) {
-  const select = event.target;
-  if (!select || select.name !== 'filetype') {
-    return;
-  }
-  filerSetState(String(select.value || {{ ft|tojson }}), '');
-});
+    const filesForm = document.getElementById('files');
+    if (!filesForm) {
+      return;
+    }
+    const dirButton = event.target.closest('button[name="directory"]');
+    if (!dirButton || !filesForm.contains(dirButton)) {
+      return;
+    }
+    const filetypeInput = filesForm.querySelector('input[name="filetype"]');
+    const currentFiletype = filetypeInput ? String(filetypeInput.value || '') : '';
+    filerSetState(currentFiletype, String(dirButton.value || ''));
+  });
+
+  document.addEventListener('change', function(event) {
+    const select = event.target;
+    if (!select || select.name !== 'filetype') {
+      return;
+    }
+    filerSetState(String(select.value || ''), '');
+  });
+
+  window.__sandtableFilerListenersBound = true;
+}
 </script>
+
+<style>
+#files.filer-actions-hidden .filer-actions {
+  display: none;
+}
+</style>
 
 <form method="post" action="/filer" class="auto_submit_form">
  <div class="filerbox">
@@ -228,7 +264,12 @@ document.addEventListener('change', function(event) {
 <form id="files" method="post" action="filer">
  <input type="hidden" name="filetype" value="{{ft}}"/>
  <span class="filerTitle">{{path}}</span>
+ <button id="toggleFileActions" class="load" type="button" style="margin-left: 8px;">Show Actions</button>
  <table id="filetable">
   {{ table|safe }}
  </table>
 </form>
+
+<script>
+filerApplyActionsVisibility(filerActionsVisible());
+</script>

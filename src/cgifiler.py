@@ -7,6 +7,9 @@ from Sand import PICTURE_PATH, CLIPART_PATH, THR_PATH, MOVIE_SCRIPT_PATH, STORE_
 from webapp import app
 from cgistuff import cgistuff
 from history import History
+from thrCache import get_or_create_thumb, warm_cache
+
+warm_cache()
 
 
 class ftBase():
@@ -25,7 +28,7 @@ class ftPictures(ftBase):
     def __init__(self):
         self.path = PICTURE_PATH
         self.columns = 6
-        self.filter = ['png', 'jpg', 'jpeg', 'gif']
+        self.filter = ['png', 'jpg', 'jpeg', 'gif', 'webp']
         self.allowUpload = True
 
     def imgFunc(self, f, fn, p):
@@ -61,7 +64,9 @@ class ftSisyphus(ftBase):
 
     def imgFunc(self, f, fn, p):
         url = f"/?view=draw&method=Sisyphus&filename={quote(fn, safe='')}"
-        return f'<a class="filer" href="{url}"><img src="images/thr.png" width="80"></a>'
+        thumb = get_or_create_thumb(fn)
+        img_src = thumb if thumb else "images/thr.png"
+        return f'<a class="filer" href="{url}"><img src="{img_src}" width="80"></a>'
 
 class ftScripts(ftBase):
     def __init__(self):
@@ -146,7 +151,7 @@ filetypes = {
     'Sisyphus':         ftSisyphus(),
     'Movie Scripts':    ftScripts(),
     'Movies':           ftMovies(),
-    'Saved Drawings':   ftDrawings(),
+    'Drawings':         ftDrawings(),
     'History':          ftHistory(),
     'Playlists':        ftPlaylists(),
 }
@@ -167,7 +172,7 @@ def render_actions(nm, fn, ft):
         drawUrl = '/?view=draw&method=%s&filename=%s' % (quote(method, safe=''), quote(filename, safe=''))
         drawButton = '<button class="load" type="button" onclick="window.location.href=\'%s\'">Draw</button>' % drawUrl
     return (
-        '<center>'
+        '<center class="filer-actions">'
         '%s'
         '<button class="delete" type="button" onclick="myDelete(\'%s\',\'%s\',\'%s\')">Delete</button>'
         '<button class="rename" type="button" onclick="myRename(\'%s\',\'%s\',\'%s\')">Rename</button>'

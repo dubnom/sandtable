@@ -168,6 +168,22 @@ def _draw_summary(chains, sandable):
     }
 
 
+def _save_playlist_item_image(itemId, imageFile, imagePath, chains, boundingBox):
+    try:
+        Chains.saveImage(
+            chains,
+            boundingBox,
+            imagePath,
+            int(IMAGE_WIDTH / 2),
+            int(IMAGE_HEIGHT / 2),
+            get_image_type(),
+            clipToTable=True,
+        )
+        Playlist.setImage(itemId, imageFile)
+    except Exception:
+        app.logger.exception('Failed to generate playlist thumbnail for item %s', itemId)
+
+
 def _api_prepare_draw(payload, shouldSave=None):
     method = payload.get('method', request.args.get('method', drawers[0]))
     sandable = _normalize_sandable(method)
@@ -828,11 +844,12 @@ def handle_playlist_add(payload):
 
     method = _normalize_sandable(payload.get('method', drawers[0]))
     if not method:
-        socketio.emit('draw:playlist:add:response', {
+        response = {
             'status': 'error',
             'error': 'Invalid drawing method',
-        }, room=request.sid)
-        return
+        }
+        socketio.emit('draw:playlist:add:response', response, room=request.sid)
+        return response
 
     params = payload.get('params')
     if not isinstance(params, dict):
@@ -845,36 +862,39 @@ def handle_playlist_add(payload):
         'action': 'refresh',
     })
     if errorResponse:
-        socketio.emit('draw:playlist:add:response', {
+        response = {
             'status': 'error',
             'error': errorResponse.get_json().get('error') if hasattr(errorResponse, 'get_json') else str(errorResponse),
-        }, room=request.sid)
-        return
+        }
+        socketio.emit('draw:playlist:add:response', response, room=request.sid)
+        return response
     if state.get('errors'):
-        socketio.emit('draw:playlist:add:response', {
+        response = {
             'status': 'error',
             'error': state['errors'],
             'fieldErrors': state.get('fieldErrors', {}),
-        }, room=request.sid)
-        return
+        }
+        socketio.emit('draw:playlist:add:response', response, room=request.sid)
+        return response
 
     item = Playlist.add(state['method'], state['params'])
 
     imageFile, imagePath = Playlist.image_paths(item['id'])
-    Chains.saveImage(
-        state['chains'],
-        state['boundingBox'],
-        imagePath,
-        int(IMAGE_WIDTH / 2),
-        int(IMAGE_HEIGHT / 2),
-        get_image_type(),
-        clipToTable=True,
-    )
-    Playlist.setImage(item['id'], imageFile)
     item['imageFile'] = imageFile
 
-    socketio.emit('draw:playlist:add:response', {
+    response = {
         'status': 'ok',
         'item': item,
         'count': len(Playlist.list()),
-    }, room=request.sid)
+    }
+    socketio.emit('draw:playlist:add:response', response, room=request.sid)
+    cgistatus._emit_statusbar_update(force=True)
+    socketio.start_background_task(
+        _save_playlist_item_image,
+        item['id'],
+        imageFile,
+        imagePath,
+        state['chains'],
+        state['boundingBox'],
+    )
+    return response

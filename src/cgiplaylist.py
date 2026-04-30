@@ -3,6 +3,7 @@ from datetime import datetime
 
 from webapp import app
 from cgistuff import cgistuff
+import cgistatus
 from playlist import Playlist
 from playlist_runtime import runner
 
@@ -21,6 +22,7 @@ def playlistPage():
         action = request.values.get('action', '')
         if action == 'remove':
             Playlist.remove(request.values.get('id', ''))
+            cgistatus._emit_statusbar_update(force=True)
         elif action == 'moveup':
             itemId = request.values.get('id', '')
             if not Playlist.move(itemId, -1):
@@ -31,6 +33,7 @@ def playlistPage():
                 error = 'Unable to move item down'
         elif action == 'clear':
             Playlist.clear()
+            cgistatus._emit_statusbar_update(force=True)
         elif action == 'draw':
             itemId = request.values.get('id', '')
             ok, msg = runner.start_one(itemId)

@@ -82,6 +82,7 @@
     methods: fallbackMethods || [],
     fields: [],
     params: {},
+    statusOwner: '',
     realtime: true,
     latestPreviewRequestId: 0,
     lastPreviewSignature: '',
@@ -187,8 +188,16 @@
     }
   }
 
-  function setStatus(msg) {
+  function setStatus(msg, owner) {
+    state.statusOwner = msg ? (owner || '') : '';
     statusMsg.textContent = msg || '';
+  }
+
+  function clearStatus(owner) {
+    if (owner && state.statusOwner && state.statusOwner !== owner) {
+      return;
+    }
+    setStatus('');
   }
 
   function showError(msg) {
@@ -637,7 +646,7 @@
     state.lastPreviewSignature = signature;
     state.lastPreviewAt = now;
 
-    setStatus('Working...');
+    setStatus('Working...', 'preview');
     state.latestPreviewRequestId += 1;
     payload.requestId = state.latestPreviewRequestId;
     socket.emit('draw:preview', payload);
@@ -710,17 +719,17 @@
     }
     if (data.error) {
       showError(data.error);
-      setStatus('');
+      clearStatus('preview');
       endMethodSwitchBusy(data && data.requestId);
     } else {
       applyPreviewData(data);
-      setStatus('');
+      clearStatus('preview');
       endMethodSwitchBusy(data && data.requestId);
     }
   });
 
   function executeDraw() {
-    setStatus('Sending to machine...');
+    setStatus('Sending to machine...', 'execute');
     socket.emit('draw:execute', {
       method: state.method,
       params: collectParams(),
@@ -730,39 +739,46 @@
   socket.on('draw:execute:response', function(data) {
     if (data.error) {
       showError(data.error);
-      setStatus('');
+      clearStatus('execute');
     } else if (data.status === 'ok') {
       if (data.image && data.image.dataUrl) {
         planImage.src = data.image.dataUrl;
       } else if (data.image && data.image.url) {
         planImage.src = data.image.url;
       }
-      setStatus('Drawing...');
+      setStatus('Drawing...', 'execute');
       showError('');
     }
   });
 
   socket.on('draw:complete', function() {
-    setStatus('Draw complete');
+    setStatus('Draw complete', 'execute');
   });
 
   function addToPlaylist() {
-    setStatus('Adding to playlist...');
+    setStatus('Adding to playlist...', 'playlist');
     socket.emit('draw:playlist:add', {
       method: state.method,
       params: collectParams(),
+    }, function(data) {
+      handlePlaylistAddResponse(data || {});
     });
   }
 
-  socket.on('draw:playlist:add:response', function(data) {
+  function handlePlaylistAddResponse(data) {
     if (data && data.error) {
       showError(data.error);
-      setStatus('');
-      return;
+      clearStatus('playlist');
+      return false;
     }
     const count = data && typeof data.count === 'number' ? data.count : null;
-    setStatus(count === null ? 'Added to playlist' : ('Added to playlist (' + count + ' items)'));
+    setStatus(count === null ? 'Added to playlist' : ('Added to playlist (' + count + ' items)'), 'playlist');
     showError('');
+    return true;
+  }
+
+  socket.on('draw:playlist:add:response', function(data) {
+    handlePlaylistAddResponse(data || {});
   });
 
   function askForDrawingName(promptTitle) {
@@ -779,7 +795,7 @@
     if (!name) {
       return;
     }
-    setStatus('Saving...');
+    setStatus('Saving...', 'save');
     socket.emit('draw:save', {
       method: state.method,
       name: name,
@@ -790,9 +806,9 @@
   socket.on('draw:save:response', function(data) {
     if (data.error) {
       showError(data.error);
-      setStatus('');
+      clearStatus('save');
     } else if (data.status === 'ok') {
-      setStatus('Saved');
+      setStatus('Saved', 'save');
       showError('');
     }
   });
@@ -802,7 +818,7 @@
     if (!name) {
       return;
     }
-    setStatus('Exporting...');
+    setStatus('Exporting...', 'export');
     socket.emit('draw:export', {
       method: state.method,
       name: name,
@@ -813,9 +829,9 @@
   socket.on('draw:export:response', function(data) {
     if (data.error) {
       showError(data.error);
-      setStatus('');
+      clearStatus('export');
     } else if (data.status === 'ok') {
-      setStatus('Exported');
+      setStatus('Exported', 'export');
       showError('');
     }
   });

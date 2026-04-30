@@ -1,7 +1,12 @@
 # Add any directories, files, or patterns you don't want to be tracked by version control
 *.pyc
+*.swp
+__pycache__/
 .tox
 *.json
 /history
 _playlist.json
 *.log
+store/playlists/*
+store/saved/*
+store/history/*

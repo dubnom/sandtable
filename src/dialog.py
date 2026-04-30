@@ -1,6 +1,7 @@
 import os
 import random
 import copy
+import json
 from html import escape
 from hashlib import md5
 
@@ -22,7 +23,7 @@ class Params(dict):
 
     def hash(self):
         h = md5()
-        h.update(bytes(str(self.items), 'utf-8'))
+        h.update(json.dumps(self, sort_keys=True, separators=(',', ':'), default=str).encode('utf-8'))
         return h.hexdigest()
 
     def __getattribute__(self, attr):

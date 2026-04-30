@@ -618,6 +618,7 @@
       method: state.method,
       action: action || 'refresh',
       params: collectParams(),
+      includeImageData: true,
       requestId: state.latestPreviewRequestId + 1,
     }, extraPayload || {});
 

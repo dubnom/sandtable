@@ -373,7 +373,7 @@ class Memoize():
             self.params = None
 
     def match(self, sandable, params):
-        return self.sandable == sandable and all(a.startswith('__') or getattr(self.params, a, None) == getattr(params, a, None) for a in dir(params))
+        return self.sandable == sandable and dict(self.params or {}) == dict(params or {})
 
     def chains(self):
         with open(CACHE_FILE, 'rb') as f:

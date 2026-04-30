@@ -157,21 +157,34 @@ class Chains():
         newChains = []
         for chain in chains:
             newChain = []
+            oldPoint = None
+            lastPoint = None
+            isClipping = False
             for point in chain:
                 if oldPoint:
                     points = Chains._clip(oldPoint, point, boundary)
                     if points is None:
                         isClipping = True
                     else:
-                        if lastPoint != points[0]:
-                            if isClipping:
-                                newChain += Chains._nastySandTableLogic(lastPoint, points[0], boundary)
-                            newChain.append(points[0])
-                        newChain.append(points[1])
-                        lastPoint = points[1]
-                        isClipping = lastPoint[0] != point[0] or lastPoint[1] != point[1]
+                        # Ensure all points are lists, deduplicate consecutive points
+                        p0 = list(points[0])
+                        p1 = list(points[1])
+                        if lastPoint is None or not (Chains.epsilon(lastPoint[0], p0[0]) and Chains.epsilon(lastPoint[1], p0[1])):
+                            if isClipping and lastPoint is not None:
+                                # Insert edge-walking logic, deduping as well
+                                edge_points = Chains._nastySandTableLogic(lastPoint, p0, boundary)
+                                for ep in edge_points:
+                                    ep = list(ep)
+                                    if len(newChain) == 0 or not (Chains.epsilon(newChain[-1][0], ep[0]) and Chains.epsilon(newChain[-1][1], ep[1])):
+                                        newChain.append(ep)
+                            newChain.append(p0)
+                        if len(newChain) == 0 or not (Chains.epsilon(newChain[-1][0], p1[0]) and Chains.epsilon(newChain[-1][1], p1[1])):
+                            newChain.append(p1)
+                        lastPoint = p1
+                        isClipping = not (Chains.epsilon(lastPoint[0], point[0]) and Chains.epsilon(lastPoint[1], point[1]))
                 oldPoint = point
-            newChains.append(newChain)
+            if newChain:
+                newChains.append(newChain)
         return newChains
 
     # The Sand Table has no z axis so this method fixes up line boundary problems.
@@ -345,6 +358,7 @@ class Chains():
 
     @staticmethod
     def _clip(point1, point2, box):
+        # Improved: Use epsilon for boundary comparisons and ensure corners are handled robustly
         p1 = [point1[0], point1[1]]
         p2 = [point2[0], point2[1]]
 
@@ -352,21 +366,34 @@ class Chains():
         outcode2 = Chains._compOutCode(p2, box)
         while True:
             if not outcode1 and not outcode2:
+                # Both points inside
                 return p1, p2
             elif outcode1 & outcode2:
+                # Both points share an outside zone (trivially reject)
                 return None
 
             outcodeOut = outcode1 if outcode1 else outcode2
 
+            x, y = None, None
             if Chains.TOP & outcodeOut:
-                x, y = p1[0] + (p2[0] - p1[0]) * (box[1][1] - p1[1]) / (p2[1] - p1[1]), box[1][1]
+                x = p1[0] + (p2[0] - p1[0]) * (box[1][1] - p1[1]) / (p2[1] - p1[1])
+                y = box[1][1]
             elif Chains.BOTTOM & outcodeOut:
-                x, y = p1[0] + (p2[0] - p1[0]) * (box[0][1] - p1[1]) / (p2[1] - p1[1]), box[0][1]
+                x = p1[0] + (p2[0] - p1[0]) * (box[0][1] - p1[1]) / (p2[1] - p1[1])
+                y = box[0][1]
 
             if Chains.RIGHT & outcodeOut:
-                x, y = box[1][0], p1[1] + (p2[1] - p1[1]) * (box[1][0] - p1[0]) / (p2[0] - p1[0])
+                y = p1[1] + (p2[1] - p1[1]) * (box[1][0] - p1[0]) / (p2[0] - p1[0])
+                x = box[1][0]
             elif Chains.LEFT & outcodeOut:
-                x, y = box[0][0], p1[1] + (p2[1] - p1[1]) * (box[0][0] - p1[0]) / (p2[0] - p1[0])
+                y = p1[1] + (p2[1] - p1[1]) * (box[0][0] - p1[0]) / (p2[0] - p1[0])
+                x = box[0][0]
+
+            # Snap to corners if very close
+            for bx in [box[0][0], box[1][0]]:
+                for by in [box[0][1], box[1][1]]:
+                    if Chains.epsilon(x, bx) and Chains.epsilon(y, by):
+                        x, y = bx, by
 
             # Now we move outside point to intersection point to clip, and get ready for next pass.
             if outcodeOut == outcode1:
@@ -375,6 +402,34 @@ class Chains():
             else:
                 p2[0], p2[1] = x, y
                 outcode2 = Chains._compOutCode(p2, box)
+
+    # Patch: Ensure _nastySandTableLogic does not duplicate corners
+    @staticmethod
+    def _nastySandTableLogic(p1, p2, boundary):
+        if p1 is None or p2 is None:
+            return []
+
+        d1 = Chains._clipDirection(p1, boundary)
+        d2 = Chains._clipDirection(p2, boundary)
+        sides1 = Chains._boundarySides(p1, d1, boundary)
+        sides2 = Chains._boundarySides(p2, d2, boundary)
+
+        bestPoints = []
+        bestCost = None
+        for side1 in sides1:
+            for side2 in sides2:
+                points, cost = Chains._boundaryRoute(p1, side1, p2, side2, boundary)
+                # Remove duplicate consecutive points (especially corners)
+                if points:
+                    deduped = [points[0]]
+                    for pt in points[1:]:
+                        if not (Chains.epsilon(pt[0], deduped[-1][0]) and Chains.epsilon(pt[1], deduped[-1][1])):
+                            deduped.append(pt)
+                    points = deduped
+                if bestCost is None or cost < bestCost:
+                    bestCost = cost
+                    bestPoints = points
+        return bestPoints
 
     @staticmethod
     def saveImage(chains, box, fileName, imageWidth, imageHeight, imageType, clipToTable=False):

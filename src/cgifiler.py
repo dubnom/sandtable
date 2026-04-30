@@ -157,50 +157,25 @@ filetypes = {
 }
 
 
-def render_actions(nm, fn, ft):
-    drawTargets = {
-        'Pictures': ('Picture', fn),
-        'Clipart': ('Clipart', fn),
-        'Sisyphus': ('Sisyphus', fn),
-    }
-    nm = escape(nm, quote=True)
-    fn = escape(fn, quote=True)
-    ft = escape(ft, quote=True)
-    drawButton = ''
-    if ft in drawTargets:
-        method, filename = drawTargets[ft]
-        drawUrl = '/?view=draw&method=%s&filename=%s' % (quote(method, safe=''), quote(filename, safe=''))
-        drawButton = '<button class="load" type="button" onclick="window.location.href=\'%s\'">Draw</button>' % drawUrl
-    return (
-        '<center class="filer-actions">'
-        '%s'
-        '<button class="delete" type="button" onclick="myDelete(\'%s\',\'%s\',\'%s\')">Delete</button>'
-        '<button class="rename" type="button" onclick="myRename(\'%s\',\'%s\',\'%s\')">Rename</button>'
-        '</center>' % (drawButton, nm, fn, ft, nm, fn, ft)
-    )
-
-
-@app.route('/filer', methods=['GET', 'POST'])
-def filerPage():
-    if request.method == 'GET' and request.args.get('embed') != '1':
-        return redirect(url_for('shellPage', view='filer'))
-
-    cstuff = cgistuff('Filer', jQuery=True)
+def _render_filer_page(title, routeBase, fixedFiletype=None, rootPath=None):
+    cstuff = cgistuff(title, jQuery=True)
 
     form = request.values
-    ft = form.get('filetype', '') or 'Clipart'
+    ft = fixedFiletype or form.get('filetype', '') or 'Clipart'
+    if ft not in filetypes:
+        ft = fixedFiletype or 'Clipart'
 
     options = '\n'.join(['<option%s>%s</option>' % (' selected' if ft == name else '', name) for name in list(filetypes.keys())])
 
     filetype = filetypes[ft]
-    path = filetype.path
+    basePath = rootPath or filetype.path
+    path = basePath
 
     if 'directory' in form:
-        path = form.get('directory', '') or filetype.path
+        path = form.get('directory', '') or basePath
         if len(path) and path[0] in '/.~\\':
-            path = filetype.path
+            path = basePath
 
-    # Check for uploads
     action = form.get('action', '').lower()
     if action == 'upload':
         logging.info('Uploading')
@@ -221,11 +196,10 @@ def filerPage():
                     os.remove(fullName)
                 fUpload.save(fullName)
 
-    # Query and display the contents of the directory
     dirlist = os.listdir(path)
     dirlist.sort()
 
-    if len(path) > len(filetype.path):
+    if len(path) > len(basePath):
         dirlist.insert(0, '..')
 
     imgNum = 0
@@ -263,8 +237,77 @@ def filerPage():
         cstuff.headerStr(),
         cstuff.startBodyStr(),
         cstuff.navigationStr(),
-        render_template('filer-page.tpl', options=options, ft=ft, path=path, table=res, upload=upload, ftfilter=ftfilter),
+        render_template(
+            'filer-page.tpl',
+            options=options,
+            ft=ft,
+            path=path,
+            table=res,
+            upload=upload,
+            ftfilter=ftfilter,
+            baseAction=routeBase,
+            showFiletypeSelector=(fixedFiletype is None),
+            filerTitle=(fixedFiletype or 'Filer'),
+        ),
         cstuff.endBodyStr()])
+
+
+def render_actions(nm, fn, ft):
+    drawTargets = {
+        'Pictures': ('Picture', fn),
+        'Clipart': ('Clipart', fn),
+        'Sisyphus': ('Sisyphus', fn),
+    }
+    nm = escape(nm, quote=True)
+    fn = escape(fn, quote=True)
+    ft = escape(ft, quote=True)
+    drawButton = ''
+    if ft in drawTargets:
+        method, filename = drawTargets[ft]
+        drawUrl = '/?view=draw&method=%s&filename=%s' % (quote(method, safe=''), quote(filename, safe=''))
+        drawButton = '<button class="load" type="button" onclick="window.location.href=\'%s\'">Draw</button>' % drawUrl
+    return (
+        '<center class="filer-actions">'
+        '%s'
+        '<button class="delete" type="button" onclick="myDelete(\'%s\',\'%s\',\'%s\')">Delete</button>'
+        '<button class="rename" type="button" onclick="myRename(\'%s\',\'%s\',\'%s\')">Rename</button>'
+        '</center>' % (drawButton, nm, fn, ft, nm, fn, ft)
+    )
+
+
+@app.route('/filer', methods=['GET', 'POST'])
+def filerPage():
+    if request.method == 'GET' and request.args.get('embed') != '1':
+        return redirect(url_for('shellPage', view='filer'))
+    return _render_filer_page('Filer', '/filer')
+
+
+@app.route('/clipart', methods=['GET', 'POST'])
+def clipartPage():
+    if request.method == 'GET' and request.args.get('embed') != '1':
+        return redirect(url_for('shellPage', view='clipart'))
+    return _render_filer_page('Clipart', '/clipart', fixedFiletype='Clipart')
+
+
+@app.route('/thr', methods=['GET', 'POST'])
+def thrPage():
+    if request.method == 'GET' and request.args.get('embed') != '1':
+        return redirect(url_for('shellPage', view='thr'))
+    return _render_filer_page('Thr', '/thr', fixedFiletype='Sisyphus')
+
+
+@app.route('/drawings', methods=['GET', 'POST'])
+def drawingsPage():
+    if request.method == 'GET' and request.args.get('embed') != '1':
+        return redirect(url_for('shellPage', view='drawings'))
+    return _render_filer_page('Drawings', '/drawings', fixedFiletype='Drawings')
+
+
+@app.route('/history', methods=['GET', 'POST'])
+def historyFilerPage():
+    if request.method == 'GET' and request.args.get('embed') != '1':
+        return redirect(url_for('shellPage', view='history'))
+    return _render_filer_page('History', '/history', fixedFiletype='History')
 
 
 @app.route('/filer/delete', methods=['POST'])

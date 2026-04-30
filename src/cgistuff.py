@@ -3,13 +3,16 @@ from pathlib import Path
 
 menuItems = (
     ('Draw', 'draw'),
-    ('History', 'history'),
     ('Playlists', 'playlist'),
-    ('Lights', 'lights'),
+    ('Drawings', 'drawings'),
+    ('History', 'history'),
     ('Pictures', 'pictures'),
-    ('Watch Movie', 'watch'),
-    ('Make Movie', 'movie'),
-    ('Filer', 'filer'),
+    ('Clipart', 'clipart'),
+    ('Thr', 'thr'),
+    # ('Watch Movie', 'watch'),
+    # ('Make Movie', 'movie'),
+    # ('Filer', 'filer'),
+    ('Lights', 'lights'),
     ('Admin', 'admin'),
 )
 

@@ -1,4 +1,13 @@
 <style>
+#globalStatusBar {
+ transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+#globalStatusBar.statusbar-flash {
+ background-color: rgba(255, 244, 173, 0.98) !important;
+ box-shadow: 0 0 0 2px rgba(199, 161, 0, 0.45), 0 2px 10px rgba(0,0,0,0.25);
+}
+
 @media (max-width: 700px) {
  #globalStatusBar {
   left: 4px !important;
@@ -47,6 +56,7 @@
   }
 
   const barNode = document.getElementById('globalStatusBar');
+  let flashTimer = null;
 
   if (typeof io === 'undefined') {
     machineNode.textContent = 'Unavailable';
@@ -103,10 +113,51 @@
     stopBtn.disabled = !running;
   }
 
+  function flashStatusBar() {
+    if (!barNode) {
+      return;
+    }
+    if (flashTimer !== null) {
+      window.clearTimeout(flashTimer);
+    }
+    barNode.classList.remove('statusbar-flash');
+    void barNode.offsetWidth;
+    barNode.classList.add('statusbar-flash');
+    flashTimer = window.setTimeout(function() {
+      barNode.classList.remove('statusbar-flash');
+      flashTimer = null;
+    }, 500);
+  }
+
+  function captureDisplayedState() {
+    return {
+      machine: machineNode.textContent,
+      playlist: playlistNode.textContent,
+      playDisabled: playBtn.disabled,
+      stopDisabled: stopBtn.disabled,
+      reconnectVisible: reconnectBtn.style.display !== 'none'
+    };
+  }
+
+  function maybeFlashStatusBar(beforeState) {
+    const afterState = captureDisplayedState();
+    if (
+      beforeState.machine !== afterState.machine ||
+      beforeState.playlist !== afterState.playlist ||
+      beforeState.playDisabled !== afterState.playDisabled ||
+      beforeState.stopDisabled !== afterState.stopDisabled ||
+      beforeState.reconnectVisible !== afterState.reconnectVisible
+    ) {
+      flashStatusBar();
+    }
+  }
+
   function applyStatus(data) {
+    const beforeState = captureDisplayedState();
     machineNode.textContent = data && data.machine && data.machine.message ? data.machine.message : 'Unknown';
     playlistNode.textContent = describePlaylist(data ? data.playlist : null);
     updateControls(data ? data.playlist : null);
+    maybeFlashStatusBar(beforeState);
   }
 
   function controlPlaylist(action) {
@@ -123,9 +174,11 @@
   });
 
   socket.on('statusbar:error', function(data) {
+    const beforeState = captureDisplayedState();
     const message = data && (data.message || data.error) ? (data.message || data.error) : 'Status update failed';
     playlistNode.textContent = message;
     updateControls(null);
+    maybeFlashStatusBar(beforeState);
   });
 
   socket.on('connect', function() {
@@ -134,15 +187,19 @@
   });
 
   socket.on('disconnect', function() {
+    const beforeState = captureDisplayedState();
     machineNode.textContent = 'Disconnected';
     playlistNode.textContent = 'Disconnected';
     updateControls(null);
     setReconnectVisible(true);
+    maybeFlashStatusBar(beforeState);
     updateBodyPadding();
   });
 
   socket.on('reconnect_failed', function() {
+    const beforeState = captureDisplayedState();
     setReconnectVisible(true);
+    maybeFlashStatusBar(beforeState);
     updateBodyPadding();
   });
 

@@ -1,7 +1,7 @@
 <table class="main">
  <tr>
   <td id="methodGridCell" valign="TOP" style="width: 247px;">
-    <div id="methodGridScroller" style="overflow-y: scroll; overflow-x: hidden; overscroll-behavior: contain; scrollbar-gutter: stable; -webkit-overflow-scrolling: touch; width: fit-content; height: calc(100vh - 170px); min-height: 160px;">
+    <div id="methodGridScroller" style="overflow-y: scroll; overflow-x: hidden; overscroll-behavior: contain; scrollbar-gutter: stable; -webkit-overflow-scrolling: touch; width: fit-content; height: calc(100vh - 170px); min-height: 160px; padding-right: 6px; box-sizing: content-box;">
        <div id="methodGrid" style="display: grid; grid-template-columns: repeat(3, 79px); gap: 4px;"></div>
      </div>
    <div id="statusMsg" class="navigation" style="margin-top: 12px;"></div>
@@ -166,7 +166,7 @@
     const threeColWidth = tileWidth * 3 + gap * 2;
     const twoColWidth = tileWidth * 2 + gap;
     const oneColWidth = tileWidth;
-    const scrollbarReserve = 14;
+    const scrollbarReserve = 24;
 
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
     const imageWidth = planImage ? Math.ceil(planImage.getBoundingClientRect().width) : 0;

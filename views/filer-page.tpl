@@ -63,6 +63,7 @@ function mySubmit(action,name,value,name2,value2) {
 
 function filerSetState(filetype, directory) {
   window[FILER_STATE_KEY] = {
+    routeBase: String('{{ baseAction }}' || ''),
     filetype: String(filetype || ''),
     directory: String(directory || '')
   };
@@ -77,9 +78,11 @@ function filerRestoreStateIfNeeded() {
   }
   const currentFiletype = {{ ft|tojson }};
   const currentDirectory = {{ path|tojson }};
+  const currentRouteBase = String('{{ baseAction }}' || '');
+  const targetRouteBase = typeof saved.routeBase === 'string' ? saved.routeBase : '';
   const targetFiletype = typeof saved.filetype === 'string' ? saved.filetype : '';
   const targetDirectory = typeof saved.directory === 'string' ? saved.directory : '';
-  if (!shouldRestore || !targetFiletype || (targetFiletype === currentFiletype && targetDirectory === currentDirectory)) {
+  if (!shouldRestore || !targetFiletype || targetRouteBase !== currentRouteBase || (targetFiletype === currentFiletype && targetDirectory === currentDirectory)) {
     window[FILER_RESTORE_FLAG_KEY] = false;
     filerSetState(currentFiletype, currentDirectory);
     return;
@@ -92,7 +95,7 @@ function filerRestoreStateIfNeeded() {
     data.append('directory', targetDirectory);
   }
 
-  fetch('/filer?embed=1', {
+  fetch('{{ baseAction }}?embed=1', {
     method: 'POST',
     body: data,
     headers: {'X-Requested-With': 'XMLHttpRequest'}
@@ -123,7 +126,7 @@ function filerRestoreStateIfNeeded() {
 if (typeof window.__sandtablePageCleanup !== 'function') {
   window.__sandtablePageCleanup = function() {
     const nextPath = String(window.__sandtableNextPath || '');
-    if (nextPath.startsWith('/filer')) {
+    if (nextPath.startsWith('{{ baseAction }}')) {
       return;
     }
     filerSetState({{ ft|tojson }}, {{ path|tojson }});
@@ -172,6 +175,7 @@ if (!window.__sandtableFilerListenersBound) {
 }
 </style>
 
+{% if showFiletypeSelector %}
 <form method="post" action="/filer" class="auto_submit_form">
  <div class="filerbox">
   <select class="filer" name="filetype">
@@ -179,9 +183,10 @@ if (!window.__sandtableFilerListenersBound) {
   </select>
  </div>
 </form>
+{% endif %}
 
 {% if upload %}
- <form id="uploadForm" enctype="multipart/form-data" method="post" action="/filer">
+ <form id="uploadForm" enctype="multipart/form-data" method="post" action="{{ baseAction }}">
   <div class="savebox">
    <input type="hidden" name="filetype" value="{{ft}}"/>
    <input type="hidden" name="directory" value="{{path}}"/>
@@ -213,7 +218,7 @@ if (!window.__sandtableFilerListenersBound) {
     data.append('_file', fileList[i]);
    }
 
-   fetch('/filer?embed=1', {
+  fetch('{{ baseAction }}?embed=1', {
     method: 'POST',
     body: data,
     headers: {'X-Requested-With': 'XMLHttpRequest'}
@@ -261,9 +266,11 @@ if (!window.__sandtableFilerListenersBound) {
  </script>
 {% endif %}
 
-<form id="files" method="post" action="filer">
+<form id="files" method="post" action="{{ baseAction }}">
  <input type="hidden" name="filetype" value="{{ft}}"/>
+ {% if showFiletypeSelector %}
  <span class="filerTitle">{{path}}</span>
+ {% endif %}
  <button id="toggleFileActions" class="load" type="button" style="margin-left: 8px;">Show Actions</button>
  <table id="filetable">
   {{ table|safe }}

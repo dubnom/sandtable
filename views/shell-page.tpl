@@ -136,6 +136,11 @@ body {
   }
 
   function disposeCurrentContent() {
+   // Persist draw state so it can be restored when navigating back
+   if (window.__sandtableDrawState) {
+    window.__sandtableSavedDraw = window.__sandtableDrawState;
+   }
+   window.__sandtableDrawState = null;
    if (typeof window.__sandtablePageCleanup === 'function') {
     try {
      window.__sandtablePageCleanup();
@@ -266,6 +271,9 @@ body {
   });
 
   content.addEventListener('click', function(event) {
+    if (event.defaultPrevented) {
+     return;
+    }
    const link = event.target.closest('a[href]');
    if (!link) {
     return;
@@ -301,6 +309,29 @@ body {
   content.addEventListener('change', function(event) {
    const form = event.target.closest('form.auto_submit_form');
    if (!form) {
+    return;
+   }
+    const target = event.target;
+    const tag = String(target.tagName || '').toUpperCase();
+    const type = String(target.type || '').toLowerCase();
+    const isAutoSubmitControl = (tag === 'SELECT') || (tag === 'INPUT' && (type === 'checkbox' || type === 'radio' || type === 'range'));
+    if (!isAutoSubmitControl) {
+     return;
+    }
+   submitForm(form, true, null).catch(function(err) {
+    console.error(err);
+   });
+  });
+
+  content.addEventListener('input', function(event) {
+   const form = event.target.closest('form.auto_submit_form');
+   if (!form) {
+    return;
+   }
+   const target = event.target;
+   const tag = String(target.tagName || '').toUpperCase();
+   const type = String(target.type || '').toLowerCase();
+   if (!(tag === 'INPUT' && type === 'range')) {
     return;
    }
    submitForm(form, true, null).catch(function(err) {

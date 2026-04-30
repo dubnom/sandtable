@@ -110,23 +110,6 @@
     socket.emit('statusbar:control', {action: action});
   }
 
-  function fetchStatusFallback() {
-    fetch(buildUrl('/api/statusbar'))
-      .then(function(response) {
-        if (!response.ok) {
-          throw new Error('Status request failed');
-        }
-        return response.json();
-      })
-      .then(function(data) {
-        applyStatus(data);
-        updateBodyPadding();
-      })
-      .catch(function() {
-        // Keep prior UI state if fallback fetch fails.
-      });
-  }
-
   socket.on('statusbar:update', function(data) {
     applyStatus(data);
     updateBodyPadding();
@@ -140,7 +123,6 @@
 
   socket.on('connect', function() {
     socket.emit('statusbar:subscribe');
-    fetchStatusFallback();
   });
 
   socket.on('disconnect', function() {
@@ -156,6 +138,5 @@
   if (socket.connected) {
     socket.emit('statusbar:subscribe');
   }
-  fetchStatusFallback();
 })();
 </script>

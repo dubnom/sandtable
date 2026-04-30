@@ -1,13 +1,10 @@
 from flask import jsonify, request
-from threading import Lock
 
 from webapp import app, socketio
 from playlist_runtime import runner
 import mach
 
 
-_statusMonitorLock = Lock()
-_statusMonitorStarted = False
 _lastStatusSnapshot = None
 
 
@@ -48,22 +45,27 @@ def _emit_statusbar_update(force=False, room=None):
     return payload
 
 
-def _status_monitor():
+def _draw_watcher():
+    """Background task: polls machine at 0.5s until it returns to ready, then pushes draw:complete."""
+    # Wait briefly for the machine to actually start moving before we check
+    socketio.sleep(1.0)
     while True:
         try:
+            payload = _status_payload()
+            if payload.get('machine', {}).get('ready'):
+                socketio.emit('draw:complete', {'status': 'done'})
+                _emit_statusbar_update(force=True)
+                return
             _emit_statusbar_update()
         except Exception:
             pass
-        socketio.sleep(2.0)
+        socketio.sleep(0.5)
 
 
-def _ensure_status_monitor_started():
-    global _statusMonitorStarted
-    with _statusMonitorLock:
-        if _statusMonitorStarted:
-            return
-        _statusMonitorStarted = True
-        socketio.start_background_task(_status_monitor)
+def signal_draw_started():
+    """Call after kicking off a machine run. Pushes a busy status and starts the draw watcher."""
+    _emit_statusbar_update(force=True)
+    socketio.start_background_task(_draw_watcher)
 
 
 @app.route('/api/statusbar', methods=['GET'])
@@ -98,7 +100,6 @@ def statusbarControlApi():
 
 @socketio.on('statusbar:subscribe')
 def handle_statusbar_subscribe():
-    _ensure_status_monitor_started()
     _emit_statusbar_update(force=True, room=request.sid)
 
 

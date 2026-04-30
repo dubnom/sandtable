@@ -4,9 +4,31 @@
  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
  <script>
   $(function() {
-   $(".auto_submit_form").change(function() {
-    this.submit();
+    $(".auto_submit_form").change(function(event) {
+     var target = event && event.target ? event.target : null;
+     if (!target) {
+      return;
+     }
+     var tag = (target.tagName || '').toUpperCase();
+     var type = String(target.type || '').toLowerCase();
+    var isAutoSubmitControl = (tag === 'SELECT') || (tag === 'INPUT' && (type === 'checkbox' || type === 'radio' || type === 'range'));
+     if (!isAutoSubmitControl) {
+      return;
+     }
+     this.submit();
    });
+
+    $(".auto_submit_form").on('input', function(event) {
+     var target = event && event.target ? event.target : null;
+     if (!target) {
+      return;
+     }
+     var tag = (target.tagName || '').toUpperCase();
+     var type = String(target.type || '').toLowerCase();
+     if (tag === 'INPUT' && type === 'range') {
+      this.submit();
+     }
+    });
   });
  </script>
 {% endif %}

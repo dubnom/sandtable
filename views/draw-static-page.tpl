@@ -8,7 +8,7 @@
   </td>
   <td id="drawDialogCell" valign="TOP">
    <center>
-    <img id="planImage" class="plan" src="{{ imagefile }}" width="{{ width }}" height="{{ height }}"><br>
+    <img id="planImage" class="plan" src="" width="{{ width }}" height="{{ height }}"><br>
     <div id="errorBox" class="error" style="display: none;"></div>
     <span id="drawInfo" class="drawtime"></span>
     <div id="dialogHost"></div>
@@ -31,8 +31,18 @@
 <script src="//cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script>
 (function() {
+  if (typeof window.__sandtablePageCleanup === 'function') {
+    try {
+      window.__sandtablePageCleanup();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const LOADING_SRC = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='{{ width }}' height='{{ height }}'%3E%3Crect width='100%25' height='100%25' fill='%23e8e4da'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23888'%3ELoading...%3C/text%3E%3C/svg%3E";
   const initialMethod = {{ method|tojson }};
   const initialParams = {{ initial_params|default({}, true)|tojson }};
+  const initialLoadname = {{ loadname|default('')|tojson }};
   const fallbackMethods = {{ sandables|tojson }};
   const pagePath = window.location.pathname || '/draw';
   const appBasePath = pagePath.replace(/\/draw\/?$/, '').replace(/\/$/, '');
@@ -60,13 +70,21 @@
     return '/draw?method=' + encodeURIComponent(method);
   }
 
+  // Restore state saved from a previous visit to the draw page
+  const _savedDraw = window.__sandtableSavedDraw || null;
+  if (_savedDraw) {
+    window.__sandtableSavedDraw = null;
+  }
+
   const state = {
-    method: initialMethod,
+    method: (_savedDraw && _savedDraw.method) ? _savedDraw.method : initialMethod,
     methods: fallbackMethods || [],
     fields: [],
     params: {},
     realtime: true,
     latestPreviewRequestId: 0,
+    lastPreviewSignature: '',
+    lastPreviewAt: 0,
   };
 
   const methodGrid = document.getElementById('methodGrid');
@@ -79,8 +97,17 @@
   const dialogHost = document.getElementById('dialogHost');
   const statusMsg = document.getElementById('statusMsg');
 
+  planImage.src = LOADING_SRC;
+
   function methodImageUrl(method) {
     return buildUrl('/images/' + encodeURIComponent(method) + '.png');
+  }
+
+  function updateMethodSelection(newMethod) {
+    const images = methodGrid.querySelectorAll('img');
+    images.forEach(function(img) {
+      img.className = img.alt === newMethod ? 'selected' : 'sandable';
+    });
   }
 
   function populateMethods(methods) {
@@ -286,6 +313,38 @@
       } else {
         input.step = 'any';
       }
+
+      const useSlider = !!field.slider && field.min !== undefined && field.min !== null && field.max !== undefined && field.max !== null;
+      if (useSlider) {
+        const wrapper = document.createElement('span');
+
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.className = kind === 'DialogInt' ? 'intSlider' : 'floatSlider';
+        slider.min = String(field.min);
+        slider.max = String(field.max);
+        slider.step = kind === 'DialogInt'
+          ? '1'
+          : String((field.step !== undefined && field.step !== null) ? field.step : 0.01);
+        slider.dataset.fieldName = field.name;
+        slider.dataset.sliderFor = field.name;
+
+        input.value = value == null ? '' : String(value);
+        slider.value = input.value === '' ? slider.min : input.value;
+
+        input.addEventListener('input', function() {
+          if (input.value !== '') {
+            slider.value = input.value;
+          }
+        });
+        slider.addEventListener('input', function() {
+          input.value = slider.value;
+        });
+
+        wrapper.appendChild(input);
+        wrapper.appendChild(slider);
+        return wrapper;
+      }
     } else {
       input.type = 'text';
     }
@@ -370,11 +429,52 @@
     return params;
   }
 
+  function updateDialogValues() {
+    state.fields.forEach(function(field) {
+      if (!field.name || field.kind === 'DialogBreak') return;
+      const node = dialogHost.querySelector('[data-field-name="' + field.name.replace(/"/g, '\\"') + '"]');
+      if (!node) return;
+      const sliderNode = dialogHost.querySelector('[data-slider-for="' + field.name.replace(/"/g, '\\"') + '"]');
+      const value = Object.prototype.hasOwnProperty.call(state.params, field.name) ? state.params[field.name] : field.default;
+      if (node.tagName === 'SELECT') {
+        node.value = String(valueForChoiceField(field, value));
+      } else if (field.kind === 'DialogColor' && Array.isArray(value) && value.length === 3) {
+        const r = Number(value[0]).toString(16).padStart(2, '0');
+        const g = Number(value[1]).toString(16).padStart(2, '0');
+        const b = Number(value[2]).toString(16).padStart(2, '0');
+        node.value = '#' + r + g + b;
+      } else {
+        node.value = value == null ? '' : String(value);
+      }
+      if (sliderNode) {
+        sliderNode.value = node.value === '' ? sliderNode.min : node.value;
+      }
+    });
+  }
+
+  function _escapeHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
   function applyPreviewData(data) {
     if (data.method) {
       state.method = data.method;
     }
-    if (Array.isArray(data.fields)) {
+    if (data.realtime !== undefined) {
+      state.realtime = data.realtime !== false;
+    }
+    let methodsChanged = false;
+    if (Array.isArray(data.methods)) {
+      const nextMethods = data.methods;
+      methodsChanged = nextMethods.length !== state.methods.length || nextMethods.some(function(m, idx) {
+        return m !== state.methods[idx];
+      });
+      if (methodsChanged) {
+        state.methods = nextMethods;
+      }
+    }
+    const fieldsChanged = Array.isArray(data.fields);
+    if (fieldsChanged) {
       state.fields = data.fields;
     }
     state.params = data.params || {};
@@ -384,42 +484,41 @@
       planImage.src = data.image.url;
     }
     const summary = data.summary || {};
-    drawInfo.textContent = summary.drawinfo || '';
+    const isLong = (summary.seconds || 0) > 3600;
+    if (summary.helpUrl) {
+      const helpLink = '<a href="' + buildUrl('/' + summary.helpUrl) + '" target="_blank">Help!</a>';
+      const timeHtml = summary.drawinfo ? (isLong ? '<span style="color:#cc0000;font-weight:bold;">' + _escapeHtml(summary.drawinfo) + '</span>' : _escapeHtml(summary.drawinfo)) : '';
+      drawInfo.innerHTML = timeHtml + '&nbsp;&nbsp;&nbsp;&nbsp;<span class="navigation">' + helpLink + '</span>';
+    } else {
+      drawInfo.innerHTML = summary.drawinfo ? (isLong ? '<span style="color:#cc0000;font-weight:bold;">' + _escapeHtml(summary.drawinfo) + '</span>' : _escapeHtml(summary.drawinfo)) : '';
+    }
     showError(data.errors || '');
-    populateMethods(state.methods);
-    renderDialog();
+    if (methodsChanged) {
+      populateMethods(state.methods);
+    } else {
+      updateMethodSelection(state.method);
+    }
+    if (fieldsChanged) {
+      renderDialog();
+    } else {
+      updateDialogValues();
+    }
+    // Keep shell-level state current so it survives page switches
+    window.__sandtableDrawState = { method: state.method, params: state.params };
   }
 
-  async function loadMethods() {
-    const data = await fetchJson(buildUrl('/api/draw/methods?method=' + encodeURIComponent(state.method)));
-    state.methods = data.methods || [];
-    populateMethods(state.methods);
-  }
-
-  function loadSchema(method) {
-    return new Promise(function(resolve, reject) {
-      socket.once('draw:schema:response', function(data) {
-        if (data.error) {
-          reject(new Error(data.error || 'Schema load failed'));
-          return;
-        }
-
-        state.method = data.method;
-        state.realtime = data.realtime !== false;
-        state.fields = data.fields || [];
-        state.params = {};
-        state.fields.forEach(function(field) {
-          if (field.name) {
-            state.params[field.name] = field.default;
-          }
-        });
-        window.history.replaceState(null, '', drawUrlForMethod(state.method));
-        renderDialog();
-        resolve(data);
-      });
-
-      socket.emit('draw:schema', {method: method});
+  function _applySchema(data) {
+    state.method = data.method;
+    state.realtime = data.realtime !== false;
+    state.fields = data.fields || [];
+    state.params = {};
+    state.fields.forEach(function(field) {
+      if (field.name) {
+        state.params[field.name] = field.default;
+      }
     });
+    window.history.replaceState(null, '', drawUrlForMethod(state.method));
+    renderDialog();
   }
 
   const realtimePreview = (function() {
@@ -441,10 +540,12 @@
 
   async function selectMethod(method) {
     setStatus('Loading method...');
+    planImage.src = LOADING_SRC;
     try {
-      await loadSchema(method);
-      await preview('refresh');
-      populateMethods(state.methods);
+      state.method = method;
+      window.history.replaceState(null, '', drawUrlForMethod(state.method));
+      preview('refresh', { includeFields: true, params: {} });
+      updateMethodSelection(method);
     } catch (err) {
       showError(err.message || 'Method load failed');
       setStatus('');
@@ -453,14 +554,32 @@
 
   // WebSocket-based interactive requests
   function preview(action, extraPayload) {
-    setStatus('Working...');
-    state.latestPreviewRequestId += 1;
-    socket.emit('draw:preview', Object.assign({
+    const payload = Object.assign({
       method: state.method,
       action: action || 'refresh',
       params: collectParams(),
-      requestId: state.latestPreviewRequestId,
-    }, extraPayload || {}));
+      requestId: state.latestPreviewRequestId + 1,
+    }, extraPayload || {});
+
+    const signature = JSON.stringify({
+      method: payload.method,
+      action: payload.action,
+      params: payload.params,
+      includeFields: !!payload.includeFields,
+      includeImageData: !!payload.includeImageData,
+      fieldName: payload.fieldName || '',
+    });
+    const now = Date.now();
+    if (signature === state.lastPreviewSignature && (now - state.lastPreviewAt) < 350) {
+      return;
+    }
+    state.lastPreviewSignature = signature;
+    state.lastPreviewAt = now;
+
+    setStatus('Working...');
+    state.latestPreviewRequestId += 1;
+    payload.requestId = state.latestPreviewRequestId;
+    socket.emit('draw:preview', payload);
   }
 
   function randomizeField(fieldName) {
@@ -472,6 +591,7 @@
       if (!field.name || field.kind === 'DialogBreak') return;
       const node = dialogHost.querySelector('[data-field-name="' + field.name.replace(/"/g, '\\"') + '"]');
       if (!node) return;
+      const sliderNode = dialogHost.querySelector('[data-slider-for="' + field.name.replace(/"/g, '\\"') + '"]');
       let defaultValue = field.default;
       if (node.tagName === 'SELECT') {
         defaultValue = valueForChoiceField(field, defaultValue);
@@ -483,6 +603,9 @@
         node.value = '#' + r + g + b;
       } else {
         node.value = defaultValue == null ? '' : String(defaultValue);
+      }
+      if (sliderNode) {
+        sliderNode.value = node.value === '' ? sliderNode.min : node.value;
       }
     });
     preview('refresh');
@@ -497,6 +620,7 @@
     if (!node) {
       return;
     }
+    const sliderNode = dialogHost.querySelector('[data-slider-for="' + fieldName.replace(/"/g, '\\"') + '"]');
 
     let defaultValue = field.default;
     if (node.tagName === 'SELECT') {
@@ -509,6 +633,10 @@
       node.value = '#' + r + g + b;
     } else {
       node.value = defaultValue == null ? '' : String(defaultValue);
+    }
+
+    if (sliderNode) {
+      sliderNode.value = node.value === '' ? sliderNode.min : node.value;
     }
 
     preview('refresh');
@@ -545,9 +673,13 @@
       } else if (data.image && data.image.url) {
         planImage.src = data.image.url;
       }
-      setStatus('Draw started');
+      setStatus('Drawing...');
       showError('');
     }
+  });
+
+  socket.on('draw:complete', function() {
+    setStatus('Draw complete');
   });
 
   function addToPlaylist() {
@@ -648,10 +780,18 @@
   document.getElementById('playlistBtn').addEventListener('click', addToPlaylist);
   document.getElementById('saveBtn').addEventListener('click', saveDrawing);
   document.getElementById('exportBtn').addEventListener('click', exportDrawing);
-  window.addEventListener('resize', function() {
+  const onResize = function() {
     layoutMethodGrid();
     layoutMethodColumns();
-  });
+  };
+  window.addEventListener('resize', onResize);
+
+  window.__sandtablePageCleanup = function() {
+    window.removeEventListener('resize', onResize);
+    if (socket && typeof socket.disconnect === 'function') {
+      socket.disconnect();
+    }
+  };
 
   dialogHost.addEventListener('change', function(event) {
     if (event.target && event.target.dataset && event.target.dataset.fieldName) {
@@ -660,7 +800,11 @@
   });
 
   dialogHost.addEventListener('input', function(event) {
-    if (event.target && event.target.dataset && event.target.dataset.fieldName) {
+    if (!event.target || !event.target.dataset || !event.target.dataset.fieldName) {
+      return;
+    }
+    var type = String(event.target.type || '').toLowerCase();
+    if (type === 'range' || type === 'color') {
       realtimePreview();
     }
   });
@@ -683,21 +827,32 @@
     try {
       layoutMethodGrid();
       layoutMethodColumns();
-      // Always show a method list immediately, even if API calls fail.
       populateMethods(state.methods);
 
-      try {
-        await loadMethods();
-      } catch (err) {
-        setStatus('Using built-in method list');
+      if (initialLoadname) {
+        const loadData = await fetchJson(buildUrl('/api/draw/load'), {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({name: initialLoadname}),
+        });
+        if (loadData.method) {
+          state.method = loadData.method;
+        }
+        if (loadData.realtime !== undefined) {
+          state.realtime = loadData.realtime !== false;
+        }
+        applyPreviewData(loadData);
+        window.history.replaceState(null, '', drawUrlForMethod(state.method));
+      } else {
+        if (_savedDraw && _savedDraw.method) {
+          preview('refresh', { includeFields: true, params: _savedDraw.params || {} });
+        } else if (initialParams && Object.keys(initialParams).length) {
+          preview('refresh', { includeFields: true, params: initialParams });
+        } else {
+          preview('refresh', { includeFields: true, params: {} });
+        }
       }
 
-      await loadSchema(state.method);
-      if (initialParams && Object.keys(initialParams).length) {
-        await preview('refresh', {params: initialParams});
-      } else {
-        await preview('refresh');
-      }
     } catch (err) {
       showError(err.message || 'Initialization failed');
       setStatus('Initialization failed');

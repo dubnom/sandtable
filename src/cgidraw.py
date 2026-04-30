@@ -11,7 +11,7 @@ from Sand import TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS,\
     CACHE_ENABLE, DATA_PATH, drawers, get_image_type
 from sandable import sandableFactory, SandException
 from Chains import Chains
-from webapp import app, socketio
+from webapp import app, socketio, PROJECT_ROOT
 from cgistuff import cgistuff
 from dialog import Dialog
 from history import History, Memoize
@@ -20,6 +20,7 @@ from playlist import Playlist
 import convert
 import mach
 import schedapi
+import cgistatus
 
 
 _previewRequestLock = Lock()
@@ -152,7 +153,7 @@ def _draw_summary(chains, sandable):
     boundingChains = Chains.bound(chains, [(0.0, 0.0), (TABLE_WIDTH, TABLE_LENGTH)])
     machChains = Chains.convertUnits(boundingChains, TABLE_UNITS, MACHINE_UNITS)
     seconds, distance, pointCount = Chains.estimateMachiningTime(machChains, MACHINE_FEED, MACHINE_ACCEL)
-    drawinfo = 'Draw time %s   %.1f %s   Points %d' % (
+    drawinfo = 'Draw time %s   %.0f %s   Points %d' % (
         timedelta(0, int(seconds)),
         convert.convert(distance, MACHINE_UNITS, TABLE_UNITS), TABLE_UNITS,
         pointCount)
@@ -321,6 +322,38 @@ def drawSchemaApi():
     })
 
 
+@app.route('/api/draw/schemas', methods=['GET'])
+def drawSchemasApi():
+    schemas = {}
+    for sandable in drawers:
+        sand = sandableFactory(sandable, TABLE_WIDTH, TABLE_LENGTH, BALL_SIZE, TABLE_UNITS)
+        schemas[sandable] = {
+            'method': sandable,
+            'realtime': bool(sand.isRealtime()),
+            'fields': [_field_to_schema(field) for field in sand.editor],
+            'image': {
+                'width': IMAGE_WIDTH,
+                'height': IMAGE_HEIGHT,
+                'path': IMAGE_FILE,
+            },
+        }
+    return jsonify(schemas)
+
+
+@app.route('/api/draw/images', methods=['GET'])
+def drawImagesApi():
+    images = {}
+    images_dir = PROJECT_ROOT / 'images'
+    for sandable in drawers:
+        path = images_dir / ('%s.png' % sandable)
+        try:
+            with open(path, 'rb') as f:
+                images[sandable] = 'data:image/png;base64,' + base64.b64encode(f.read()).decode('ascii')
+        except OSError:
+            pass
+    return jsonify(images)
+
+
 @socketio.on('draw:schema')
 def handle_schema(payload):
     """WebSocket handler for schema request (equivalent to GET /api/draw/schema)."""
@@ -442,6 +475,7 @@ def drawExecuteApi():
     History.history(state['paramsObj'], state['method'], state['chains'])
     with mach.mach() as e:
         e.run(state['chains'], state['boundingBox'], MACHINE_FEED, TABLE_UNITS, MACHINE_UNITS)
+    cgistatus.signal_draw_started()
 
     return jsonify({
         'status': 'ok',
@@ -537,7 +571,7 @@ def drawPage():
             selected = drawers[0]
         return ''.join([
             cstuff.standardTopStr(),
-            render_template('draw-static-page.tpl', method=selected, sandables=drawers, width=IMAGE_WIDTH, height=IMAGE_HEIGHT, imagefile=IMAGE_FILE, embedded=True, loadname=loadName, initial_params=initialParams),
+            render_template('draw-static-page.tpl', method=selected, sandables=drawers, width=IMAGE_WIDTH, height=IMAGE_HEIGHT, embedded=True, loadname=loadName, initial_params=initialParams),
             cstuff.endBodyStr()])
 
     cstuff = cgistuff('Draw')
@@ -655,7 +689,8 @@ def handle_preview(payload):
         return
 
     includeFields = bool(payload.get('includeFields'))
-    response = _api_response_from_state(state, includeFields=includeFields, includeImageData=True)
+    includeImageData = bool(payload.get('includeImageData'))
+    response = _api_response_from_state(state, includeFields=includeFields, includeImageData=includeImageData)
     response['requestId'] = requestId
     socketio.emit('draw:preview:response', response, room=request.sid)
 
@@ -690,6 +725,7 @@ def handle_execute(payload):
     History.history(state['paramsObj'], state['method'], state['chains'])
     with mach.mach() as e:
         e.run(state['chains'], state['boundingBox'], MACHINE_FEED, TABLE_UNITS, MACHINE_UNITS)
+    cgistatus.signal_draw_started()
 
     socketio.emit('draw:execute:response', {
         'status': 'ok',

@@ -414,9 +414,28 @@
 
   async function fetchJson(url, options) {
     const response = await fetch(url, options || {});
-    const payload = await response.json();
+    const contentType = String(response.headers.get('content-type') || '').toLowerCase();
+    const isJson = contentType.indexOf('application/json') >= 0;
+    const bodyText = await response.text();
+    let payload = {};
+    if (isJson && bodyText) {
+      try {
+        payload = JSON.parse(bodyText);
+      } catch (err) {
+        payload = {};
+      }
+    }
     if (!response.ok) {
-      const err = new Error(payload.error || 'Request failed');
+      const err = new Error((payload && payload.error) || ('Request failed (' + response.status + ')'));
+      err.status = response.status;
+      err.responseText = bodyText;
+      err.payload = payload;
+      throw err;
+    }
+    if (!isJson) {
+      const err = new Error('Server returned non-JSON response');
+      err.status = response.status;
+      err.responseText = bodyText;
       err.payload = payload;
       throw err;
     }

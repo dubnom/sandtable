@@ -494,6 +494,37 @@ def drawLoadApi():
     return jsonify(response)
 
 
+@app.route('/api/draw/playlist-item', methods=['POST'])
+def drawPlaylistItemApi():
+    payload = request.get_json(silent=True) or {}
+    itemId = str(payload.get('id', '')).strip()
+    if not itemId:
+        return jsonify({'error': 'No playlist item id was specified'}), 400
+
+    item = None
+    for candidate in Playlist.list():
+        if str(candidate.get('id', '')) == itemId:
+            item = candidate
+            break
+
+    if not item:
+        return jsonify({'error': 'Playlist item was not found'}), 404
+
+    state, errorResponse, status = _api_prepare_draw({
+        'method': item.get('method', ''),
+        'params': item.get('params', {}),
+        'action': 'load',
+    })
+    if errorResponse:
+        return errorResponse, status
+    if state.get('cancelled'):
+        return jsonify({'status': 'cancelled'}), 409
+
+    response = _api_response_from_state(state, includeFields=True)
+    response['playlistItemId'] = itemId
+    return jsonify(response)
+
+
 @app.route('/api/draw/execute', methods=['POST'])
 def drawExecuteApi():
     payload = request.get_json(silent=True) or {}
@@ -584,9 +615,10 @@ def drawExportApi():
 def drawPage():
     if request.method == 'GET':
         loadName = request.args.get('loadname', '').strip()
+        playlistItemId = request.args.get('playlistItemId', '').strip()
         initialParams = {}
         for key, value in request.args.items():
-            if key in ('embed', 'view', 'method', 'loadname'):
+            if key in ('embed', 'view', 'method', 'loadname', 'playlistItemId'):
                 continue
             initialParams[key] = value
         if request.args.get('embed') != '1':
@@ -596,6 +628,8 @@ def drawPage():
             redirectArgs = {'view': 'draw', 'method': selected}
             if loadName:
                 redirectArgs['loadname'] = loadName
+            if playlistItemId:
+                redirectArgs['playlistItemId'] = playlistItemId
             redirectArgs.update(initialParams)
             return redirect(url_for('shellPage', **redirectArgs))
 
@@ -603,6 +637,17 @@ def drawPage():
         selected = request.args.get('method', drawers[0])
         if selected not in drawers:
             selected = drawers[0]
+        if playlistItemId:
+            for candidate in Playlist.list():
+                if str(candidate.get('id', '')) != playlistItemId:
+                    continue
+                candidateMethod = str(candidate.get('method', '') or '')
+                if candidateMethod in drawers:
+                    selected = candidateMethod
+                candidateParams = candidate.get('params', {})
+                if isinstance(candidateParams, dict):
+                    initialParams = dict(candidateParams)
+                break
         return ''.join([
             cstuff.standardTopStr(),
             render_template('draw-static-page.tpl', method=selected, sandables=drawers, width=IMAGE_WIDTH, height=IMAGE_HEIGHT, embedded=True, loadname=loadName, initial_params=initialParams),

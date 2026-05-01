@@ -68,7 +68,7 @@ button.history	    { background-color: #6F6F6F; border: 2px solid #6F6F6F; margi
 button.picture      { background-color: #FFFFFF; border: 2px solid #FFFFFF; margin: 0px 0px 0px 0px; padding: 0px }
 
 input.save	{ background: #DFDFFF; color: black; width: 300px; vertical-align: middle }
-select.load	{ background: #DFDFFF; color: black; width: 250px; vertical-align: middle }
+select.load	{ background: #DFDFFF; color: black; width: 25ch; max-width: 25ch; vertical-align: middle }
 input.upload    { background: #DF00FF: color: black; width: 400px; vertical-align: middle }
 
 pre.text	{ color: black; font-family: "Lucida Console", monospace, "Courier New"; font-size: 85% } 

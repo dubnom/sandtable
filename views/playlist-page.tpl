@@ -147,7 +147,9 @@
    <tr>
       <td class="help">
        {% if item.imageUrl %}
-             <img src="{{ item.imageUrl }}" alt="{{ item.title }}" width="96" class="history" style="height: auto;">
+              <a href="/?view=draw&method={{ item.method }}&playlistItemId={{ item.id }}" title="Open in Draw">
+          <img src="{{ item.imageUrl }}" alt="{{ item.title }}" width="96" class="history" style="height: auto;">
+              </a>
        {% endif %}
       </td>
     <td class="help">{{ item.title }}</td>

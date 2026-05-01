@@ -159,6 +159,8 @@ class DialogFloats(DialogField):
         return '<input name="%s" type="string" size="20" value="%s">' % (self.name, self._format(value))
 
     def fromForm(self, value):
+        if isinstance(value, (list, tuple)):
+            return [float(num) for num in value]
         return [float(num) for num in value.split(',')]
 
     def errorCheck(self, value):
@@ -234,6 +236,8 @@ class DialogInts(DialogField):
         return '<input name="%s" type="string" size="20" value="%s">' % (self.name, self._format(value))
 
     def fromForm(self, value):
+        if isinstance(value, (list, tuple)):
+            return [int(num) for num in value]
         return [int(num) for num in value.split(',')]
 
     def errorCheck(self, value):
@@ -339,6 +343,13 @@ class DialogFile(DialogField):
         self.filter = filter
         self.filters = filter.split('|')
         self.extensions = extensions
+        self.displayLength = 25
+
+    def _displayText(self, text):
+        label = str(text)
+        if len(label) <= self.displayLength:
+            return label
+        return label[:self.displayLength-3] + '...'
 
     def _extension(self, filename):
         pieces = filename.split('.')
@@ -347,7 +358,7 @@ class DialogFile(DialogField):
         return '.' + pieces[-1].lower()
 
     def toForm(self, value):
-        str = '<select name="%s" onChange="form.submit()">\n' % (self.name)
+        str = '<select name="%s" style="width: 25ch; max-width: 25ch" onChange="form.submit()">\n' % (self.name)
         if value.endswith('/'):
             value = value[0:len(value)-1]
         if os.path.isdir(value):
@@ -379,7 +390,7 @@ class DialogFile(DialogField):
                 selected = ' selected'
             else:
                 selected = ''
-            str += '<option value="%s"%s>%s</option>\n' % (filename, selected, show)
+            str += '<option value="%s"%s>%s</option>\n' % (filename, selected, self._displayText(show))
         str += '</select>'
         return str
 
@@ -454,6 +465,13 @@ class DialogFileList(DialogField):
         DialogField.__init__(self, name, prompt, '', default, None, None, None)
         self.path = path
         self.filters = [f.strip() for f in filter.split('|') if f.strip()]
+        self.displayLength = 25
+
+    def _displayText(self, text):
+        label = str(text)
+        if len(label) <= self.displayLength:
+            return label
+        return label[:self.displayLength-3] + '...'
 
     def _extension(self, filename):
         pieces = filename.split('.')
@@ -472,11 +490,11 @@ class DialogFileList(DialogField):
         return files
 
     def toForm(self, value):
-        html = '<select name="%s">\n' % self.name
+        html = '<select name="%s" style="width: 25ch; max-width: 25ch">\n' % self.name
         files = self._getFiles()
         for display, fullpath in files:
             selected = ' selected' if fullpath == value else ''
-            html += '<option value="%s"%s>%s</option>\n' % (fullpath, selected, display)
+            html += '<option value="%s"%s>%s</option>\n' % (fullpath, selected, self._displayText(display))
         html += '</select>'
         return html
 
@@ -520,6 +538,8 @@ class DialogColor(DialogField):
         return str
 
     def fromForm(self, value):
+        if isinstance(value, (list, tuple)) and len(value) >= 3:
+            return tuple(int(value[i]) for i in range(3))
         value = value.lstrip('#')
         lv = len(value)
         return tuple(int(value[i:i+int(lv/3)], 16) for i in range(0, lv, int(lv/3)))

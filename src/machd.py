@@ -258,6 +258,13 @@ class PlaylistRunner:
             logging.warning('Unable to halt machine during playlist abort: %s', error)
         return True, 'Aborting playlist'
 
+    def _schedule_message_clear(self, delay=5):
+        def _clear():
+            time.sleep(delay)
+            with self._lock:
+                self._message = ''
+        Thread(target=_clear, daemon=True).start()
+
     def _should_stop(self):
         with self._lock:
             return self._stopRequested
@@ -329,6 +336,7 @@ class PlaylistRunner:
                         self._set_state(state=self.IDLE, message='Playlist aborted', current=None, currentIndex=0, total=len(items), mode=mode)
                     else:
                         self._set_state(state=self.ERROR, message=message, current=item, currentIndex=index, total=len(items), mode=mode)
+                    self._schedule_message_clear()
                     return
 
             if self._should_abort():
@@ -337,6 +345,7 @@ class PlaylistRunner:
                 self._set_state(state=self.IDLE, message='Playlist stopped', current=None, currentIndex=0, total=len(items), mode=mode)
             else:
                 self._set_state(state=self.IDLE, message='Playlist complete', current=None, currentIndex=0, total=len(items), mode=mode)
+            self._schedule_message_clear()
         finally:
             with self._lock:
                 self._thread = None

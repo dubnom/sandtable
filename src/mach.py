@@ -28,11 +28,24 @@ class mach:
     def close(self):
         pass
 
-    def run(self, chains, box, feed, tableUnits, machUnits,  wait=False):
+    def run(self, chains, box, feed, tableUnits, machUnits, wait=False, meta=None):
         chains = Chains.bound(chains, box)
         chains = Chains.convertUnits(chains, tableUnits, machUnits)
         chains = Chains.round(chains, 2)
-        self.command('run', {'chains': chains, 'wait': wait, 'feed': feed, 'units': machUnits})
+        self.command('run', {'chains': chains, 'wait': wait, 'feed': feed, 'units': machUnits, 'meta': meta or {}})
+
+    def run_playlist(self, items, mode='all'):
+        self.command('playlistStart', {'items': items, 'mode': mode})
+
+    def stop_playlist(self):
+        self.command('playlistStop')
+
+    def abort_playlist(self):
+        self.command('playlistAbort')
+
+    def getPlaylistStatus(self):
+        self.command('playlistStatus')
+        return self.status
 
     def stop(self):
         self.command('halt')

@@ -63,6 +63,7 @@
     playlistNode.textContent = 'Socket.IO not loaded';
     playBtn.disabled = true;
     stopBtn.disabled = true;
+    stopBtn.style.display = 'none';
     reconnectBtn.style.display = '';
     return;
   }
@@ -95,15 +96,52 @@
     if (count) {
       text += ' (' + count + ' item' + (count === 1 ? '' : 's') + ')';
     }
-    if (current && current.title) {
-      text += ' - ' + current.title;
-      if (status.currentIndex && status.total) {
-        text += ' [' + status.currentIndex + '/' + status.total + ']';
-      }
+    if (current && status.currentIndex && status.total) {
+      text += ' [' + status.currentIndex + '/' + status.total + ']';
     } else if (status.message) {
       text += ' - ' + status.message;
     }
     return text;
+  }
+
+  function formatDuration(seconds) {
+    const total = Math.max(0, Number(seconds || 0));
+    const whole = Math.round(total);
+    const mins = Math.floor(whole / 60);
+    const secs = whole % 60;
+    const hours = Math.floor(mins / 60);
+    const remMins = mins % 60;
+    if (hours > 0) {
+      return String(hours) + ':' + String(remMins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+    }
+    return String(mins) + ':' + String(secs).padStart(2, '0');
+  }
+
+  function describeMachine(data) {
+    const machine = data && data.machine ? data.machine : null;
+    const drawing = data && data.drawing ? data.drawing : null;
+    if (!machine) {
+      return 'Unknown';
+    }
+    if (!drawing || drawing.state !== 'running') {
+      return machine.message || 'Unknown';
+    }
+
+    const details = [];
+    if (drawing.title) {
+      details.push(drawing.title);
+    } else if (drawing.method) {
+      details.push(drawing.method);
+    }
+    if (drawing.percentComplete !== null && drawing.percentComplete !== undefined) {
+      details.push(String(Math.round(Number(drawing.percentComplete))) + '%');
+    }
+    if (drawing.remainingSeconds) {
+      details.push(formatDuration(drawing.remainingSeconds) + ' left');
+    } else if (drawing.elapsedSeconds) {
+      details.push('elapsed ' + formatDuration(drawing.elapsedSeconds));
+    }
+    return (machine.message || 'Busy') + ' - ' + details.join(' · ');
   }
 
   function updateControls(status) {
@@ -111,6 +149,8 @@
     const running = state === 'playing' || state === 'stopping' || state === 'aborting';
     playBtn.disabled = running || !status || !status.count;
     stopBtn.disabled = !running;
+    playBtn.style.display = running ? 'none' : '';
+    stopBtn.style.display = running ? '' : 'none';
   }
 
   function flashStatusBar() {
@@ -154,7 +194,7 @@
 
   function applyStatus(data) {
     const beforeState = captureDisplayedState();
-    machineNode.textContent = data && data.machine && data.machine.message ? data.machine.message : 'Unknown';
+    machineNode.textContent = describeMachine(data);
     playlistNode.textContent = describePlaylist(data ? data.playlist : null);
     updateControls(data ? data.playlist : null);
     maybeFlashStatusBar(beforeState);
@@ -212,6 +252,7 @@
     socket.emit('statusbar:subscribe');
   } else {
     setReconnectVisible(true);
+    stopBtn.style.display = 'none';
   }
 })();
 </script>

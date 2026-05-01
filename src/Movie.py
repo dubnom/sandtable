@@ -210,7 +210,7 @@ class drawer:
 
     def drawInSand(self, chains):
         with mach.mach() as e:
-            e.run(chains, self.boundingBox, MACHINE_FEED, TABLE_UNITS, MACHINE_UNITS, wait=True)
+            e.run(chains, self.boundingBox, MACHINE_FEED, TABLE_UNITS, MACHINE_UNITS, wait=True, meta={'title': 'Movie frame %04d' % self.frameNumber, 'source': 'movie'})
 
 
 class Thingy:

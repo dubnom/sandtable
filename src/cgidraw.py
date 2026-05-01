@@ -168,6 +168,17 @@ def _draw_summary(chains, sandable):
     }
 
 
+def _draw_status_meta(method, summary=None, source='draw'):
+    payload = {
+        'title': str(method),
+        'method': str(method),
+        'source': source,
+    }
+    if isinstance(summary, dict) and 'seconds' in summary:
+        payload['estimatedSeconds'] = int(summary['seconds'])
+    return payload
+
+
 def _save_playlist_item_image(itemId, imageFile, imagePath, chains, boundingBox):
     try:
         Chains.saveImage(
@@ -502,7 +513,7 @@ def drawExecuteApi():
         sched.demoHalt()
     History.history(state['paramsObj'], state['method'], state['chains'])
     with mach.mach() as e:
-        e.run(state['chains'], state['boundingBox'], MACHINE_FEED, TABLE_UNITS, MACHINE_UNITS)
+        e.run(state['chains'], state['boundingBox'], MACHINE_FEED, TABLE_UNITS, MACHINE_UNITS, meta=_draw_status_meta(state['method'], state['summary']))
     cgistatus.signal_draw_started()
 
     return jsonify({
@@ -636,7 +647,7 @@ def drawPage():
                 sched.demoHalt()
             History.history(params, sandable, chains)
             with mach.mach() as e:
-                e.run(chains, boundingBox, MACHINE_FEED, TABLE_UNITS, MACHINE_UNITS)
+                e.run(chains, boundingBox, MACHINE_FEED, TABLE_UNITS, MACHINE_UNITS, meta=_draw_status_meta(sandable))
 
         # If 'Abort' has been requested stop the drawing
         if action == 'abort' or action == 'Abort!':
@@ -752,7 +763,7 @@ def handle_execute(payload):
         sched.demoHalt()
     History.history(state['paramsObj'], state['method'], state['chains'])
     with mach.mach() as e:
-        e.run(state['chains'], state['boundingBox'], MACHINE_FEED, TABLE_UNITS, MACHINE_UNITS)
+        e.run(state['chains'], state['boundingBox'], MACHINE_FEED, TABLE_UNITS, MACHINE_UNITS, meta=_draw_status_meta(state['method'], state['summary']))
     cgistatus.signal_draw_started()
 
     socketio.emit('draw:execute:response', {

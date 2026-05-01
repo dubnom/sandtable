@@ -5,6 +5,7 @@ flask
 flask-socketio
 python-socketio
 python-engineio
+websocket-client
 cython
 pypotrace
 shapely

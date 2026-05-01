@@ -23,6 +23,18 @@ class Machine:
         self.queue = queue.Queue()
         self.initialize(params, fullInit)
 
+    def _normalize_ready(self):
+        ready = self.ready
+        if isinstance(ready, bool):
+            return ready
+        if isinstance(ready, str):
+            state = ready.strip().lower()
+            if state in ('idle', 'ready', 'true'):
+                return True
+            if state in ('busy', 'running', 'run', 'false'):
+                return False
+        return bool(ready)
+
     def send(self, data):
         self.queue.put(data)
 
@@ -52,4 +64,4 @@ class Machine:
     def getStatus(self):
         count = self.count
         percent = 100 if count == 0 else (count-self.queue.qsize()) / count
-        return {'pos': self.pos, 'ready': self.ready, 'percent': percent}
+        return {'pos': self.pos, 'ready': self._normalize_ready(), 'percent': percent}

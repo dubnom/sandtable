@@ -49,6 +49,8 @@ TMP_PATH = "/tmp/"
 MACH_HOST = 'localhost'
 MACH_PORT = 5007
 MACH_LOG = "/var/log/machd.log"
+STATUS_HOST = 'localhost'
+STATUS_PORT = 5010
 
 VER_FILE = "%smachine.py" % DATA_PATH
 

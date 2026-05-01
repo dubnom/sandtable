@@ -10,16 +10,18 @@ def SmartDraw(chains, width, height, ballSize):
     intersections = []
     scanToY = []
     y = 0.
+    # Create the scan lines
     while y <= height:
         lines.append(shapely.geometry.LineString([(0, y), (width, y)]))
         scanToY.append(y)
         y += ballSize
         intersections.append([])
 
+    polygons = [shapely.geometry.LineString(chain) for chain in chains]
+
     # Find all the intersections of the polygons with the scan lines
     # FIX: Where there is no intersection, find the closest scanline and pick a point
-    for polyNum, chain in enumerate(chains):
-        polygon = shapely.geometry.LineString(chain)
+    for polyNum, polygon in enumerate(polygons):
         for scanNum, line in enumerate(lines):
             intercepts = polygon.intersection(line)
             if intercepts:

@@ -13,11 +13,25 @@ import convert
 import ledapi
 import schedapi
 import MovieStatus
+import cgistatus
 from cgistuff import cgistuff
+
+
+def _format_duration(seconds):
+    total = int(max(0, seconds or 0))
+    minutes, secs = divmod(total, 60)
+    hours, minutes = divmod(minutes, 60)
+    if hours:
+        return '%d:%02d:%02d' % (hours, minutes, secs)
+    return '%d:%02d' % (minutes, secs)
 
 
 @app.route('/admin/status', methods=['GET', 'POST'])
 def status():
+    return {'stuff': _status_rows()}
+
+
+def _status_rows():
     results = [
         ('Table Width',     '%g %s' % (TABLE_WIDTH, TABLE_UNITS)),
         ('Table Length',    '%g %s' % (TABLE_LENGTH, TABLE_UNITS)),
@@ -28,18 +42,35 @@ def status():
     ]
 
     try:
-        with mach.mach() as e:
-            status = e.getStatus()
-            results.append(['Machine State', ["Busy", "Ready"][status['ready']]])
+        payload = cgistatus._status_payload()
+        machineStatus = payload.get('machine', {})
+        rawStatus = machineStatus.get('raw', {}) if isinstance(machineStatus, dict) else {}
+        drawingStatus = payload.get('drawing', {}) if isinstance(payload, dict) else {}
+        playlistStatus = payload.get('playlist', {}) if isinstance(payload, dict) else {}
+        if rawStatus:
+            results.append(['Machine State', 'Ready' if rawStatus.get('ready') else 'Busy'])
             results.append(['Machine Position', '%.2f, %.2f %s' % (
-                status['pos'][0],
-                status['pos'][1],
+                rawStatus['pos'][0],
+                rawStatus['pos'][1],
                 MACHINE_UNITS)])
             results.append(['Table Position', '%.2f, %.2f %s' % (
-                convert.convert(status['pos'][0], MACHINE_UNITS, TABLE_UNITS),
-                convert.convert(status['pos'][1], MACHINE_UNITS, TABLE_UNITS),
+                convert.convert(rawStatus['pos'][0], MACHINE_UNITS, TABLE_UNITS),
+                convert.convert(rawStatus['pos'][1], MACHINE_UNITS, TABLE_UNITS),
                 TABLE_UNITS)])
-            results.append(['Drawing Percent', '%5.1f' % (100*status['percent'])])
+            if drawingStatus.get('state') == 'running':
+                results.append(['Current Drawing', drawingStatus.get('title') or drawingStatus.get('method') or 'Drawing'])
+                if drawingStatus.get('percentComplete') is not None:
+                    results.append(['Drawing Progress', '%.1f%%' % drawingStatus['percentComplete']])
+                results.append(['Elapsed', _format_duration(drawingStatus.get('elapsedSeconds', 0))])
+                results.append(['Remaining', _format_duration(drawingStatus.get('remainingSeconds', 0))])
+                if drawingStatus.get('pointCount'):
+                    results.append(['Point Count', '%d' % drawingStatus['pointCount']])
+            elif 'percent' in rawStatus:
+                results.append(['Queue Progress', '%5.1f%%' % (100 * rawStatus['percent'])])
+            results.append(['Playlist Status', '%s - %s' % (
+                playlistStatus.get('state', 'unknown'),
+                playlistStatus.get('message', ''),
+            )])
     except Exception:
         results.append(('State', 'Unknown'))
         results.append(('Position', 'Unknown'))
@@ -57,7 +88,7 @@ def status():
         results.append(('LED Status', 'Unknown'))
 
     results.append(('Movie Status', MovieStatus.MovieStatus().load()))
-    return {'stuff': results}
+    return results
 
 
 @app.route('/admin', methods=['GET', 'POST'])
@@ -101,7 +132,7 @@ def adminPage():
     return ''.join([
         cstuff.standardTopStr(),
         render_template('admin-page.tpl', message=message, message2=message2, actions=actions,
-                        imageType=get_image_type(), imageTypes=IMAGE_TYPES),
+                        imageType=get_image_type(), imageTypes=IMAGE_TYPES, statusRows=_status_rows()),
         cstuff.endBodyStr()])
 
 

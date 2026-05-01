@@ -1,4 +1,10 @@
-<div class="admingood" id="stats">STATS</div>
+<div class="admingood" id="stats">
+ <table>
+ {% for row in statusRows %}
+  <tr><td>{{ row[0] }}</td><td>{{ row[1] }}</td></tr>
+ {% endfor %}
+ </table>
+</div>
 <script>
 if (typeof window.__sandtablePageCleanup === 'function') {
  try {
@@ -19,13 +25,20 @@ function formatStuff(stuff) {
  text += '</table>';
  return( text );
 }
-function updater() {
- $.post("admin/status", {}, updateStats);
-} 
-updater();
-var adminStatsInterval = setInterval(updater, 2500);
+var adminStatusSocket = window.__sandtableStatusSocket;
+if (adminStatusSocket) {
+ adminStatusSocket.on('admin:update', updateStats);
+ adminStatusSocket.on('connect', function() {
+  adminStatusSocket.emit('admin:subscribe');
+ });
+ if (adminStatusSocket.connected) {
+  adminStatusSocket.emit('admin:subscribe');
+ }
+}
 window.__sandtablePageCleanup = function() {
- clearInterval(adminStatsInterval);
+ if (adminStatusSocket) {
+  adminStatusSocket.off('admin:update', updateStats);
+ }
 };
 </script>
 

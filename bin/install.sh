@@ -78,7 +78,7 @@ apt-get install -y libgeos-dev
 apt-get install -y python3-numpy python3-scipy
 
 # Python3 packages
-pip install -r requirements.txt
+pip install -r bin/requirements.txt
 
 # Optional Samba support
 if [ "$st_samba" = "enable" ];

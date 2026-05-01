@@ -9,18 +9,25 @@ function filerActionsVisible() {
 
 function filerApplyActionsVisibility(visible) {
   var filesForm = document.getElementById('files');
+  var uploadControls = document.getElementById('uploadControls');
   if (!filesForm) {
     return;
   }
   if (visible) {
     filesForm.classList.remove('filer-actions-hidden');
+    if (uploadControls) {
+      uploadControls.classList.remove('filer-actions-hidden');
+    }
   } else {
     filesForm.classList.add('filer-actions-hidden');
+    if (uploadControls) {
+      uploadControls.classList.add('filer-actions-hidden');
+    }
   }
   window[FILER_ACTIONS_VISIBLE_KEY] = !!visible;
   var button = document.getElementById('toggleFileActions');
   if (button) {
-    button.textContent = visible ? 'Hide Actions' : 'Show Actions';
+    button.textContent = visible ? 'Hide Controls' : 'Show Controls';
   }
 }
 
@@ -173,6 +180,10 @@ if (!window.__sandtableFilerListenersBound) {
 #files.filer-actions-hidden .filer-actions {
   display: none;
 }
+
+#uploadControls.filer-actions-hidden {
+  display: none;
+}
 </style>
 
 {% if showFiletypeSelector %}
@@ -187,6 +198,7 @@ if (!window.__sandtableFilerListenersBound) {
 
 {% if upload %}
  <form id="uploadForm" enctype="multipart/form-data" method="post" action="{{ baseAction }}">
+  <div id="uploadControls">
   <div class="savebox">
    <input type="hidden" name="filetype" value="{{ft}}"/>
    <input type="hidden" name="directory" value="{{path}}"/>
@@ -195,6 +207,7 @@ if (!window.__sandtableFilerListenersBound) {
   </div>
   <div id="uploadDropZone" class="savebox" style="margin-top: 8px; border: 2px dashed #888; border-radius: 6px; padding: 10px; text-align: center;">
    Drag and drop files here to upload
+  </div>
   </div>
  </form>
  <script>
@@ -271,7 +284,7 @@ if (!window.__sandtableFilerListenersBound) {
  {% if showFiletypeSelector %}
  <span class="filerTitle">{{path}}</span>
  {% endif %}
- <button id="toggleFileActions" class="load" type="button" style="margin-left: 8px;">Show Actions</button>
+ <button id="toggleFileActions" class="load" type="button" style="margin-left: 8px;">Show Controls</button>
  <table id="filetable">
   {{ table|safe }}
  </table>

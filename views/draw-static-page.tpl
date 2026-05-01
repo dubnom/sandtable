@@ -881,7 +881,77 @@
     }
   });
 
-  function executeDraw() {
+  function playlistIsActive(status) {
+    const playlist = status && status.playlist ? status.playlist : null;
+    const playlistState = playlist && playlist.state ? String(playlist.state) : '';
+    return playlistState === 'playing' || playlistState === 'stopping' || playlistState === 'aborting';
+  }
+
+  async function fetchStatusSnapshot() {
+    const response = await fetch(buildUrl('/api/statusbar'), {
+      credentials: 'same-origin',
+    });
+    if (!response.ok) {
+      throw new Error('Unable to check machine status');
+    }
+    return response.json();
+  }
+
+  async function abortBusyMachine(status) {
+    const url = playlistIsActive(status) ? buildUrl('/api/statusbar/control') : buildUrl('/api/draw/abort');
+    const payload = playlistIsActive(status) ? {action: 'abort'} : {};
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'same-origin',
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json().catch(function() {
+      return {};
+    });
+    if (!response.ok || (data && data.status === 'error')) {
+      throw new Error((data && (data.message || data.error)) || 'Unable to abort current job');
+    }
+    return data;
+  }
+
+  async function confirmAbortIfBusy(promptText, owner) {
+    let status;
+    try {
+      status = await fetchStatusSnapshot();
+    } catch (error) {
+      showError(error.message || 'Unable to check machine status');
+      clearStatus(owner);
+      return false;
+    }
+
+    if (status && status.machine && status.machine.ready) {
+      return true;
+    }
+
+    if (!window.confirm(promptText)) {
+      clearStatus(owner);
+      return false;
+    }
+
+    setStatus('Aborting current job...', owner);
+    try {
+      await abortBusyMachine(status);
+      return true;
+    } catch (error) {
+      showError(error.message || 'Unable to abort current job');
+      clearStatus(owner);
+      return false;
+    }
+  }
+
+  async function executeDraw() {
+    const shouldContinue = await confirmAbortIfBusy('Machine is busy. Confirm abort and draw?', 'execute');
+    if (!shouldContinue) {
+      return;
+    }
     setStatus('Sending to machine...', 'execute');
     socket.emit('draw:execute', {
       method: state.method,

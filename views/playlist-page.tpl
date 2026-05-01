@@ -46,6 +46,79 @@
     actionInput.value = 'save';
     form.requestSubmit();
    });
+
+   function playlistIsActive(status) {
+    var playlist = status && status.playlist ? status.playlist : null;
+    var playlistState = playlist && playlist.state ? String(playlist.state) : '';
+    return playlistState === 'playing' || playlistState === 'stopping' || playlistState === 'aborting';
+   }
+
+   function fetchStatusSnapshot() {
+    return fetch('/api/statusbar', {
+      credentials: 'same-origin'
+    }).then(function(response) {
+      if (!response.ok) {
+        throw new Error('Unable to check machine status');
+      }
+      return response.json();
+    });
+   }
+
+   function abortBusyMachine(status) {
+    var url = playlistIsActive(status) ? '/api/statusbar/control' : '/api/draw/abort';
+    var payload = playlistIsActive(status) ? {action: 'abort'} : {};
+    return fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'same-origin',
+      body: JSON.stringify(payload)
+    }).then(function(response) {
+      return response.json().catch(function() {
+        return {};
+      }).then(function(data) {
+        if (!response.ok || (data && data.status === 'error')) {
+          throw new Error((data && (data.message || data.error)) || 'Unable to abort current job');
+        }
+        return data;
+      });
+    });
+   }
+
+   function guardBusyDrawSubmission(event) {
+    var target = event.target;
+    if (!target || !target.matches('form[action="playlist"]')) {
+      return;
+    }
+
+    var actionField = target.querySelector('input[name="action"]');
+    var action = actionField ? String(actionField.value || '').toLowerCase() : '';
+    if (action !== 'draw' && action !== 'drawall') {
+      return;
+    }
+
+    event.preventDefault();
+    fetchStatusSnapshot().then(function(status) {
+      if (status && status.machine && status.machine.ready) {
+        target.submit();
+        return;
+      }
+
+      var label = action === 'drawall' ? 'draw playlist' : 'draw';
+      if (!window.confirm('Machine is busy. Confirm abort and ' + label + '?')) {
+        return;
+      }
+
+      return abortBusyMachine(status).then(function() {
+        target.submit();
+      });
+    }).catch(function(error) {
+      window.alert(error && error.message ? error.message : 'Unable to check machine status');
+    });
+   }
+
+   document.addEventListener('submit', guardBusyDrawSubmission, true);
  })();
  </script>
 

@@ -5,13 +5,12 @@ import os
 
 from Sand import TABLE_WIDTH, TABLE_LENGTH, TABLE_UNITS, BALL_SIZE,\
     MACHINE, MACHINE_FEED, MACHINE_ACCEL, MACHINE_UNITS,\
-    MACH_LOG, LED_LOG, SERVER_LOG, SCHEDULER_LOG, MOVIE_STATUS_LOG,\
+    MACH_LOG, LED_LOG, SERVER_LOG, MOVIE_STATUS_LOG,\
     VER_FILE, get_image_type, set_image_type, IMAGE_TYPES
 from webapp import app
 import mach
 import convert
 import ledapi
-import schedapi
 import MovieStatus
 import cgistatus
 from cgistuff import cgistuff
@@ -76,12 +75,6 @@ def _status_rows():
         results.append(('Position', 'Unknown'))
 
     try:
-        with schedapi.schedapi() as sched:
-            results.append(('Demo Mode', '%s' % sched.status()))
-    except Exception:
-        results.append(('Demo Mode', 'Unknown'))
-
-    try:
         with ledapi.ledapi() as led:
             results.append(('LED Status', '%s' % led.status()))
     except Exception:
@@ -105,11 +98,6 @@ def adminPage():
         "mach_log":     (_machLog,      "Mach Log - View the log of the motor control system"),
         "mach_res":     (_machReset,    "Mach Reset - Reset the motor control system"),
         "mach_res_a":   (_machResetA,   "Mach Reset and Reinitialize - Reset everything motor control related"),
-        "sched_log":    (_schedLog,     "Scheduler log - view the log of the demo scheduler"),
-        "sched_res":    (_schedReset,   "Scheduler Reset - Reset the scheduler/switch monitor"),
-        "demo_cont":    (_schedDemo,    "Demo mode - Go into continuous demonstration mode"),
-        "demo_once":    (_schedOnce,    "Demo mode - Single demo"),
-        "demo_halt":    (_schedHalt,    "Demo mode - Exit"),
         "movie_log":    (_movieLog,     "Movie Log - View the log of the movie system"),
         "movie_halt":   (_movieHalt,    "Movie Halt - Stop the movie system"),
     }
@@ -170,8 +158,6 @@ def _ledsReset():
 
 
 def _machHalt():
-    with schedapi.schedapi() as sched:
-        sched.demoHalt()
     with mach.mach() as e:
         e.stop()
     return 'Halted drawing', None
@@ -190,34 +176,6 @@ def _machResetA():
     except Exception:
         pass
     return _machReset()
-
-
-def _schedLog():
-    return "scheduler.log", _escapeFile(SCHEDULER_LOG)
-
-
-def _schedReset():
-    with schedapi.schedapi() as sched:
-        sched.restart()
-    return 'Restarting scheduler', None
-
-
-def _schedOnce():
-    with schedapi.schedapi() as sched:
-        sched.demoOnce()
-    return 'Single Demo Mode', None
-
-
-def _schedDemo():
-    with schedapi.schedapi() as sched:
-        sched.demoContinuous()
-    return 'Continuous Demo Mode', None
-
-
-def _schedHalt():
-    with schedapi.schedapi() as sched:
-        sched.demoHalt()
-    return 'Halting Demo Mode', None
 
 
 def _movieLog():

@@ -5,7 +5,6 @@ HOST_PORT           = 80
 CACHE_ENABLE        = True
 IMAGE_TYPE          = 'Realistic'
 LOGGING_LEVEL       = "debug"
-SCHEDULER_ENABLE    = True
 
 BALL_SIZE           = 0.625 * 2.54
 TABLE_UNITS         = "cm"

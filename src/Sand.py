@@ -70,10 +70,6 @@ LED_HOST = 'localhost'
 LED_PORT = 5008
 LED_LOG = "/var/log/ledaemon.log"
 
-SCHEDULER_HOST = 'localhost'
-SCHEDULER_PORT = 5009
-SCHEDULER_LOG = "/var/log/scheduler.log"
-
 # Import machine specific configuration. This is done through a hostmap file
 # located in the machines subdirectory.
 HOST_NAME = platform.node()

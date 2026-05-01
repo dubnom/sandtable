@@ -9,8 +9,6 @@ websocket-client
 cython
 pypotrace
 shapely
-apscheduler
-sqlalchemy
 fontTools
 markdown
 gphoto2

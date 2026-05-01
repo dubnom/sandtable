@@ -6,7 +6,6 @@ CACHE_ENABLE        = True
 IMAGE_TYPE          = 'Realistic'
 BALL_SIZE           = 0.75      # Diameter of ball
 LOGGING_LEVEL       = "debug"
-SCHEDULER_ENABLE    = True
 
 TABLE_UNITS         = "inches"
 TABLE_WIDTH         = 30.0

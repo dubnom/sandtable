@@ -20,7 +20,6 @@ Everything you need to control a SandTable is included in this project. You only
 The SandTable system is designed to make it easy to add new drawing methods and lighting schemes.
 
 The software also has some neat additional features:
-* A scheduler that can wake up and draw a random image.
 * A movie mode that runs through a script of keyframe drawings, automatically interpolates intermediate frames, and triggers a camera to take pictures. The pictures are then assembled into an animated movie.
 * A filer for managing clipart, movies, and pictures.
 
@@ -66,8 +65,6 @@ I highly recommend adding controllable LED lighting and support already exists f
 * [pillow](https://pillow.readthedocs.io/en/stable/) - Python image package
 * [Flask](https://flask.palletsprojects.com/) - Lightweight Python web framework
 * [shapely](https://pypi.org/project/Shapely/) - Python interface to GEOS to operate on planar geometry
-* [apscheduler](https://apscheduler.readthedocs.io/en/latest/) - Advanced Python scheduler
-* [sqlalchemy](https://www.sqlalchemy.org/) - Python SQL toolkit and object relational manager
 * [fontTools](https://github.com/fonttools/fonttools) - Python library for manipulating fonts
 * [gphoto2](https://github.com/jim-easterbrook/python-gphoto2) - Python control of cameras
 * [blinka](https://pypi.org/project/Adafruit-Blinka/) - Adafruit Circuitpython device control
@@ -107,11 +104,9 @@ Logs are written to:
 * Server logs - /var/logs/sandtable.log
 * CNC Machine logs - /var/logs/machd.log
 * LED Lighting logs - /var/logs/ledaemon.log
-* Scheduler logs - /var/logs/scheduler.log
 
 ### To Do:
 * Add test code
-* Improve scheduler interface
 * Improve lighting scenes
 * Make the web interface more interactive
 * Move common items from machines Leds into ledaemon

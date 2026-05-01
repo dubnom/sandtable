@@ -19,7 +19,6 @@ from playlist import Playlist
 
 import convert
 import mach
-import schedapi
 import cgistatus
 
 
@@ -509,8 +508,6 @@ def drawExecuteApi():
             'summary': state['summary'],
         }), 400
 
-    with schedapi.schedapi() as sched:
-        sched.demoHalt()
     History.history(state['paramsObj'], state['method'], state['chains'])
     with mach.mach() as e:
         e.run(state['chains'], state['boundingBox'], MACHINE_FEED, TABLE_UNITS, MACHINE_UNITS, meta=_draw_status_meta(state['method'], state['summary']))
@@ -526,8 +523,6 @@ def drawExecuteApi():
 
 @app.route('/api/draw/abort', methods=['POST'])
 def drawAbortApi():
-    with schedapi.schedapi() as sched:
-        sched.demoHalt()
     with mach.mach() as e:
         e.stop()
     return jsonify({'status': 'ok'})
@@ -643,16 +638,12 @@ def drawPage():
 
         # If 'Draw in Sand' has been requested then do it!
         if action == 'doit' or action == 'Draw in Sand!':
-            with schedapi.schedapi() as sched:
-                sched.demoHalt()
             History.history(params, sandable, chains)
             with mach.mach() as e:
                 e.run(chains, boundingBox, MACHINE_FEED, TABLE_UNITS, MACHINE_UNITS, meta=_draw_status_meta(sandable))
 
         # If 'Abort' has been requested stop the drawing
         if action == 'abort' or action == 'Abort!':
-            with schedapi.schedapi() as sched:
-                sched.demoHalt()
             with mach.mach() as e:
                 e.stop()
 
@@ -759,8 +750,6 @@ def handle_execute(payload):
         }, room=request.sid)
         return
 
-    with schedapi.schedapi() as sched:
-        sched.demoHalt()
     History.history(state['paramsObj'], state['method'], state['chains'])
     with mach.mach() as e:
         e.run(state['chains'], state['boundingBox'], MACHINE_FEED, TABLE_UNITS, MACHINE_UNITS, meta=_draw_status_meta(state['method'], state['summary']))
@@ -777,8 +766,6 @@ def handle_execute(payload):
 @socketio.on('draw:abort')
 def handle_abort(payload):
     """WebSocket handler for abort request (equivalent to POST /api/draw/abort)"""
-    with schedapi.schedapi() as sched:
-        sched.demoHalt()
     with mach.mach() as e:
         e.stop()
     socketio.emit('draw:abort:response', {'status': 'ok'}, room=request.sid)

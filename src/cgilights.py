@@ -33,16 +33,41 @@ def lightsPage():
 
     cstuff = cgistuff('Lights', jQuery=True)
     form = request.form
+    formData = dict(form)
+    status = None
+    try:
+        with ledapi.ledapi() as led:
+            status = led.status()
+    except Exception:
+        status = None
 
     method = form.get('method', '')
-    ledPattern = method if method in ledPatterns else ledPatterns[0]
+    statusPattern = str((status or {}).get('pattern', '') or '')
+    statusParams = (status or {}).get('params', {}) if isinstance((status or {}).get('params', {}), dict) else {}
+
+    if method in ledPatterns:
+        ledPattern = method
+    elif statusPattern in ledPatterns:
+        ledPattern = statusPattern
+    else:
+        ledPattern = ledPatterns[0]
+
+    if method not in ledPatterns and statusParams:
+        # No explicit user selection: initialize controls from daemon state.
+        for key, value in statusParams.items():
+            formData[str(key)] = value
+
     pattern = ledPatternFactory(ledPattern, LED_COLUMNS, LED_ROWS)
-    d = Dialog(pattern.editor, form, None, autoSubmit=True)
+    d = Dialog(pattern.editor, formData, None, autoSubmit=True)
     params = d.getParams()
     if method:
         try:
             with ledapi.ledapi() as led:
-                led.setPattern(ledPattern, params)
+                response = led.setPattern(ledPattern, params)
+                if isinstance(response, dict):
+                    daemonPattern = str(response.get('pattern', '') or '')
+                    if daemonPattern in ledPatterns:
+                        ledPattern = daemonPattern
         except Exception:
             pass
 

@@ -129,8 +129,9 @@
   let socket = io({
     reconnection: true,
     reconnectionDelay: 1000,
-    reconnectionDelayMax: 5000,
-    reconnectionAttempts: 5,
+    reconnectionDelayMax: 10000,
+    reconnectionAttempts: Infinity,
+    randomizationFactor: 0.5,
     path: (appBasePath ? appBasePath : '') + '/socket.io'
   });
 
@@ -169,6 +170,8 @@
     switchBusyTimer: null,
     drawerMode: false,
     drawerOpen: false,
+    initComplete: false,
+    hasHydratedPreview: false,
   };
 
   const methodGrid = document.getElementById('methodGrid');
@@ -492,6 +495,7 @@
       const select = document.createElement('select');
       select.dataset.fieldName = field.name;
       const choices = field.choices || [];
+      let matchedValue = false;
       choices.forEach(function(choice) {
         const opt = document.createElement('option');
         const displayName = Array.isArray(choice) ? choice[0] : String(choice);
@@ -500,9 +504,20 @@
         opt.textContent = displayName;
         if (filePath === String(value)) {
           opt.selected = true;
+          matchedValue = true;
         }
         select.appendChild(opt);
       });
+
+      // Preserve externally provided values (e.g. clicked from filer/history)
+      // even if they are not included in the current static choice list.
+      if (value != null && String(value) !== '' && !matchedValue) {
+        const fallback = document.createElement('option');
+        fallback.value = String(value);
+        fallback.textContent = String(value).split('/').pop() || String(value);
+        fallback.selected = true;
+        select.appendChild(fallback);
+      }
       return select;
     }
 
@@ -740,6 +755,7 @@
     }
     // Keep shell-level state current so it survives page switches
     window.__sandtableDrawState = { method: state.method, params: state.params };
+    state.hasHydratedPreview = true;
   }
 
   function _applySchema(data) {
@@ -1081,14 +1097,40 @@
   // WebSocket connection handlers
   socket.on('connect', function() {
     setStatus('Connected');
+    // Re-sync only after initial page load and first preview hydration complete.
+    if (state.initComplete && state.hasHydratedPreview) {
+      preview('refresh');
+    }
   });
 
   socket.on('disconnect', function() {
     setStatus('Disconnected - attempting to reconnect');
   });
 
+  socket.on('reconnect_attempt', function(attempt) {
+    setStatus('Reconnecting (attempt ' + String(attempt || '') + ')', 'socket');
+  });
+
+  socket.on('reconnect', function(attempt) {
+    setStatus('Reconnected (attempt ' + String(attempt || '') + ')', 'socket');
+    if (state.initComplete && state.hasHydratedPreview) {
+      preview('refresh');
+    }
+  });
+
+  socket.on('reconnect_error', function(error) {
+    const message = error && error.message ? error.message : 'unknown error';
+    setStatus('Reconnect error: ' + message, 'socket');
+  });
+
+  socket.on('reconnect_failed', function() {
+    showError('Unable to reconnect. Please reload the page.');
+    setStatus('Reconnect failed', 'socket');
+  });
+
   socket.on('connect_error', function(error) {
-    showError('Connection error: ' + error.message);
+    const message = error && error.message ? error.message : 'unknown error';
+    showError('Connection error: ' + message);
   });
 
   redrawBtn.addEventListener('click', function() {
@@ -1189,6 +1231,8 @@
     } catch (err) {
       showError(err.message || 'Initialization failed');
       setStatus('Initialization failed');
+    } finally {
+      state.initComplete = true;
     }
   })();
 })();

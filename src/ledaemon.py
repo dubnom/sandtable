@@ -35,7 +35,7 @@ class LedThread(Thread):
         super(LedThread, self).__init__()
         self.leds = Leds.Leds(LED_ROWS, LED_COLUMNS, LED_MAPPING, LED_PARAMS)
         self.leds.refresh()
-        self.setPattern(startupPattern(LED_COLUMNS, LED_ROWS), None)
+        self.setPattern(startupPattern(LED_COLUMNS, LED_ROWS), None, patternName='startup')
 
     def run(self):
         self.running = True
@@ -55,16 +55,21 @@ class LedThread(Thread):
         self.leds.close()
         logging.info("LedThread exiting")
 
-    def setPattern(self, pattern, params):
+    def setPattern(self, pattern, params, patternName=None):
         logging.info("Switching to pattern: %s" % pattern)
-        self.pattern = type(pattern).__name__
+        self.pattern = str(patternName) if patternName else type(pattern).__name__
+        self.params = dict(params) if params else {}
         self.generator = pattern.generator(self.leds, params)
 
     def stop(self):
         self.running = False
 
     def status(self):
-        return {'running': self.generator is not None, 'pattern': self.pattern}
+        return {
+            'running': self.generator is not None,
+            'pattern': self.pattern,
+            'params': self.params,
+        }
 
 
 class MyHandler(socketserver.StreamRequestHandler):
@@ -80,7 +85,7 @@ class MyHandler(socketserver.StreamRequestHandler):
             params.update(p)
             logging.info("Request: %s %s %s" % (cmd, pattern, params))
             pat = ledPatternFactory(pattern, LED_COLUMNS, LED_ROWS)
-            self.ledThread.setPattern(pat, params)
+            self.ledThread.setPattern(pat, params, patternName=pattern)
         elif cmd == 'status':
             pass
         elif cmd == 'restart':

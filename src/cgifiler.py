@@ -204,7 +204,16 @@ def _render_filer_page(title, routeBase, fixedFiletype=None, rootPath=None):
                 fUpload.save(fullName)
 
     dirlist = os.listdir(path)
-    dirlist.sort()
+    if ft == 'History':
+        # History view should be chronological; newest modified entries first.
+        def _mtime(name):
+            try:
+                return os.path.getmtime(os.path.join(path, name))
+            except OSError:
+                return 0.0
+        dirlist.sort(key=_mtime, reverse=True)
+    else:
+        dirlist.sort()
 
     if len(path) > len(basePath):
         dirlist.insert(0, '..')

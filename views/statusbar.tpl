@@ -3,6 +3,37 @@
  transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+#globalStatusBar.statusbar-conn-reconnecting {
+ box-shadow: 0 0 0 2px rgba(220, 136, 0, 0.45), 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+#globalStatusBar.statusbar-conn-offline {
+ box-shadow: 0 0 0 2px rgba(176, 0, 32, 0.45), 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+#globalConnectionBadge {
+ display: none;
+ align-items: center;
+ justify-content: center;
+ min-width: 92px;
+ padding: 2px 8px;
+ border-radius: 999px;
+ font-size: 78%;
+ font-weight: bold;
+ letter-spacing: 0.03em;
+ text-transform: uppercase;
+ background: #2e7d32;
+ color: #fff;
+}
+
+#globalConnectionBadge.conn-reconnecting {
+ background: #c77800;
+}
+
+#globalConnectionBadge.conn-offline {
+ background: #b00020;
+}
+
 #globalStatusBar.statusbar-flash {
  background-color: rgba(255, 244, 173, 0.98) !important;
  box-shadow: 0 0 0 2px rgba(199, 161, 0, 0.45), 0 2px 10px rgba(0,0,0,0.25);
@@ -30,6 +61,7 @@
 }
 </style>
 <div id="globalStatusBar" style="position: fixed; left: 8px; right: 8px; bottom: 8px; margin: 0; padding: 8px 10px; background-color: rgba(255,255,255,0.92); border-radius: 6px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.25); z-index: 1000;">
+ <span id="globalConnectionBadge" class="conn-online" aria-live="polite">Online</span>
  <span class="statusbar-group"><strong>Table:</strong> <span id="globalMachineStatus">Loading...</span></span>
  <span class="statusbar-group"><strong>Playlist:</strong> <span id="globalPlaylistStatus">Loading...</span></span>
  <button id="globalPlaylistPlayBtn" class="doit" type="button">Play</button>
@@ -56,6 +88,7 @@
   }
 
   const barNode = document.getElementById('globalStatusBar');
+  const connectionBadgeNode = document.getElementById('globalConnectionBadge');
   let flashTimer = null;
 
   if (typeof io === 'undefined') {
@@ -70,10 +103,14 @@
 
   const socket = window.__sandtableStatusSocket || io({
     reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 10000,
     transports: ['websocket'],
     path: buildUrl('/socket.io')
   });
   window.__sandtableStatusSocket = socket;
+  let reconnectAttempt = 0;
 
   function updateBodyPadding() {
     if (!barNode) {
@@ -208,6 +245,34 @@
     reconnectBtn.style.display = visible ? '' : 'none';
   }
 
+  function setConnectionState(mode) {
+    if (!connectionBadgeNode || !barNode) {
+      return;
+    }
+    connectionBadgeNode.classList.remove('conn-online', 'conn-reconnecting', 'conn-offline');
+    barNode.classList.remove('statusbar-conn-reconnecting', 'statusbar-conn-offline');
+    connectionBadgeNode.style.display = 'none';
+
+    if (mode === 'offline') {
+      connectionBadgeNode.classList.add('conn-offline');
+      connectionBadgeNode.textContent = 'Offline';
+      connectionBadgeNode.style.display = 'inline-flex';
+      barNode.classList.add('statusbar-conn-offline');
+      return;
+    }
+    if (mode === 'reconnecting') {
+      barNode.classList.add('statusbar-conn-reconnecting');
+      return;
+    }
+  }
+
+  function reconnectMessage(prefix) {
+    if (reconnectAttempt <= 0) {
+      return prefix;
+    }
+    return prefix + ' (attempt ' + reconnectAttempt + ')';
+  }
+
   socket.on('statusbar:update', function(data) {
     applyStatus(data);
     updateBodyPadding();
@@ -222,15 +287,45 @@
   });
 
   socket.on('connect', function() {
+    reconnectAttempt = 0;
+    setConnectionState('online');
     setReconnectVisible(false);
+    reconnectBtn.disabled = false;
     socket.emit('statusbar:subscribe');
+
+    // Refresh once on connect/reconnect in case an update event was missed.
+    fetch(buildUrl('/api/statusbar'), {credentials: 'same-origin'})
+      .then(function(response) { return response.json(); })
+      .then(function(snapshot) { applyStatus(snapshot); updateBodyPadding(); })
+      .catch(function() {});
   });
 
   socket.on('disconnect', function() {
     const beforeState = captureDisplayedState();
+    setConnectionState('reconnecting');
     machineNode.textContent = 'Disconnected';
-    playlistNode.textContent = 'Disconnected';
+    playlistNode.textContent = reconnectMessage('Disconnected - reconnecting');
     updateControls(null);
+    setReconnectVisible(true);
+    maybeFlashStatusBar(beforeState);
+    updateBodyPadding();
+  });
+
+  socket.on('reconnect_attempt', function(attempt) {
+    reconnectAttempt = Number(attempt || (reconnectAttempt + 1));
+    const beforeState = captureDisplayedState();
+    setConnectionState('reconnecting');
+    machineNode.textContent = 'Disconnected';
+    playlistNode.textContent = reconnectMessage('Reconnecting');
+    setReconnectVisible(true);
+    maybeFlashStatusBar(beforeState);
+    updateBodyPadding();
+  });
+
+  socket.on('reconnect_error', function() {
+    const beforeState = captureDisplayedState();
+    setConnectionState('reconnecting');
+    playlistNode.textContent = reconnectMessage('Reconnect error');
     setReconnectVisible(true);
     maybeFlashStatusBar(beforeState);
     updateBodyPadding();
@@ -238,19 +333,46 @@
 
   socket.on('reconnect_failed', function() {
     const beforeState = captureDisplayedState();
+    setConnectionState('offline');
+    playlistNode.textContent = reconnectMessage('Reconnect failed');
     setReconnectVisible(true);
+    reconnectBtn.disabled = false;
     maybeFlashStatusBar(beforeState);
     updateBodyPadding();
   });
 
   playBtn.addEventListener('click', function() { controlPlaylist('play'); });
   stopBtn.addEventListener('click', function() { controlPlaylist('stop'); });
-  reconnectBtn.addEventListener('click', function() { window.location.reload(); });
+  reconnectBtn.addEventListener('click', function() {
+    reconnectBtn.disabled = true;
+    const beforeState = captureDisplayedState();
+    setConnectionState('reconnecting');
+    playlistNode.textContent = 'Manual reconnect requested';
+    maybeFlashStatusBar(beforeState);
+    try {
+      if (!socket.connected) {
+        socket.connect();
+      } else {
+        socket.emit('statusbar:subscribe');
+      }
+    } catch (err) {
+      window.location.reload();
+      return;
+    }
+    window.setTimeout(function() {
+      reconnectBtn.disabled = false;
+      if (!socket.connected) {
+        window.location.reload();
+      }
+    }, 4000);
+  });
 
   if (socket.connected) {
+    setConnectionState('online');
     setReconnectVisible(false);
     socket.emit('statusbar:subscribe');
   } else {
+    setConnectionState('offline');
     setReconnectVisible(true);
     stopBtn.style.display = 'none';
   }

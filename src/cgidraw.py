@@ -138,6 +138,10 @@ def _generate_chains_and_image(sandable, sand, params, boundingBox, shouldSave=N
         except SandException as e:
             errors = str(e)
             chains = []
+        except Exception as e:
+            app.logger.exception('Unexpected draw generation failure for %s', sandable)
+            errors = str(e)
+            chains = []
 
         if shouldSave is not None and not shouldSave():
             cancelled = True

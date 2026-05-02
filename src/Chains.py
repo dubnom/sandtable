@@ -227,6 +227,20 @@ class Chains():
         x0, y0 = boundary[0]
         x1, y1 = boundary[1]
         x, y = point
+
+        # If the point lies on an edge, prefer that explicit edge instead of
+        # nearest-distance inference, which can pick the wrong side at corners.
+        if Chains.epsilon(x, x0):
+            sides.append('left')
+        if Chains.epsilon(x, x1):
+            sides.append('right')
+        if Chains.epsilon(y, y0):
+            sides.append('bottom')
+        if Chains.epsilon(y, y1):
+            sides.append('top')
+        if sides:
+            return sides
+
         distances = [
             (abs(x - x0), 'left'),
             (abs(x - x1), 'right'),
@@ -280,11 +294,21 @@ class Chains():
 
     @staticmethod
     def _cornersClockwise(start, end, boundary):
+        x0, y0 = boundary[0]
+        x1, y1 = boundary[1]
+        perimeter = 2.0 * ((x1 - x0) + (y1 - y0))
+        if perimeter <= 0.0:
+            return []
+
         points = []
         for cornerPoint, cornerOffset in Chains._corners(boundary):
-            if Chains._isBetweenClockwise(start, end, cornerOffset):
-                points.append(cornerPoint)
-        return points
+            if not Chains._isBetweenClockwise(start, end, cornerOffset):
+                continue
+            # Preserve actual clockwise traversal order from start to end.
+            delta = (cornerOffset - start) % perimeter
+            points.append((delta, cornerPoint))
+        points.sort(key=lambda item: item[0])
+        return [cornerPoint for _, cornerPoint in points]
 
     @staticmethod
     def _boundaryRoute(p1, side1, p2, side2, boundary):
@@ -322,13 +346,13 @@ class Chains():
     def _clipDirection(p, box):
         code = 0
         if p:
-            if p[1] >= box[1][1]:
+            if p[1] > box[1][1]:
                 code |= Chains.TOP
-            elif p[1] <= box[0][1]:
+            elif p[1] < box[0][1]:
                 code |= Chains.BOTTOM
-            if p[0] >= box[1][0]:
+            if p[0] > box[1][0]:
                 code |= Chains.RIGHT
-            elif p[0] <= box[0][0]:
+            elif p[0] < box[0][0]:
                 code |= Chains.LEFT
         return code
 
@@ -834,7 +858,9 @@ class Chains():
             arr = np.array(chain)
             try:
                 tck, u = interpolate.splprep([arr[:, 0], arr[:, 1]], s=0)
-            except TypeError:
+            except (TypeError, ValueError, RuntimeError):
+                return chain
+            except Exception:
                 return chain
             newLen = len(chain) * expansion
             stepSize = 1. / newLen
@@ -846,4 +872,4 @@ class Chains():
     @staticmethod
     def splines(chains, expansion=5):
         """Post processor to insert extra points (splines) into chains"""
-        return [Chains.Spline(chain) for chain in Chains.deDupe(chains)]
+        return [Chains.Spline(chain, expansion=expansion) for chain in Chains.deDupe(chains)]

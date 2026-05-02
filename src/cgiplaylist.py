@@ -1,5 +1,5 @@
 from flask import render_template, request, redirect, url_for
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from webapp import app
 from cgistuff import cgistuff
@@ -91,11 +91,23 @@ def playlistPage():
     savedPlaylists = Playlist.list_saved()
     if (not selectedSaved or selectedSaved not in savedPlaylists) and savedPlaylists:
         selectedSaved = savedPlaylists[0]
+    totalSeconds = 0
     for item in items:
         try:
             item['createdText'] = datetime.fromtimestamp(int(item.get('created', 0))).strftime('%Y-%m-%d %H:%M:%S')
         except (TypeError, ValueError, OSError):
             item['createdText'] = str(item.get('created', ''))
+
+        drawTimeSecs = item.get('drawTime')
+        if drawTimeSecs is not None:
+            try:
+                secs = int(drawTimeSecs)
+                totalSeconds += secs
+                item['drawTimeText'] = str(timedelta(seconds=secs))
+            except (TypeError, ValueError):
+                item['drawTimeText'] = ''
+        else:
+            item['drawTimeText'] = ''
 
         imageFile = str(item.get('imageFile', '') or '').strip()
         if imageFile:
@@ -103,7 +115,9 @@ def playlistPage():
         else:
             item['imageUrl'] = ''
 
+    totalTimeText = str(timedelta(seconds=totalSeconds)) if totalSeconds else ''
+
     return ''.join([
         cstuff.standardTopStr(),
-        render_template('playlist-page.tpl', items=items, status=status, error=error, savedPlaylists=savedPlaylists, selectedSaved=selectedSaved),
+        render_template('playlist-page.tpl', items=items, status=status, error=error, savedPlaylists=savedPlaylists, selectedSaved=selectedSaved, totalTimeText=totalTimeText),
         cstuff.endBodyStr()])

@@ -926,6 +926,14 @@ def handle_playlist_add(payload):
 
     item = Playlist.add(state['method'], state['params'])
 
+    try:
+        machChains = Chains.convertUnits(Chains.bound(state['chains'], state['boundingBox']), TABLE_UNITS, MACHINE_UNITS)
+        drawSeconds, _dist, _pts = Chains.estimateMachiningTime(machChains, MACHINE_FEED, MACHINE_ACCEL)
+        Playlist.setDrawTime(item['id'], drawSeconds)
+        item['drawTime'] = int(drawSeconds)
+    except Exception:
+        pass
+
     imageFile, imagePath = Playlist.image_paths(item['id'])
     item['imageFile'] = imageFile
 

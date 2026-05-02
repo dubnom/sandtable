@@ -60,7 +60,13 @@ class Dialog:
                 self.params[field.name] = field.fromFormRaw(self.form)
             elif field.name in self.form:
                 try:
-                    value = field.fromForm(self.form.get(field.name))
+                    raw = self.form.get(field.name)
+                    # When the form is a plain dict (e.g. from playlist params), a
+                    # scalar field may have been stored as a single-element list.
+                    # Unwrap it so scalar fromForm() implementations get a plain value.
+                    if isinstance(raw, list) and len(raw) == 1 and not isinstance(field, (DialogFloats, DialogInts)):
+                        raw = raw[0]
+                    value = field.fromForm(raw)
                 except ValueError:
                     self.errors[field.name] = "Invalid, set to default"
                     value = field.default

@@ -47,19 +47,38 @@ a.plan:hover	{ color: #FFFFFF }
 a.plan:active	{ color: #FFFFFF }
 
 button { border-radius: 4px }
-button.redraw	{ color: #000000; background-color: #00DF2F; font-size: 100%; margin: 3px 3px 3px 3px }
-button.random   { color: #FFFFFF; background-color: #8A2BE2; font-size: 100%; margin: 3px 3px 3px 3px }
-button.defaults { color: #FFFFFF; background-color: #7B3FA0; font-size: 100%; margin: 3px 3px 3px 3px }
-button.doit	    { color: #000000; background-color: #DFBF00; font-size: 100%; margin: 3px 3px 3px 3px }
-button.abort    { color: #FFFFFF; background-color: #8F0000; font-size: 100%; margin: 3px 3px 3px 3px }
-button.sand	    { color: #000000; background-color: #DFBF00; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
-button.preview	{ color: #000000; background-color: #00DF2F; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
-button.save     { color: #FFFFFF; background-color: #00007F; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
-button.export   { color: #FFFFFF; background-color: #6F5F00; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
-button.upload   { color: #FFFFFF; background-color: #00007F; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
-button.load	    { color: #FFFFFF; background-color: #00007F; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
-button.delete	{ color: #FFFFFF; background-color: #7F0000; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
-button.rename	{ color: #FFFFFF; background-color: #00007F; font-size: 100%; margin: 3px 3px 3px 3px; vertical-align: middle }
+button.redraw,
+button.random,
+button.defaults,
+button.doit,
+button.abort,
+button.sand,
+button.preview,
+button.save,
+button.export,
+button.upload,
+button.load,
+button.delete,
+button.rename {
+	font-size: 100%;
+	margin: 3px 3px 3px 3px;
+	padding: 2px 6px;
+	line-height: 1.2;
+	vertical-align: middle;
+}
+button.redraw	{ color: #000000; background-color: #00DF2F }
+button.random   { color: #FFFFFF; background-color: #8A2BE2 }
+button.defaults { color: #FFFFFF; background-color: #7B3FA0 }
+button.doit	    { color: #000000; background-color: #DFBF00 }
+button.abort    { color: #FFFFFF; background-color: #8F0000 }
+button.sand	    { color: #000000; background-color: #DFBF00 }
+button.preview	{ color: #000000; background-color: #00DF2F }
+button.save     { color: #FFFFFF; background-color: #00007F }
+button.export   { color: #FFFFFF; background-color: #6F5F00 }
+button.upload   { color: #FFFFFF; background-color: #00007F }
+button.load	    { color: #FFFFFF; background-color: #00007F }
+button.delete	{ color: #FFFFFF; background-color: #7F0000 }
+button.rename	{ color: #FFFFFF; background-color: #00007F }
 button.sandable	{ background-color: #6F6F6F; border: 2px solid #6F6F6F; margin: 0px 0px 0px 0px; padding: 0px }
 button.selected	{ background-color: #000000; border: 3px solid #FFE000; margin: 0px 0px 0px 0px; padding: 0px; box-shadow: 0 0 0 2px rgba(255, 224, 0, 0.65), 0 0 14px rgba(255, 224, 0, 0.7) }
 button.led		    { background-color: #6F6F6F; border: 2px solid #6F6F6F; margin: 0px 0px 0px 0px; padding: 0px }
@@ -86,6 +105,10 @@ ul          { list-style-type: square; list-style-position: outside }
 
 div.adminwarn	{ background-color: white; width: 400px; padding: 10px; border: 10px solid red; margin: 10px; }
 div.admingood	{ background-color: white; width: 400px; padding: 10px; border: 10px solid darkgreen; margin: 10px; }
+
+.pl-thumb { position: relative; display: inline-block; }
+.pl-thumb-label { display: none; position: absolute; top: 50%; left: 100%; transform: translateY(-50%); background: rgba(0,0,0,0.75); color: #fff; font-size: 80%; white-space: nowrap; padding: 3px 6px; border-radius: 3px; pointer-events: none; z-index: 10; margin-left: 8px; }
+.pl-thumb:hover .pl-thumb-label { display: block; }
 
 .intSlider { -webkit-appearance: none; height: 5px; border-radius: 2px; background-color: #a29963}
 .intSlider::-webkit-slider-thumb {-webkit-appearance: none; appearance: none; height: 12px; width: 12px; border-radius: 50%; cursor: pointer; background:#615301}

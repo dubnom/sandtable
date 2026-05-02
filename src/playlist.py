@@ -291,6 +291,17 @@ class Playlist:
         return item
 
     @staticmethod
+    def setDrawTime(itemId, seconds):
+        itemId = str(itemId)
+        items = Playlist._load()
+        for item in items:
+            if str(item.get('id', '')) == itemId:
+                item['drawTime'] = int(seconds)
+                Playlist._save(items)
+                return True
+        return False
+
+    @staticmethod
     def setImage(itemId, imageFile):
         itemId = str(itemId)
         imageFile = Playlist._safe_relative_store_path(imageFile)

@@ -132,29 +132,29 @@
  {% if items and items|length %}
   <form method="post" action="playlist" style="margin-bottom: 12px;">
      <button class="doit" type="submit" name="action" value="drawall">Draw Playlist</button>
-    <button class="delete" type="submit" name="action" value="clear" style="font-size: 100%; margin: 3px 3px 3px 3px; padding: 2px 6px;" onclick="return confirm('Clear the entire playlist?');">Clear Playlist</button>
+    <button class="delete" type="submit" name="action" value="clear" onclick="return confirm('Clear the entire playlist?');">Clear Playlist</button>
+    {% if totalTimeText %}<span style="margin-left: 10px; font-size: 100%;">Total time: {{ totalTimeText }}</span>{% endif %}
   </form>
 
   <table class="help" cellspacing="0" cellpadding="4" style="background-color: rgba(255,255,255,0.85);">
    <tr>
       <th class="help">Image</th>
-    <th class="help">Title</th>
-    <th class="help">Method</th>
-    <th class="help">Added</th>
+    <th class="help">Draw Time</th>
     <th class="help">Actions</th>
    </tr>
    {% for item in items %}
    <tr>
       <td class="help">
        {% if item.imageUrl %}
-              <a href="/?view=draw&method={{ item.method }}&playlistItemId={{ item.id }}" title="Open in Draw">
-          <img src="{{ item.imageUrl }}" alt="{{ item.title }}" width="96" class="history" style="height: auto;">
-              </a>
+        <span class="pl-thumb">
+         <a href="/?view=draw&method={{ item.method }}&playlistItemId={{ item.id }}">
+          <img src="{{ item.imageUrl }}" alt="{{ item.title }}" width="96" class="history" style="height: auto; display: block;">
+         </a>
+         <span class="pl-thumb-label">{{ item.title }}</span>
+        </span>
        {% endif %}
       </td>
-    <td class="help">{{ item.title }}</td>
-      <td class="help"><a href="/draw?method={{ item.method }}">{{ item.method }}</a></td>
-        <td class="help">{{ item.createdText }}</td>
+    <td class="help">{{ item.drawTimeText or '—' }}</td>
     <td class="help">
     <form method="post" action="playlist" style="display:inline;">
      <input type="hidden" name="action" value="moveup">

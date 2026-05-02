@@ -4,6 +4,17 @@
  display: none;
 }
 
+#dialogScroll {
+ width: fit-content;
+ max-width: 100%;
+ overflow-y: auto;
+ overflow-x: hidden;
+ max-height: 320px;
+ margin: 6px auto 0;
+ padding-right: 6px;
+ box-sizing: border-box;
+}
+
 #methodDrawerPanel {
  position: static;
 }
@@ -87,15 +98,15 @@
     <img id="planImage" class="plan" src="" width="{{ width }}" height="{{ height }}"><br>
     <div id="errorBox" class="error" style="display: none;"></div>
     <span id="drawInfo" class="drawtime"></span>
-    <div id="dialogHost"></div>
-    <div style="margin-top: 10px; line-height: 1.8;">
+    <div id="dialogScroll"><div id="dialogHost"></div></div>
+    <div id="drawActions" style="margin-top: 10px; line-height: 1.8;">
       <button id="redrawBtn" class="redraw" type="button">Refresh</button>
      <button id="randomBtn" class="random" type="button">Random!</button>
       <button id="defaultsBtn" class="defaults" type="button">Defaults</button>
       <button id="drawBtn" class="doit" type="button">Draw Now!</button>
       <button id="playlistBtn" class="load" type="button">Add to Playlist</button>
     </div>
-    <div class="savebox" style="margin-top: 10px;">
+    <div id="drawSaveActions" class="savebox" style="margin-top: 10px;">
       <button id="saveBtn" class="save" type="button">Save...</button>
       <button id="exportBtn" class="export" type="button">Export...</button>
     </div>
@@ -115,6 +126,12 @@
     } catch (err) {
       console.error(err);
     }
+  }
+
+  const shellContentNode = document.getElementById('shellContent');
+  const previousShellOverflow = shellContentNode ? shellContentNode.style.overflow : '';
+  if (shellContentNode) {
+    shellContentNode.style.overflow = 'hidden';
   }
 
   const LOADING_SRC = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='{{ width }}' height='{{ height }}'%3E%3Crect width='100%25' height='100%25' fill='%23e8e4da'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23888'%3ELoading...%3C/text%3E%3C/svg%3E";
@@ -184,7 +201,10 @@
   const planImage = document.getElementById('planImage');
   const errorBox = document.getElementById('errorBox');
   const drawInfo = document.getElementById('drawInfo');
+  const dialogScroll = document.getElementById('dialogScroll');
   const dialogHost = document.getElementById('dialogHost');
+  const drawActions = document.getElementById('drawActions');
+  const drawSaveActions = document.getElementById('drawSaveActions');
   const statusMsg = document.getElementById('statusMsg');
   const redrawBtn = document.getElementById('redrawBtn');
   const METHOD_TILE_WIDTH = 79;
@@ -339,6 +359,23 @@
       methodGridScroller.style.width = String(selectedCellWidth) + 'px';
     }
     syncMethodDrawerChrome();
+    layoutDialogScroll();
+  }
+
+  function layoutDialogScroll() {
+    if (!dialogScroll) {
+      return;
+    }
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+    const statusBar = document.getElementById('globalStatusBar');
+    const statusTop = statusBar ? statusBar.getBoundingClientRect().top : viewportHeight;
+    const top = dialogScroll.getBoundingClientRect().top;
+    const reserve = 8 +
+      (drawActions ? drawActions.offsetHeight : 0) +
+      (drawSaveActions ? drawSaveActions.offsetHeight : 0) +
+      8;
+    const available = Math.max(120, statusTop - top - reserve);
+    dialogScroll.style.maxHeight = String(available) + 'px';
   }
 
   function setStatus(msg, owner) {
@@ -660,6 +697,7 @@
 
     dialogHost.innerHTML = '';
     dialogHost.appendChild(table);
+    layoutDialogScroll();
     layoutMethodColumns();
   }
 
@@ -1157,10 +1195,14 @@
   const onResize = function() {
     layoutMethodGrid();
     layoutMethodColumns();
+    layoutDialogScroll();
   };
   window.addEventListener('resize', onResize);
 
   window.__sandtablePageCleanup = function() {
+    if (shellContentNode) {
+      shellContentNode.style.overflow = previousShellOverflow;
+    }
     window.removeEventListener('resize', onResize);
     if (socket && typeof socket.disconnect === 'function') {
       socket.disconnect();

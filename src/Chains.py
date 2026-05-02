@@ -475,14 +475,18 @@ class Chains():
         pic.save(fileName, "PNG")
 
     @staticmethod
-    def makeImage(chains, box, imageWidth, imageHeight, clipToTable=False):
+    def makeImage(chains, box, imageWidth, imageHeight, clipToTable=False, antialias=True):
         """Convert chains into a schematic image.
 
         When clipToTable is true, render only the bounded table view. Otherwise,
         preserve the existing diagnostic view that shows both the raw chains and
         their bounded result.
         """
-        pic = Image.new("RGB", (imageWidth, imageHeight))
+        aaFactor = 2 if antialias else 1
+        renderWidth = max(1, int(imageWidth * aaFactor))
+        renderHeight = max(1, int(imageHeight * aaFactor))
+
+        pic = Image.new("RGB", (renderWidth, renderHeight))
         draw = ImageDraw.Draw(pic)
 
         boundedChains = Chains.bound(chains, box) if clipToTable else None
@@ -490,8 +494,8 @@ class Chains():
         # Scale the coordinate system
         extents = Chains.calcExtents(([box] + boundedChains) if clipToTable else (chains + [box]))
         offset = (-extents[0][0], -extents[0][1])
-        xScale = float(imageWidth - 1) / (extents[1][0] - extents[0][0])
-        yScale = float(imageHeight - 1) / (extents[1][1] - extents[0][1])
+        xScale = float(renderWidth - 1) / (extents[1][0] - extents[0][0])
+        yScale = float(renderHeight - 1) / (extents[1][1] - extents[0][1])
         scale = (min(xScale, yScale), min(xScale, yScale))
 
         # Draw grid
@@ -504,27 +508,35 @@ class Chains():
         while y < box[1][1]:
             rules.append([(box[0][0], y), (box[1][0], y)])
             y += 5.0
-        Chains._drawChains(draw, rules, offset, scale, (64, 32, 32), imageHeight)
+        gridWidth = aaFactor if aaFactor > 1 else 1
+        Chains._drawChains(draw, rules, offset, scale, (64, 32, 32), renderHeight, lineWidth=gridWidth)
 
         # Draw the bounding box
         boxChains = [[box[0], (box[0][0], box[1][1]), box[1], (box[1][0], box[0][1]), box[0]]]
-        Chains._drawChains(draw, boxChains, offset, scale, (200, 0, 0), imageHeight)
+        Chains._drawChains(draw, boxChains, offset, scale, (200, 0, 0), renderHeight, lineWidth=gridWidth)
 
         if clipToTable:
-            Chains._drawChains(draw, boundedChains, offset, scale, (128, 250, 250), imageHeight)
+            chainWidth = aaFactor if aaFactor > 1 else 1
+            Chains._drawChains(draw, boundedChains, offset, scale, (128, 250, 250), renderHeight, lineWidth=chainWidth)
+            if aaFactor > 1:
+                pic = pic.resize((imageWidth, imageHeight), Image.Resampling.LANCZOS)
             return pic
 
         # Draw the unbounded chains
-        Chains._drawChains(draw, chains, offset, scale, (128, 128, 128), imageHeight)
+        chainWidth = aaFactor if aaFactor > 1 else 1
+        Chains._drawChains(draw, chains, offset, scale, (128, 128, 128), renderHeight, lineWidth=chainWidth)
 
         # Draw the bounded chains
-        Chains._drawChains(draw, Chains.bound(chains, box), offset, scale, (128, 250, 250), imageHeight)
+        Chains._drawChains(draw, Chains.bound(chains, box), offset, scale, (128, 250, 250), renderHeight, lineWidth=chainWidth)
+        if aaFactor > 1:
+            pic = pic.resize((imageWidth, imageHeight), Image.Resampling.LANCZOS)
         return pic
 
     @staticmethod
-    def _drawChains(draw, chains, offset, scale, color, imageHeight):
+    def _drawChains(draw, chains, offset, scale, color, imageHeight, lineWidth=1):
+        width = max(1, int(round(lineWidth)))
         for chain in Chains._makeReadyToDraw(Chains.scale(Chains.transform(chains, offset), scale), imageHeight - 1):
-            draw.line(chain, fill=color)
+            draw.line(chain, fill=color, width=width)
 
     @staticmethod
     def _drawChainsAuto(draw, chains, offset, scale, imageHeight):
